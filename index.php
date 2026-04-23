@@ -10,6 +10,7 @@ if (empty($_SESSION['user_id'])) {
 
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
+$userId = (int)$_SESSION['user_id'];
 $userName = $_SESSION['user_name'] ?? 'User';
 $userRole = $_SESSION['user_role'] ?? 'user';
 
@@ -31,7 +32,7 @@ function postForm(string $action, string $tabTarget, string $tok): string {
 $db = db();
 
 // ─── ACTIVE AUCTION (selected via navbar or session) ─────────────────────────
-$allAuctions = $db->query("SELECT * FROM auction ORDER BY date DESC, id DESC")->fetchAll();
+$allAuctions = $db->query("SELECT * FROM auction WHERE user_id=$userId ORDER BY date DESC, id DESC")->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['auction_id'])) {
     $_SESSION['auction_id'] = (int)$_GET['auction_id'];
@@ -42,8 +43,8 @@ if (empty($_SESSION['auction_id']) && !empty($allAuctions)) {
 $activeAuctionId = (int)($_SESSION['auction_id'] ?? 0);
 $auction = null;
 if ($activeAuctionId) {
-    $stmt = $db->prepare("SELECT * FROM auction WHERE id=?");
-    $stmt->execute([$activeAuctionId]);
+    $stmt = $db->prepare("SELECT * FROM auction WHERE id=? AND user_id=?");
+    $stmt->execute([$activeAuctionId, $userId]);
     $auction = $stmt->fetch();
 }
 if (!$auction && !empty($allAuctions)) {
@@ -65,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date = trim($_POST['date'] ?? '');
         $location = trim($_POST['location'] ?? '');
         if ($name !== '' && $date !== '') {
-            $stmt = $db->prepare("INSERT INTO auction (name, date, location) VALUES (?,?,?)");
-            $stmt->execute([$name, $date, $location]);
+            $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, location) VALUES (?,?,?,?)");
+            $stmt->execute([$userId, $name, $date, $location]);
             $newId = (int)$db->lastInsertId();
             // Create default fees for new auction
             $db->prepare("INSERT INTO fees (auction_id, entry_fee, commission_rate, tax_rate, transport_fee) VALUES (?,?,?,?,?)")
@@ -77,13 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     elseif ($action === 'delete_auction') {
         $id = (int)$_POST['id'];
-        $db->prepare("DELETE FROM auction WHERE id=?")->execute([$id]);
+        $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([$id, $userId]);
         unset($_SESSION['auction_id']);
     }
 
     elseif ($action === 'save_auction') {
-        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, location=? WHERE id=?");
-        $stmt->execute([trim($_POST['name']), trim($_POST['date']), trim($_POST['location'] ?? ''), $activeAuctionId]);
+        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, location=? WHERE id=? AND user_id=?");
+        $stmt->execute([trim($_POST['name']), trim($_POST['date']), trim($_POST['location'] ?? ''), $activeAuctionId, $userId]);
     }
 
     elseif ($action === 'add_member') {

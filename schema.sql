@@ -11,11 +11,13 @@ USE `auctionkai`;
 -- ── Auctions (multiple auctions) ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `auction` (
   `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id`    INT UNSIGNED NOT NULL,
   `name`       VARCHAR(200) NOT NULL,
   `date`       DATE         NOT NULL,
   `location`   VARCHAR(200) DEFAULT '',
   `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Members (sellers) ────────────────────────────────────────────
@@ -82,15 +84,14 @@ INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
 -- ─────────────────────────────────────────────────────────────────
 -- Seed: Multiple Japanese auctions
 -- ─────────────────────────────────────────────────────────────────
-INSERT INTO `auction` (`name`, `date`, `location`) VALUES
-  ('Nagoya Auto Auction',       CURDATE(), 'Nagoya, Aichi'),
-  ('Tokyo Bay Auto Auction',    CURDATE(), 'Odaiba, Tokyo'),
-  ('Osaka JAA Auction',         CURDATE(), 'Izumiotsu, Osaka'),
-  ('Yokohama Auto Auction',     CURDATE(), 'Yokohama, Kanagawa'),
-  ('Fukuoka Auto Auction',      CURDATE(), 'Fukuoka, Fukuoka'),
-  ('Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
+INSERT INTO `auction` (`user_id`, `name`, `date`, `location`) VALUES
+  (1, 'Nagoya Auto Auction',       CURDATE(), 'Nagoya, Aichi'),
+  (1, 'Tokyo Bay Auto Auction',    CURDATE(), 'Odaiba, Tokyo'),
+  (1, 'Osaka JAA Auction',         CURDATE(), 'Izumiotsu, Osaka'),
+  (1, 'Yokohama Auto Auction',     CURDATE(), 'Yokohama, Kanagawa'),
+  (1, 'Fukuoka Auto Auction',      CURDATE(), 'Fukuoka, Fukuoka'),
+  (1, 'Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
 
--- Fees for each auction
 INSERT INTO `fees` (`auction_id`, `entry_fee`, `commission_rate`, `tax_rate`, `transport_fee`) VALUES
   (1, 3000, 3.00, 10.00, 5000),
   (2, 3500, 3.50, 10.00, 6000),
@@ -99,17 +100,17 @@ INSERT INTO `fees` (`auction_id`, `entry_fee`, `commission_rate`, `tax_rate`, `t
   (5, 2000, 2.00,  8.00, 4000),
   (6, 2500, 2.50,  8.00, 7000);
 
--- Custom deductions for Nagoya auction
+-- Custom deductions for Nagoya auction (user_id=1)
 INSERT INTO `custom_deductions` (`auction_id`, `name`, `amount`) VALUES
   (1, 'Document Fee', 1500);
 
--- Sample members (Nagoya)
+-- Sample members (Nagoya, user_id=1)
 INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
   (1, 'Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
   (1, 'Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
   (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com');
 
--- Sample members (Tokyo)
+-- Sample members (Tokyo, user_id=1)
 INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
   (2, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
   (2, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
