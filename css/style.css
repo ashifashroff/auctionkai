@@ -56,9 +56,6 @@
 .btn-icon:hover{background:rgba(204,119,119,.25)}
 
 /* ── FORM ROW FOR ADD/EDIT ─────────────────────────── */
-.add-row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start}
-.add-row>div{min-width:140px;flex:1}
-.ar-vehicles>div{min-width:120px}
 
 /* ── STATEMENT SECTIONS ────────────────────────────── */
 .sh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
