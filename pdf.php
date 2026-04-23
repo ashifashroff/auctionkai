@@ -55,7 +55,7 @@ if (empty($targets)) { echo 'No members found.'; exit; }
 function renderStatement(array $m, array $s, array $feeItems, array $auction): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
-        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td>" . h($v['year']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td></tr>";
+        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td></tr>";
     }
     $customRows = '';
     foreach ($s['deductions'] as $d) {
@@ -73,7 +73,7 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
       <table>
-        <thead><tr><th>Lot #</th><th>Vehicle</th><th>Year</th><th class='r'>Sold Price</th></tr></thead>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th></tr></thead>
         <tbody>{$rows}<tr class='tr'><td colspan='3'>Gross Sales Total</td><td class='r'>" . fmt($s['grossSales']) . "</td></tr></tbody>
       </table>
       <div class='sec'>Fee Breakdown</div>
