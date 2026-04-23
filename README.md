@@ -8,7 +8,7 @@ A premium dark-themed settlement management system for Japanese auto auctions. B
 
 | Login | Dashboard | Statements |
 |-------|-----------|-------------|
-| Dark themed auth | Multi-auction management | Full breakdown with PDF |
+| Dark themed auth | Stats + ranking | Full breakdown with PDF |
 
 ---
 
@@ -61,6 +61,12 @@ Or register a new account via the **Register** link.
 
 ## ✨ Features
 
+### 📊 Dashboard
+- At-a-glance stats: Members, Vehicles, Sold count, Gross Sales, Net Payout
+- **Member ranking** sorted by net payout descending
+- Gold badge for #1 member
+- Each rank shows sold/unsold count + gross sales
+
 ### 🔐 Authentication
 - Login / Register with bcrypt passwords
 - Session-based access control
@@ -87,6 +93,7 @@ Or register a new account via the **Register** link.
 - **Modal-based edit** — AJAX fetch + save, no page reload
 - **AJAX delete** — fade-out animation
 - Toggle sold/unsold with one click
+- **Real-time search** — filter table by lot, member, make, model
 - Per-vehicle fields: Lot #, Make, Model, Sold Price, Recycle Fee, Listing Fee, Sold Fee, Nagare Fee, Other Fee
 
 ### 💰 Smart Fee Logic
@@ -107,6 +114,7 @@ Or register a new account via the **Register** link.
 
 ### 📄 Settlement Statements
 - Only members with sold vehicles are shown
+- "No sold vehicles recorded for this auction yet." when no sales data
 - Full breakdown: Gross Sales → + Tax → + Recycle → Total Received → − Fees → − Commission → NET PAYOUT
 - **¥0 payout** when member has no sales
 - Email draft generation (mailto: link)
@@ -145,12 +153,12 @@ auctionkai/
 │   ├── pdf.css                ← PDF print styles (light theme, A4)
 │   └── tailwind-config.php    ← Tailwind CDN + custom theme config
 ├── js/
-│   └── app.js                 ← All client-side JS (modals, AJAX, autocomplete)
+│   └── app.js                 ← All client-side JS (modals, AJAX, autocomplete, search)
 ├── config.php                 ← DB credentials + PDO connection
 ├── schema.sql                 ← Full DB schema + seed data
 ├── login.php                  ← Login & registration
 ├── logout.php                 ← Session destroy & redirect
-├── index.php                  ← Main app (members, vehicles, statements)
+├── index.php                  ← Main app (dashboard, members, vehicles, statements)
 ├── profile.php                ← User profile & password change
 ├── pdf.php                    ← Print-ready A4 settlement statements
 ├── get_vehicle.php            ← AJAX: fetch vehicle data
@@ -202,15 +210,38 @@ members (id, user_id, name, phone, email, created_at)
 
 **Fonts:** Noto Sans JP (UI) + Space Mono (numbers/prices)
 
-**Animations:** Fade-in, slide-down, pulse-gold on active auction, button hover lift
+**Animations:** Fade-in, slide-down, pulse-gold on active auction, button hover lift, staggered card entrance
+
+---
+
+## 🔒 Security
+
+| Measure | Implementation |
+|---------|---------------|
+| SQL Injection | All queries use PDO prepared statements with `?` placeholders |
+| XSS | `htmlspecialchars()` on all output |
+| CSRF | Token verification on every POST form |
+| Passwords | `password_hash()` with bcrypt |
+| Data Isolation | Every write query verifies `user_id` ownership via `auction.user_id` |
+| Vehicle Auth | DELETE/UPDATE verify `auction_id IN (SELECT id FROM auction WHERE user_id=?)` |
+| Member Auth | All member queries filter by `user_id` |
+| No Orphan Tables | Removed `vehicle_fees` reference from expiry cleanup |
 
 ---
 
 ## 📝 Changelog
 
+### v2.1 — Dashboard + Search + Security Hardening
+- 📊 Dashboard tab with stats cards and member ranking by net payout
+- 🔍 Real-time vehicle search (filter by lot, member, make, model)
+- 🔒 All raw SQL queries converted to PDO prepared statements
+- 🔒 Vehicle ownership verification on delete/toggle/update
+- 🗑 Removed orphan `vehicle_fees` table reference from expiry loop
+- 📄 "No sold vehicles recorded" message when no sales data
+
 ### v2.0 — Tailwind CSS + AJAX Overhaul
 - Migrated to Tailwind CSS (CDN, no build step)
-- Same dark premium theme with custom `ak-*` color palette
+- Custom `ak-*` color palette matching original theme
 - All CRUD operations via AJAX (add/edit/delete vehicles, edit members)
 - Modal-based editing for vehicles and members
 - Member detail modal (click name → sold/unsold list + PDF)
@@ -270,17 +301,7 @@ members (id, user_id, name, phone, email, created_at)
 | PDF blank/error | Ensure `commission_fee` column exists |
 | Fields look invisible | Fixed — inputs use `--card` background now |
 | Nagare field missing | It's always visible, disabled when Sold is checked |
-
----
-
-## 🔒 Security Notes
-
-- Passwords stored with `password_hash()` (bcrypt)
-- SQL injection prevented via PDO prepared statements
-- XSS prevented via `htmlspecialchars()` output encoding
-- CSRF tokens on all form submissions
-- User data isolation — each user only accesses their own records
-- **Rotate the GitHub token** if it was ever exposed in chat
+| Vehicle search not working | Hard refresh browser (JS cache) |
 
 ---
 
