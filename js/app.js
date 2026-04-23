@@ -7,8 +7,8 @@ function toggleSoldFields(isSold) {
     if (!isSold) el.value = '';
   });
   document.querySelectorAll('.nagare-field').forEach(el => {
-    el.style.display = isSold ? 'none' : '';
-    if (isSold) el.querySelector('input').value = '';
+    if (isSold) { el.classList.add('hidden'); el.querySelector('input').value = ''; }
+    else { el.classList.remove('hidden'); }
   });
 }
 
@@ -19,9 +19,9 @@ function toggleModalSoldFields(isSold) {
     if (!isSold) el.value = '';
   });
   document.querySelectorAll('.modal-nagare-field').forEach(el => {
-    el.style.display = isSold ? 'none' : '';
     const inp = el.querySelector('input');
-    if (isSold) inp.value = '';
+    if (isSold) { el.classList.add('hidden'); inp.value = ''; }
+    else { el.classList.remove('hidden'); }
     inp.disabled = isSold;
   });
 }
