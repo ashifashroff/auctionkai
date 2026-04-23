@@ -555,45 +555,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <?php endif; ?>
 
 <?php endif; ?>
-<!-- Edit Vehicle Modal -->
-<div id="editModal" class="modal-overlay" style="display:none">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>Edit Vehicle</h3>
-      <button class="modal-close" onclick="closeEditModal()">×</button>
-    </div>
-    <div id="modalMsg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
-    <form id="editForm" onsubmit="return submitEditForm(event)">
-      <input type="hidden" id="edit_id" name="id">
-      <div class="modal-grid">
-        <div>
-          <label class="lbl">Member *</label>
-          <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" required>
-          <input type="hidden" id="edit_memberId" name="memberId" required>
-          <div id="edit_memberDropdown" class="member-dropdown" style="display:none"></div>
-        </div>
-        <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" required></div>
-        <div><label class="lbl">Model</label><input class="inp" id="edit_model" name="model"></div>
-        <div><label class="lbl">Lot #</label><input class="inp" id="edit_lot" name="lot"></div>
-        <div><label class="lbl">Sold Price (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" min="0"></div>
-        <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_recycleFee" name="recycleFee" min="0"></div>
-        <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" min="0"></div>
-        <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" min="0"></div>
-        <div class="modal-nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="edit_nagareFee" name="nagareFee" min="0"></div>
-        <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="edit_otherFee" name="otherFee" min="0"></div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-          <input type="checkbox" id="edit_sold" name="sold" style="accent-color:var(--gold)" onchange="toggleModalSoldFields(this.checked)"> Sold
-        </label>
-        <div style="flex:1"></div>
-        <button type="button" class="btn btn-dark btn-sm" onclick="closeEditModal()">Cancel</button>
-        <button type="submit" class="btn btn-gold btn-sm" id="editSubmitBtn">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
 function toggleSoldFields(isSold) {
   document.querySelectorAll('.sold-fields').forEach(el => {
@@ -789,6 +750,55 @@ document.addEventListener('click', function(e) {
   });
 });
 
+// ─── BODY SCROLL LOCK FOR MODAL ─────────────────────
+const editModal = document.getElementById('editModal');
+if (editModal) {
+  const observer = new MutationObserver(() => {
+    document.body.style.overflow = editModal.style.display === 'flex' ? 'hidden' : '';
+  });
+  observer.observe(editModal, { attributes: true, attributeFilter: ['style'] });
+}
+
 </script>
+
+<!-- Edit Vehicle Modal (root level) -->
+<div id="editModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Edit Vehicle</h3>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div id="modalMsg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+    <form id="editForm" onsubmit="return submitEditForm(event)">
+      <input type="hidden" id="edit_id" name="id">
+      <div class="modal-grid">
+        <div>
+          <label class="lbl">Member *</label>
+          <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" required>
+          <input type="hidden" id="edit_memberId" name="memberId" required>
+          <div id="edit_memberDropdown" class="member-dropdown" style="display:none"></div>
+        </div>
+        <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" required></div>
+        <div><label class="lbl">Model</label><input class="inp" id="edit_model" name="model"></div>
+        <div><label class="lbl">Lot #</label><input class="inp" id="edit_lot" name="lot"></div>
+        <div><label class="lbl">Sold Price (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" min="0"></div>
+        <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_recycleFee" name="recycleFee" min="0"></div>
+        <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" min="0"></div>
+        <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" min="0"></div>
+        <div class="modal-nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="edit_nagareFee" name="nagareFee" min="0"></div>
+        <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="edit_otherFee" name="otherFee" min="0"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
+          <input type="checkbox" id="edit_sold" name="sold" style="accent-color:var(--gold)" onchange="toggleModalSoldFields(this.checked)"> Sold
+        </label>
+        <div style="flex:1"></div>
+        <button type="button" class="btn btn-dark btn-sm" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-gold btn-sm" id="editSubmitBtn">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>
