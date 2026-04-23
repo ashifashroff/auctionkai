@@ -73,14 +73,7 @@ CREATE TABLE IF NOT EXISTS `fee_items` (
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Vehicle Additional Fees (custom per vehicle) ────────────────
-CREATE TABLE IF NOT EXISTS `vehicle_fees` (
-  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `vehicle_id`  INT UNSIGNED NOT NULL,
-  `name`        VARCHAR(200) NOT NULL,
-  `amount`      DECIMAL(12,0) NOT NULL DEFAULT 0,
-  FOREIGN KEY (`vehicle_id`) REFERENCES `vehicles`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 -- ── Custom Deductions (per auction) ─────────────────────────────
 -- ─────────────────────────────────────────────────────────────────

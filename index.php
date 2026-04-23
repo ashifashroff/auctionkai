@@ -160,21 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    elseif ($action === 'add_vehicle_fee') {
-        $vid   = (int)$_POST['vehicleId'];
-        $fname = trim($_POST['feeName'] ?? '');
-        $famt  = (float)($_POST['feeAmount'] ?? 0);
-        if ($vid && $fname !== '' && $famt > 0) {
-            $stmt = $db->prepare("INSERT INTO vehicle_fees (vehicle_id, name, amount) VALUES (?,?,?)");
-            $stmt->execute([$vid, $fname, $famt]);
-        }
-    }
-
-    elseif ($action === 'remove_vehicle_fee') {
-        $stmt = $db->prepare("DELETE FROM vehicle_fees WHERE id=?");
-        $stmt->execute([(int)$_POST['feeId']]);
-    }
-
     elseif ($action === 'remove_vehicle') {
         $stmt = $db->prepare("DELETE FROM vehicles WHERE id=?");
         $stmt->execute([(int)$_POST['id']]);
@@ -238,15 +223,10 @@ $vehicles = $activeAuctionId
     ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " AND m.user_id=$userId ORDER BY v.id")->fetchAll()
     : [];
 
-$vehicleIds = array_column($vehicles, 'id');
-$allVehicleFees = !empty($vehicleIds)
-    ? $db->query("SELECT * FROM vehicle_fees WHERE vehicle_id IN (" . implode(',', array_map('intval', $vehicleIds)) . ") ORDER BY id")->fetchAll()
-    : [];
-
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
-function calcStatement(int $memberId, array $vehicles, array $feeItems, array $allVehicleFees): array {
+function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $allMv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
@@ -258,22 +238,8 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems, array $a
     // Filter fee items for this member only
     $memberFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === $memberId);
 
-    // Vehicle-level custom fees
-    $vehicleCustomTotal = 0;
-    $vehicleCustomDetails = [];
-    foreach ($mv as $v) {
-        $vFees = array_filter($allVehicleFees, fn($f) => (int)$f['vehicle_id'] === (int)$v['id']);
-        $vFeeSum = 0;
-        foreach ($vFees as $vf) {
-            $vFeeSum += (float)$vf['amount'];
-            $vehicleCustomDetails[] = ['vehicle' => $v['make'] . ' ' . $v['model'], 'lot' => $v['lot'], 'name' => $vf['name'], 'amount' => (float)$vf['amount']];
-        }
-        $vehicleCustomTotal += $vFeeSum;
-    }
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
 
-    $totalReceived = $grossSales + $taxTotal + $recycleTotal + $vehicleCustomTotal;
-
-    // Auction-level fees grouped by category (for this member)
     $listingFees = [];
     $soldFees = [];
     $totalListingDed = 0;
@@ -309,7 +275,7 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems, array $a
     $totalDed = $totalListingDed + $totalSoldDed;
     $netPayout = $totalReceived - $totalDed;
 
-    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','vehicleCustomTotal','vehicleCustomDetails','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
+    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
@@ -430,7 +396,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <?php foreach ($members as $m):
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
     $soldCount = count(array_filter($mv, fn($v) => $v['sold']));
-    $s         = calcStatement((int)$m["id"], $vehicles, $feeItems, $allVehicleFees);
+    $s         = calcStatement((int)$m["id"], $vehicles, $feeItems);
     $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
   <?php if ($editing): ?>
@@ -568,7 +534,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
           </form>
         </td>
         <td>
-          <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
+          <div style="display:flex;gap:4px;align-items:center">
             <a class="btn btn-dark btn-sm" href="?tab=vehicles&edit_vehicle=<?= (int)$v['id'] ?>" style="font-size:11px;padding:4px 10px">Edit</a>
             <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
               <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
@@ -576,30 +542,18 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
             </form>
           </div>
           <?php
-          $vFees = array_filter($allVehicleFees, fn($f) => (int)$f['vehicle_id'] === (int)$v['id']);
-          if (!empty($vFees)):
+          $ownerFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === (int)$v['member_id']);
+          if (!empty($ownerFees)):
           ?>
-          <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px">
-            <?php foreach ($vFees as $vf): ?>
-            <div style="font-size:11px;color:var(--text2);display:flex;justify-content:space-between;gap:8px">
-              <span><?= h($vf['name']) ?></span>
-              <span style="font-family:var(--mono);color:var(--gold)">¥<?= number_format((float)$vf['amount']) ?></span>
-              <?= postForm('remove_vehicle_fee', 'vehicles', $tok) ?>
-                <input type="hidden" name="feeId" value="<?= (int)$vf['id'] ?>">
-                <button style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;padding:0" type="submit">×</button>
-              </form>
+          <div style="margin-top:6px;display:flex;flex-direction:column;gap:2px">
+            <?php foreach ($ownerFees as $of): ?>
+            <div style="font-size:10px;color:var(--muted);display:flex;justify-content:space-between;gap:6px">
+              <span><?= ($of['category'] ?? 'sold') === 'listing' ? '📋' : '💰' ?> <?= h($of['name']) ?></span>
+              <span style="font-family:var(--mono);color:var(--gold)"><?= $of['type'] === 'percent' ? (float)$of['amount'] . '%' : '¥' . number_format((float)$of['amount']) ?>/<?= ($of['scope'] ?? 'per_vehicle') === 'per_member' ? 'm' : 'v' ?></span>
             </div>
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
-          <?= postForm('add_vehicle_fee', 'vehicles', $tok) ?>
-            <input type="hidden" name="vehicleId" value="<?= (int)$v['id'] ?>">
-            <div style="display:flex;gap:4px;margin-top:4px">
-              <input class="inp" name="feeName" placeholder="Fee name" style="font-size:11px;padding:4px 6px;flex:1">
-              <input class="inp mono" name="feeAmount" type="number" placeholder="¥" style="font-size:11px;padding:4px 6px;width:70px">
-              <button class="btn btn-dark" type="submit" style="font-size:10px;padding:3px 8px">+</button>
-            </div>
-          </form>
         </td>
       </tr>
       <?php endif; ?>
@@ -723,7 +677,7 @@ foreach ($members as $m) {
   <div class="card nm">No members registered for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
-    $s = calcStatement((int)$m["id"], $vehicles, $feeItems, $allVehicleFees);
+    $s = calcStatement((int)$m["id"], $vehicles, $feeItems);
     $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
     $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>
@@ -785,7 +739,7 @@ foreach ($members as $m) {
         <?php endforeach; ?>
         <?php endif; ?>
 
-        <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed'] + $s['vehicleCustomTotal']) ?></span></div>
+        <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
       </div>
     </div>

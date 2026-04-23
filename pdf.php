@@ -4,7 +4,7 @@ require_once 'config.php';
 function fmt(float $n): string { return '¥' . number_format(round($n)); }
 function h(string $s): string  { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-function calcStatement(int $memberId, array $vehicles, array $feeItems, array $allVehicleFees): array {
+function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $allMv       = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
@@ -13,19 +13,8 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems, array $a
     $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
     $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
 
-    $vehicleCustomTotal = 0;
-    $vehicleCustomDetails = [];
-    foreach ($mv as $v) {
-        $vFees = array_filter($allVehicleFees, fn($f) => (int)$f['vehicle_id'] === (int)$v['id']);
-        foreach ($vFees as $vf) {
-            $vehicleCustomTotal += (float)$vf['amount'];
-            $vehicleCustomDetails[] = ['vehicle' => $v['make'] . ' ' . $v['model'], 'lot' => $v['lot'], 'name' => $vf['name'], 'amount' => (float)$vf['amount']];
-        }
-    }
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
 
-    $totalReceived = $grossSales + $taxTotal + $recycleTotal + $vehicleCustomTotal;
-
-    // Filter fees for this member only
     $memberFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === $memberId);
 
     $listingFees = [];
@@ -56,7 +45,7 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems, array $a
 
     $totalDed = $totalListingDed + $totalSoldDed;
     $netPayout = $totalReceived - $totalDed;
-    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','vehicleCustomTotal','vehicleCustomDetails','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
+    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
 }
 
 $db = db();
@@ -69,14 +58,9 @@ if (!$activeAuctionId) {
 }
 
 $auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch() : null;
-$feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items WHERE user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY sort_order, id")->fetchAll() : [];
+$feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items fi JOIN members m ON fi.member_id = m.id WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY fi.member_id, fi.sort_order, fi.id")->fetchAll() : [];
 $members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
 $vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
-
-$vehicleIds = array_column($vehicles, 'id');
-$allVehicleFees = !empty($vehicleIds)
-    ? $db->query("SELECT * FROM vehicle_fees WHERE vehicle_id IN (" . implode(',', array_map('intval', $vehicleIds)) . ") ORDER BY id")->fetchAll()
-    : [];
 
 $printAll = isset($_GET['all']);
 $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
@@ -106,10 +90,6 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
         elseif ($d['type'] === 'percent') $label .= ' (' . $d['rate'] . '%)';
         $soldRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
     }
-    $vehicleFeeRows = '';
-    foreach ($s['vehicleCustomDetails'] as $vd) {
-        $vehicleFeeRows .= "<div class='row dim'><span>" . h($vd['name']) . " (" . h($vd['lot'] ?: $vd['vehicle']) . ")</span><span>−" . fmt($vd['amount']) . "</span></div>";
-    }
     $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
     <div class='page'>
@@ -130,8 +110,7 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
         <div class='row' style='font-weight:700;border-top:1px solid #ccc;padding-top:8px'><span>Total Received</span><span>" . fmt($s['totalReceived']) . "</span></div>
         " . (!empty($listingRows) ? "<div class='sec'>Listing Fees</div>" . $listingRows : "") . "
         " . (!empty($soldRows) ? "<div class='sec'>Sold Fees</div>" . $soldRows : "") . "
-        " . (!empty($vehicleFeeRows) ? "<div class='sec'>Additional Vehicle Fees</div>" . $vehicleFeeRows : "") . "
-        <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed'] + $s['vehicleCustomTotal']) . "</span></div>
+        <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
       <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · AuctionKai Settlement System</div>
