@@ -1,8 +1,17 @@
 <?php
 require_once 'config.php';
 session_start();
+
+// ─── AUTH CHECK ────────────────────────────────────────────────────────────────
+if (empty($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
+$userName = $_SESSION['user_name'] ?? 'User';
+$userRole = $_SESSION['user_role'] ?? 'user';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function fmt(float $n): string {
@@ -198,139 +207,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <title>AuctionKai — Settlement System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root {
-    --bg:#0A1420;--bg2:#07101A;--card:#111E2D;--border:#1E3A5F;
-    --gold:#D4A84B;--text:#E8DCC8;--text2:#A8C4D8;--muted:#6A88A0;
-    --muted2:#3A5570;--green:#4CAF82;--red:#CC7777;--infield:#0A1724;
-    --mono:'Space Mono',monospace;--sans:'Noto Sans JP',sans-serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.5}
-a{color:inherit;text-decoration:none}
-button,input,select,textarea{font-family:var(--sans)}
-
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
-.brand{font-size:22px;font-weight:700;color:var(--gold);letter-spacing:-0.5px}
-.brand-sub{font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:1px;text-transform:uppercase}
-.topbar form{display:flex;gap:10px;align-items:center}
-
-/* Auction selector */
-.auction-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:68px;z-index:99}
-.auction-select{display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center}
-.auction-chip{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--infield);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
-.auction-chip:hover{border-color:var(--gold);color:var(--text2)}
-.auction-chip.active{background:var(--gold);color:#0A1420;border-color:var(--gold)}
-.auction-chip .chip-loc{font-size:10px;opacity:.7}
-.auction-add{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px dashed var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s}
-.auction-add:hover{border-color:var(--gold);color:var(--gold)}
-.auction-meta{font-size:11px;color:var(--muted);white-space:nowrap}
-.auction-meta b{color:var(--gold)}
-
-.tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding-left:16px;overflow-x:auto}
-.tab-btn{padding:13px 20px;font-size:13px;font-weight:400;color:var(--muted);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;transition:color .15s}
-.tab-btn:hover{color:var(--text2)}
-.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
-.tab-stats{margin-left:auto;padding:0 24px;font-size:12px;color:var(--muted);display:flex;gap:16px;align-items:center;white-space:nowrap}
-.tab-stats b{color:var(--gold)} .tab-stats b.g{color:var(--green)}
-
-.content{padding:28px;max-width:1150px;margin:0 auto}
-h2{font-size:17px;font-weight:700;margin-bottom:20px}
-
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px}
-.card-pad{padding:20px 24px}
-
-.inp,select.inp{background:var(--infield);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;width:100%;transition:border-color .15s}
-.inp:focus,select.inp:focus{border-color:var(--gold)}
-.inp.mono{font-family:var(--mono);text-align:right;color:var(--gold)}
-.lbl{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:500}
-
-.btn{border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);white-space:nowrap}
-.btn-gold{background:var(--gold);color:#0A1420} .btn-gold:hover{background:#E0B85A}
-.btn-dark{background:var(--infield);color:var(--gold);border:1px solid var(--border)} .btn-dark:hover{border-color:var(--gold)}
-.btn-ghost{background:none;border:1px solid #3A2020;color:var(--red)} .btn-ghost:hover{background:#2A1010}
-.btn-icon{background:none;border:none;color:var(--red);cursor:pointer;font-size:20px;line-height:1;padding:0 6px}
-.btn-sm{padding:6px 14px;font-size:12px}
-.btn-email{background:#0F2030;color:var(--gold);border:1px solid var(--border);padding:8px 16px;font-weight:600;font-size:12px;border-radius:8px;cursor:pointer;white-space:nowrap;display:inline-block}
-.btn-email:hover{border-color:var(--gold)}
-
-.add-row{display:grid;gap:12px;align-items:end;margin-bottom:16px}
-.ar-members{grid-template-columns:2fr 1.5fr 2fr auto}
-.ar-vehicles{grid-template-columns:2fr 1.5fr 1.5fr 0.8fr 1fr 1.5fr auto}
-.ar-auction{grid-template-columns:2fr 1fr 1.5fr auto}
-@media(max-width:900px){.ar-members{grid-template-columns:1fr 1fr}.ar-vehicles{grid-template-columns:1fr 1fr 1fr}.ar-auction{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.ar-members,.ar-vehicles,.ar-auction{grid-template-columns:1fr}.topbar form{flex-wrap:wrap}}
-
-.sec-lbl{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:14px;text-transform:uppercase}
-
-/* Members */
-.mi{display:flex;align-items:center;gap:16px;padding:16px 20px;animation:fi .2s ease}
-.av{width:42px;height:42px;border-radius:50%;background:#1E3A5F;display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:17px;flex-shrink:0}
-.mn{font-weight:600;font-size:15px;color:#F0E4C8}
-.mm{font-size:12px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ms{text-align:center;padding:0 20px;border-left:1px solid var(--border);border-right:1px solid var(--border);flex-shrink:0}
-.ms-big{font-size:22px;font-weight:700;color:var(--gold);font-family:var(--mono)}
-.ms-sm{font-size:11px;color:var(--muted)}
-.mp{text-align:right;padding:0 20px;border-right:1px solid var(--border);flex-shrink:0}
-.mp-num{font-size:17px;font-weight:700;color:var(--green);font-family:var(--mono)}
-
-/* Vehicles table */
-.vt{width:100%;border-collapse:collapse;font-size:13px}
-.vt th{padding:12px 16px;text-align:left;color:var(--muted);font-weight:600;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border)}
-.vt th.r{text-align:right}
-.vt td{padding:11px 16px;border-bottom:1px solid #131F2E}
-.vt tr:last-child td{border-bottom:none}
-.vt tr:hover td{background:rgba(30,58,95,.2)}
-.lot{color:var(--gold);font-family:var(--mono);font-size:11px}
-.sb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;border:none;cursor:pointer;font-family:var(--sans)}
-.sy{background:#1A3A2A;color:var(--green)} .sn{background:#3A1A1A;color:var(--red)}
-
-/* Fee settings */
-.fr{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--infield);border-radius:10px;margin-bottom:10px}
-.fr-lbl{flex:1} .fr-name{font-size:13px;font-weight:600;color:var(--text)} .fr-note{font-size:11px;color:var(--muted);margin-top:2px}
-.fr-inp{display:flex;align-items:center;gap:6px} .fr-unit{color:var(--muted);font-size:13px}
-.ci{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--infield);border-radius:8px;margin-bottom:8px}
-.ci-name{flex:1;font-size:13px;color:var(--text)} .ci-amt{font-family:var(--mono);color:var(--gold);font-size:13px}
-.add-ci{display:flex;gap:10px;margin-top:12px}
-
-/* Statements */
-.sh{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.sn2{font-size:17px;font-weight:700;color:#F0E4C8} .sm{font-size:12px;color:var(--muted);margin-top:2px}
-.sa{display:flex;gap:10px}
-.sb2{display:grid;grid-template-columns:1fr 1fr}
-.sl{padding:20px 24px;border-right:1px solid var(--border)}
-.sr{padding:20px 24px}
-.ssl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--muted);margin-bottom:12px;text-transform:uppercase}
-.vr{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #131F2E}
-.vr-lot{color:var(--gold);font-family:var(--mono);font-size:11px;margin-right:6px}
-.vr-car{color:var(--text2)} .vr-yr{color:var(--muted)} .vr-p{font-family:var(--mono);color:var(--green);flex-shrink:0;margin-left:8px}
-.sg{display:flex;justify-content:space-between;padding:10px 0 0;font-weight:700}
-.sg-l{color:var(--muted);font-size:13px} .sg-n{font-family:var(--mono);color:var(--text);font-size:15px}
-.dr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #131F2E}
-.dr-l{color:var(--muted)} .dr-l.dim{color:var(--muted2)} .dr-a{font-family:var(--mono);color:var(--red);flex-shrink:0;margin-left:8px}
-.dt{display:flex;justify-content:space-between;padding:8px 0}
-.dt-l{font-weight:700;color:var(--red);font-size:12px} .dt-n{font-family:var(--mono);font-weight:700;color:var(--red)}
-.np{margin-top:12px;background:var(--gold);border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center}
-.np-l{font-size:12px;font-weight:700;color:#0A1420;letter-spacing:.5px}
-.np-n{font-size:20px;font-weight:700;font-family:var(--mono);color:#0A1420}
-.se{padding:28px;color:var(--muted);font-size:13px;text-align:center}
-.nm{text-align:center;padding:60px;color:var(--muted)}
-.st-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
-
-/* DB badge */
-.db-badge{background:#1A3A1A;border:1px solid #2A5A2A;color:#4CAF82;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px}
-
-/* Auction edit panel */
-.auction-edit{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:auto}
-.auction-edit .inp{width:auto}
-
-/* No auction state */
-.no-auction{text-align:center;padding:80px 20px}
-.no-auction h2{color:var(--gold);font-size:22px;margin-bottom:12px}
-.no-auction p{color:var(--muted);font-size:14px}
-
-@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -350,7 +227,16 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
     </form>
   </div>
   <?php endif; ?>
+  <div class="user-menu">
+    <div class="user-avatar"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
+    <div>
+      <div class="user-name"><?= h($userName) ?></div>
+      <div class="user-role"><?= h($userRole) ?></div>
+    </div>
+    <a href="logout.php" class="logout-btn">Logout</a>
+  </div>
 </div>
+
 
 <!-- ─── AUCTION SELECTOR BAR ─────────────────────────────────────── -->
 <div class="auction-bar">
