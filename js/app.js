@@ -182,6 +182,26 @@ function submitEditForm(e) {
   return false;
 }
 
+// ─── DELETE VEHICLE (AJAX) ─────────────────────────
+function deleteVehicle(vehicleId, btn) {
+  if (!confirm('Remove this vehicle?')) return;
+  btn.disabled = true;
+  btn.textContent = '…';
+  fetch('delete_vehicle.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: vehicleId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { alert(data.error); btn.disabled = false; btn.textContent = '×'; return; }
+    const row = document.querySelector(`tr[data-vid="${vehicleId}"]`);
+    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => location.reload(), 300); }
+    else location.reload();
+  })
+  .catch(() => { alert('Network error.'); btn.disabled = false; btn.textContent = '×'; });
+}
+
 // ─── GLOBAL EVENT LISTENERS ─────────────────────────
 
 // Close modal on overlay click

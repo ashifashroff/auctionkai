@@ -465,10 +465,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <td style="white-space:nowrap">
           <div style="display:flex;gap:4px;align-items:center">
             <button class="btn btn-dark btn-sm" onclick="openEditModal(<?= (int)$v['id'] ?>)">Edit</button>
-            <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
-              <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
-              <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
-            </form>
+            <button class="btn-icon" onclick="deleteVehicle(<?= (int)$v['id'] ?>, this)">×</button>
           </div>
         </td>
       </tr>
