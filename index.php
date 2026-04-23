@@ -501,8 +501,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
               <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
             </form>
           </div>
-          <?php
-          <?php endif; ?>
         </td>
       </tr>
       <?php endif; ?>
