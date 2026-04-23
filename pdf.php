@@ -181,7 +181,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
 </div>
 
 <?php foreach ($targets as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, $feeItems);
+    $s = calcStatement((int)$m['id'], $vehicles, $feeItems, $allVehicleFees);
     if ($s['count'] === 0) continue;
     echo renderStatement($m, $s, $feeItems, $auction);
 endforeach; ?>
