@@ -557,7 +557,8 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <?php endif; ?>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:2px solid var(--border);margin-top:6px;font-weight:700"><span style="color:var(--gold)">Total Received</span><span style="font-family:var(--mono);color:var(--gold);font-size:15px"><?= fmt($s['totalReceived']) ?></span></div>
       </div>
-        <div class="ssl">Vehicle Fee Deductions</div>
+      <div class="sr">
+        <div class="ssl">Deductions</div>
         <?php if ($s['listingFeeTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Listing Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['listingFeeTotal']) ?></span></div>
         <?php endif; ?>
@@ -569,10 +570,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <?php endif; ?>
         <?php if ($s['otherFeeTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
-    <?php endif; ?>
+        <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Commission <?= $s['commissionRate'] ?>%</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
         <?php endif; ?>
+        <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
+        <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
+      </div>
+    </div>
+    <?php endif; ?>
   </div>
   <?php endforeach; ?>
 <?php endif; ?>
