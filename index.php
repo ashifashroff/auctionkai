@@ -248,14 +248,14 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     </form>
   </div>
   <?php endif; ?>
-  <div class="user-menu">
+  <a href="profile.php" class="user-menu" style="text-decoration:none">
     <div class="user-avatar"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
     <div>
       <div class="user-name"><?= h($userName) ?></div>
       <div class="user-role"><?= h($userRole) ?></div>
     </div>
-    <a href="logout.php" class="logout-btn">Logout</a>
-  </div>
+  </a>
+  <a href="logout.php" class="logout-btn">Logout</a>
 </div>
 
 
