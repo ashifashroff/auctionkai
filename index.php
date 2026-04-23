@@ -523,6 +523,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="flex justify-between py-1 text-[13px]"><span class="text-ak-text2">+ Recycle Fees</span><span class="font-mono text-ak-green"><?= fmt($s['recycleTotal']) ?></span></div>
         <?php endif; ?>
         <div class="flex justify-between py-2 border-t-2 border-ak-border mt-1.5 font-bold"><span class="text-ak-gold">Total Received</span><span class="font-mono text-ak-gold text-[15px]"><?= fmt($s['totalReceived']) ?></span></div>
+        <?php if ($s['unsoldCount'] > 0): ?>
+        <div class="ssl mt-4">Unsold Vehicles (<?= $s['unsoldCount'] ?>)</div>
+        <?php foreach ($s['uv'] as $v): ?>
+        <div class="vr">
+          <span class="vr-car"><span class="vr-lot"><?= h($v['lot'] ?: '—') ?></span><?= h($v['make'] . ' ' . $v['model']) ?></span>
+          <span class="font-mono text-ak-red text-xs"><?= (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '' ?><?= (float)($v['other_fee'] ?? 0) > 0 ? ' −' . fmt((float)$v['other_fee']) : '' ?></span>
+        </div>
+        <?php endforeach; ?>
+        <?php endif; ?>
       </div>
       <div class="sr">
         <div class="ssl">Deductions</div>
