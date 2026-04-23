@@ -406,7 +406,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" min="0"></div>
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0"></div>
-      <div class="nagare-field hidden"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0"></div>
+      <div class="nagare-field hidden"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0" disabled></div>
       <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" min="0"></div>
       <div class="flex items-end gap-2">
         <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
