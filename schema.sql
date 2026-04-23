@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────
--- AuctionKai — MySQL Schema
+-- AuctionKai — MySQL Schema (Multi-Auction)
 -- Run this entire file once in phpMyAdmin → SQL tab
 -- ─────────────────────────────────────────────────────────────────
 
@@ -8,22 +8,25 @@ CREATE DATABASE IF NOT EXISTS `auctionkai`
 
 USE `auctionkai`;
 
--- ── Auction (one active auction at a time) ───────────────────────
+-- ── Auctions (multiple auctions) ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `auction` (
   `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`       VARCHAR(200) NOT NULL DEFAULT 'Nagoya Auto Auction',
+  `name`       VARCHAR(200) NOT NULL,
   `date`       DATE         NOT NULL,
+  `location`   VARCHAR(200) DEFAULT '',
   `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Members (sellers) ────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `members` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`       VARCHAR(200)  NOT NULL,
-  `phone`      VARCHAR(50)   DEFAULT '',
-  `email`      VARCHAR(200)  DEFAULT '',
-  `created_at` TIMESTAMP     DEFAULT CURRENT_TIMESTAMP
+  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `auction_id`  INT UNSIGNED NOT NULL,
+  `name`        VARCHAR(200)  NOT NULL,
+  `phone`       VARCHAR(50)   DEFAULT '',
+  `email`       VARCHAR(200)  DEFAULT '',
+  `created_at`  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Vehicles ─────────────────────────────────────────────────────
@@ -40,40 +43,63 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Fee Settings ─────────────────────────────────────────────────
+-- ── Fee Settings (per auction) ──────────────────────────────────
 CREATE TABLE IF NOT EXISTS `fees` (
   `id`              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `auction_id`      INT UNSIGNED NOT NULL,
   `entry_fee`       DECIMAL(10,0) NOT NULL DEFAULT 3000,
   `commission_rate` DECIMAL(5,2)  NOT NULL DEFAULT 3.00,
   `tax_rate`        DECIMAL(5,2)  NOT NULL DEFAULT 10.00,
   `transport_fee`   DECIMAL(10,0) NOT NULL DEFAULT 5000,
-  `updated_at`      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at`      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Custom Deductions ────────────────────────────────────────────
+-- ── Custom Deductions (per auction) ─────────────────────────────
 CREATE TABLE IF NOT EXISTS `custom_deductions` (
-  `id`     INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `name`   VARCHAR(200)  NOT NULL,
-  `amount` DECIMAL(10,0) NOT NULL DEFAULT 0
+  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `auction_id` INT UNSIGNED NOT NULL,
+  `name`       VARCHAR(200)  NOT NULL,
+  `amount`     DECIMAL(10,0) NOT NULL DEFAULT 0,
+  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─────────────────────────────────────────────────────────────────
--- Seed default data
+-- Seed: Multiple Japanese auctions
 -- ─────────────────────────────────────────────────────────────────
-INSERT INTO `auction` (`name`, `date`) VALUES ('Nagoya Auto Auction', CURDATE());
+INSERT INTO `auction` (`name`, `date`, `location`) VALUES
+  ('Nagoya Auto Auction',       CURDATE(), 'Nagoya, Aichi'),
+  ('Tokyo Bay Auto Auction',    CURDATE(), 'Odaiba, Tokyo'),
+  ('Osaka JAA Auction',         CURDATE(), 'Izumiotsu, Osaka'),
+  ('Yokohama Auto Auction',     CURDATE(), 'Yokohama, Kanagawa'),
+  ('Fukuoka Auto Auction',      CURDATE(), 'Fukuoka, Fukuoka'),
+  ('Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
 
-INSERT INTO `fees` (`entry_fee`, `commission_rate`, `tax_rate`, `transport_fee`)
-VALUES (3000, 3.00, 10.00, 5000);
+-- Fees for each auction
+INSERT INTO `fees` (`auction_id`, `entry_fee`, `commission_rate`, `tax_rate`, `transport_fee`) VALUES
+  (1, 3000, 3.00, 10.00, 5000),
+  (2, 3500, 3.50, 10.00, 6000),
+  (3, 2500, 2.50, 10.00, 4500),
+  (4, 3000, 3.00, 10.00, 5500),
+  (5, 2000, 2.00,  8.00, 4000),
+  (6, 2500, 2.50,  8.00, 7000);
 
-INSERT INTO `custom_deductions` (`name`, `amount`) VALUES ('Document Fee', 1500);
+-- Custom deductions for Nagoya auction
+INSERT INTO `custom_deductions` (`auction_id`, `name`, `amount`) VALUES
+  (1, 'Document Fee', 1500);
 
--- Sample members
-INSERT INTO `members` (`name`, `phone`, `email`) VALUES
-  ('Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
-  ('Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
-  ('Chen Wei',            '070-5555-0001', 'cwei@example.com');
+-- Sample members (Nagoya)
+INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
+  (1, 'Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
+  (1, 'Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
+  (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com');
 
--- Sample vehicles (member IDs 1,2,3 from above)
+-- Sample members (Tokyo)
+INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
+  (2, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
+  (2, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
+
+-- Sample vehicles (Nagoya members)
 INSERT INTO `vehicles` (`member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
   (1, 'Toyota',     'Prius',     '2019', 'A-001',  850000, 1),
   (1, 'Honda',      'Fit',       '2018', 'A-002',  420000, 1),
@@ -81,3 +107,9 @@ INSERT INTO `vehicles` (`member_id`, `make`, `model`, `year`, `lot`, `sold_price
   (2, 'Mazda',      'CX-5',      '2021', 'B-002', 1250000, 1),
   (3, 'Subaru',     'Forester',  '2019', 'C-001',  920000, 1),
   (3, 'Mitsubishi', 'Outlander', '2018', 'C-002',       0, 0);
+
+-- Sample vehicles (Tokyo members)
+INSERT INTO `vehicles` (`member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
+  (4, 'Honda',   'Civic',    '2020', 'T-001',  780000, 1),
+  (4, 'Toyota',  'Corolla',  '2019', 'T-002',  550000, 1),
+  (5, 'Lexus',   'IS 300',   '2021', 'T-003', 1800000, 1);

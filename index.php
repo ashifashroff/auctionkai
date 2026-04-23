@@ -18,41 +18,71 @@ function postForm(string $action, string $tabTarget, string $tok): string {
          . "<input type='hidden' name='_tok'   value='" . h($tok) . "'>";
 }
 
-// ─── LOAD CORE DATA ───────────────────────────────────────────────────────────
+// ─── LOAD DB ─────────────────────────────────────────────────────────────────
 $db = db();
 
-// Auto-init: insert defaults if tables are empty
-if (!$db->query("SELECT id FROM auction LIMIT 1")->fetch()) {
-    $db->exec("INSERT INTO auction (name, date) VALUES ('Nagoya Auto Auction', CURDATE())");
+// ─── ACTIVE AUCTION (selected via navbar or session) ─────────────────────────
+$allAuctions = $db->query("SELECT * FROM auction ORDER BY date DESC, id DESC")->fetchAll();
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['auction_id'])) {
+    $_SESSION['auction_id'] = (int)$_GET['auction_id'];
 }
-if (!$db->query("SELECT id FROM fees LIMIT 1")->fetch()) {
-    $db->exec("INSERT INTO fees (entry_fee, commission_rate, tax_rate, transport_fee) VALUES (3000, 3, 10, 5000)");
+if (empty($_SESSION['auction_id']) && !empty($allAuctions)) {
+    $_SESSION['auction_id'] = (int)$allAuctions[0]['id'];
+}
+$activeAuctionId = (int)($_SESSION['auction_id'] ?? 0);
+$auction = $activeAuctionId
+    ? $db->prepare("SELECT * FROM auction WHERE id=?")->execute([$activeAuctionId]) || $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch()
+    : null;
+if (!$auction && !empty($allAuctions)) {
+    $auction = $allAuctions[0];
+    $activeAuctionId = (int)$auction['id'];
+    $_SESSION['auction_id'] = $activeAuctionId;
 }
 
 // ─── HANDLE POSTS ────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Basic CSRF check
     if (($_POST['_tok'] ?? '') !== $tok) {
         http_response_code(403); exit('Forbidden');
     }
 
     $action = $_POST['action'] ?? '';
 
-    if ($action === 'save_auction') {
-        $stmt = $db->prepare("UPDATE auction SET name=?, date=? ORDER BY id LIMIT 1");
-        $stmt->execute([trim($_POST['name']), trim($_POST['date'])]);
+    if ($action === 'add_auction') {
+        $name = trim($_POST['name'] ?? '');
+        $date = trim($_POST['date'] ?? '');
+        $location = trim($_POST['location'] ?? '');
+        if ($name !== '' && $date !== '') {
+            $stmt = $db->prepare("INSERT INTO auction (name, date, location) VALUES (?,?,?)");
+            $stmt->execute([$name, $date, $location]);
+            $newId = (int)$db->lastInsertId();
+            // Create default fees for new auction
+            $db->prepare("INSERT INTO fees (auction_id, entry_fee, commission_rate, tax_rate, transport_fee) VALUES (?,?,?,?)")
+               ->execute([$newId, 3000, 3.00, 10.00, 5000]);
+            $_SESSION['auction_id'] = $newId;
+        }
+    }
+
+    elseif ($action === 'delete_auction') {
+        $id = (int)$_POST['id'];
+        $db->prepare("DELETE FROM auction WHERE id=?")->execute([$id]);
+        unset($_SESSION['auction_id']);
+    }
+
+    elseif ($action === 'save_auction') {
+        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, location=? WHERE id=?");
+        $stmt->execute([trim($_POST['name']), trim($_POST['date']), trim($_POST['location'] ?? ''), $activeAuctionId]);
     }
 
     elseif ($action === 'add_member') {
         $name = trim($_POST['name'] ?? '');
         if ($name !== '') {
-            $stmt = $db->prepare("INSERT INTO members (name, phone, email) VALUES (?,?,?)");
-            $stmt->execute([$name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
+            $stmt = $db->prepare("INSERT INTO members (auction_id, name, phone, email) VALUES (?,?,?,?)");
+            $stmt->execute([$activeAuctionId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
         }
     }
 
     elseif ($action === 'remove_member') {
-        // CASCADE deletes vehicles too (see schema FK)
         $stmt = $db->prepare("DELETE FROM members WHERE id=?");
         $stmt->execute([(int)$_POST['id']]);
     }
@@ -84,12 +114,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     elseif ($action === 'save_fees') {
-        $stmt = $db->prepare("UPDATE fees SET entry_fee=?, commission_rate=?, tax_rate=?, transport_fee=? ORDER BY id LIMIT 1");
+        $stmt = $db->prepare("UPDATE fees SET entry_fee=?, commission_rate=?, tax_rate=?, transport_fee=? WHERE auction_id=?");
         $stmt->execute([
             (float)($_POST['entryFee']       ?? 0),
             (float)($_POST['commissionRate'] ?? 0),
             (float)($_POST['taxRate']        ?? 0),
             (float)($_POST['transportFee']   ?? 0),
+            $activeAuctionId,
         ]);
     }
 
@@ -97,8 +128,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cname   = trim($_POST['customName']   ?? '');
         $camount = (float)($_POST['customAmount'] ?? 0);
         if ($cname !== '' && $camount > 0) {
-            $stmt = $db->prepare("INSERT INTO custom_deductions (name, amount) VALUES (?,?)");
-            $stmt->execute([$cname, $camount]);
+            $stmt = $db->prepare("INSERT INTO custom_deductions (auction_id, name, amount) VALUES (?,?,?)");
+            $stmt->execute([$activeAuctionId, $cname, $camount]);
         }
     }
 
@@ -112,14 +143,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// ─── FETCH DATA ───────────────────────────────────────────────────────────────
-$auction  = $db->query("SELECT * FROM auction  ORDER BY id LIMIT 1")->fetch();
-$fees     = $db->query("SELECT * FROM fees     ORDER BY id LIMIT 1")->fetch();
-$members  = $db->query("SELECT * FROM members  ORDER BY id")->fetchAll();
-$vehicles = $db->query("SELECT * FROM vehicles ORDER BY id")->fetchAll();
-$customs  = $db->query("SELECT * FROM custom_deductions ORDER BY id")->fetchAll();
+// ─── FETCH DATA (filtered by active auction) ─────────────────────────────────
+$fees     = $activeAuctionId
+    ? ($db->query("SELECT * FROM fees WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id LIMIT 1")->fetch() ?: null)
+    : null;
+if (!$fees && $activeAuctionId) {
+    // Auto-create fees if missing
+    $db->prepare("INSERT INTO fees (auction_id, entry_fee, commission_rate, tax_rate, transport_fee) VALUES (?,?,?,?,?)")
+       ->execute([$activeAuctionId, 3000, 3.00, 10.00, 5000]);
+    $fees = $db->query("SELECT * FROM fees WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id LIMIT 1")->fetch();
+}
+$customs  = $activeAuctionId
+    ? $db->query("SELECT * FROM custom_deductions WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll()
+    : [];
+$members  = $activeAuctionId
+    ? $db->query("SELECT * FROM members WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll()
+    : [];
+$vehicles = $activeAuctionId
+    ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE m.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll()
+    : [];
 
-// Attach customs into fees array for convenience
 $fees['customDeductions'] = $customs;
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
@@ -169,6 +212,18 @@ button,input,select,textarea{font-family:var(--sans)}
 .brand-sub{font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:1px;text-transform:uppercase}
 .topbar form{display:flex;gap:10px;align-items:center}
 
+/* Auction selector */
+.auction-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:68px;z-index:99}
+.auction-select{display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center}
+.auction-chip{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1px solid var(--border);background:var(--infield);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.auction-chip:hover{border-color:var(--gold);color:var(--text2)}
+.auction-chip.active{background:var(--gold);color:#0A1420;border-color:var(--gold)}
+.auction-chip .chip-loc{font-size:10px;opacity:.7}
+.auction-add{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px dashed var(--border);background:none;color:var(--muted);cursor:pointer;transition:all .15s}
+.auction-add:hover{border-color:var(--gold);color:var(--gold)}
+.auction-meta{font-size:11px;color:var(--muted);white-space:nowrap}
+.auction-meta b{color:var(--gold)}
+
 .tabs{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding-left:16px;overflow-x:auto}
 .tab-btn{padding:13px 20px;font-size:13px;font-weight:400;color:var(--muted);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-block;transition:color .15s}
 .tab-btn:hover{color:var(--text2)}
@@ -199,8 +254,9 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 .add-row{display:grid;gap:12px;align-items:end;margin-bottom:16px}
 .ar-members{grid-template-columns:2fr 1.5fr 2fr auto}
 .ar-vehicles{grid-template-columns:2fr 1.5fr 1.5fr 0.8fr 1fr 1.5fr auto}
-@media(max-width:900px){.ar-members{grid-template-columns:1fr 1fr}.ar-vehicles{grid-template-columns:1fr 1fr 1fr}}
-@media(max-width:600px){.ar-members,.ar-vehicles{grid-template-columns:1fr}.topbar form{flex-wrap:wrap}}
+.ar-auction{grid-template-columns:2fr 1fr 1.5fr auto}
+@media(max-width:900px){.ar-members{grid-template-columns:1fr 1fr}.ar-vehicles{grid-template-columns:1fr 1fr 1fr}.ar-auction{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.ar-members,.ar-vehicles,.ar-auction{grid-template-columns:1fr}.topbar form{flex-wrap:wrap}}
 
 .sec-lbl{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:14px;text-transform:uppercase}
 
@@ -261,6 +317,15 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 /* DB badge */
 .db-badge{background:#1A3A1A;border:1px solid #2A5A2A;color:#4CAF82;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;margin-left:8px}
 
+/* Auction edit panel */
+.auction-edit{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.auction-edit .inp{width:auto}
+
+/* No auction state */
+.no-auction{text-align:center;padding:80px 20px}
+.no-auction h2{color:var(--gold);font-size:22px;margin-bottom:12px}
+.no-auction p{color:var(--muted);font-size:14px}
+
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
@@ -272,17 +337,52 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
     <div class="brand">⚡ AuctionKai <span class="db-badge">MySQL</span></div>
     <div class="brand-sub">Settlement Management System</div>
   </div>
-  <?= postForm('save_auction', $tab, $tok) ?>
-    <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
-    <input class="inp" type="date" style="width:150px" name="date" value="<?= h($auction['date']) ?>">
-    <button class="btn btn-dark btn-sm" type="submit">Save</button>
+  <?php if ($auction): ?>
+  <div class="auction-edit">
+    <?= postForm('save_auction', $tab, $tok) ?>
+      <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
+      <input class="inp" type="date" style="width:140px" name="date" value="<?= h($auction['date']) ?>">
+      <input class="inp" style="width:180px" name="location" value="<?= h($auction['location'] ?? '') ?>" placeholder="Location">
+      <button class="btn btn-dark btn-sm" type="submit">Save</button>
+    </form>
+  </div>
+  <?php endif; ?>
+</div>
+
+<!-- ─── AUCTION SELECTOR BAR ─────────────────────────────────────── -->
+<div class="auction-bar">
+  <div class="auction-select">
+    <?php foreach ($allAuctions as $a): ?>
+      <a class="auction-chip <?= (int)$a['id'] === $activeAuctionId ? 'active' : '' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
+        <?= h($a['name']) ?>
+        <?php if (!empty($a['location'])): ?><span class="chip-loc">📍 <?= h($a['location']) ?></span><?php endif; ?>
+      </a>
+    <?php endforeach; ?>
+    <button class="auction-add" onclick="document.getElementById('addAuctionForm').style.display=document.getElementById('addAuctionForm').style.display==='none'?'flex':'none'">+ New Auction</button>
+  </div>
+  <?php if ($auction): ?>
+  <div class="auction-meta">
+    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · <?= h($auction['location'] ?? 'No location') ?>
+  </div>
+  <?php endif; ?>
+</div>
+
+<!-- ─── ADD AUCTION FORM (hidden by default) ─────────────────────── -->
+<div id="addAuctionForm" style="display:none;padding:16px 28px;background:var(--bg2);border-bottom:1px solid var(--border)">
+  <?= postForm('add_auction', 'members', $tok) ?>
+    <div class="add-row ar-auction" style="margin-bottom:0">
+      <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" required></div>
+      <div><label class="lbl">Date *</label><input class="inp" type="date" name="date" required></div>
+      <div><label class="lbl">Location</label><input class="inp" name="location" placeholder="e.g. Odaiba, Tokyo"></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn btn-gold" type="submit">+ Create</button></div>
+    </div>
   </form>
 </div>
 
 <!-- ─── TABS ─────────────────────────────────────────────────────── -->
 <div class="tabs">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="tab-btn <?= $tab === $key ? 'active' : '' ?>" href="?tab=<?= $key ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <a class="tab-btn <?= $tab === $key ? 'active' : '' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
   <div class="tab-stats">
     <span><b><?= count($members) ?></b> members</span>
@@ -293,8 +393,14 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 <!-- ─── CONTENT ───────────────────────────────────────────────────── -->
 <div class="content">
 
-<?php if ($tab === 'members'): ?>
-<h2>Members / Sellers</h2>
+<?php if (!$auction): ?>
+  <div class="no-auction">
+    <h2>No Auctions Yet</h2>
+    <p>Click <strong>"+ New Auction"</strong> above to create your first auction.</p>
+  </div>
+
+<?php elseif ($tab === 'members'): ?>
+<h2>Members / Sellers — <?= h($auction['name']) ?></h2>
 <div class="card card-pad" style="margin-bottom:20px">
   <div class="sec-lbl">Add New Member</div>
   <?= postForm('add_member', 'members', $tok) ?>
@@ -308,7 +414,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 </div>
 <div style="display:flex;flex-direction:column;gap:10px">
 <?php if (empty($members)): ?>
-  <div class="card card-pad" style="text-align:center;color:var(--muted);padding:48px">No members yet.</div>
+  <div class="card card-pad" style="text-align:center;color:var(--muted);padding:48px">No members yet for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
@@ -339,7 +445,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 </div>
 
 <?php elseif ($tab === 'vehicles'): ?>
-<h2>Vehicle Listings</h2>
+<h2>Vehicle Listings — <?= h($auction['name']) ?></h2>
 <div class="card card-pad" style="margin-bottom:20px">
   <div class="sec-lbl">Add Vehicle</div>
   <?= postForm('add_vehicle', 'vehicles', $tok) ?>
@@ -372,7 +478,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
     <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th>Year</th><th class="r">Sold Price</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
-      <tr><td colspan="7" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet.</td></tr>
+      <tr><td colspan="7" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
@@ -406,7 +512,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 
 <?php elseif ($tab === 'fees'): ?>
 <div style="max-width:580px">
-<h2>Fee Settings</h2>
+<h2>Fee Settings — <?= h($auction['name']) ?></h2>
 <?= postForm('save_fees', 'fees', $tok) ?>
 <div class="card card-pad" style="margin-bottom:16px">
   <div class="sec-lbl">Standard Fees (per vehicle)</div>
@@ -453,11 +559,11 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
 
 <?php elseif ($tab === 'statements'): ?>
 <div class="st-top">
-  <h2>Settlement Statements</h2>
-  <a class="btn btn-dark" href="pdf.php?all=1" target="_blank">↓ Print All PDFs</a>
+  <h2>Settlement Statements — <?= h($auction['name']) ?></h2>
+  <a class="btn btn-dark" href="pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
 </div>
 <?php if (empty($members)): ?>
-  <div class="card nm">No members registered yet.</div>
+  <div class="card nm">No members registered for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
     $s = calcStatement((int)$m['id'], $vehicles, $fees);
@@ -469,7 +575,7 @@ h2{font-size:17px;font-weight:700;margin-bottom:20px}
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
         <a class="btn-email" href="mailto:<?= h($m['email']) ?>?subject=<?= $emailSubject ?>&body=<?= $emailBody ?>">✉ Send Email</a>
-        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>" target="_blank">↓ PDF</a>
+        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
     <?php if ($s['count'] === 0): ?>

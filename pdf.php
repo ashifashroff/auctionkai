@@ -20,13 +20,21 @@ function calcStatement(int $memberId, array $vehicles, array $fees): array {
     return compact('mv','count','grossSales','entryTotal','commTotal','transTotal','customTotal','subtotal','tax','totalDed','netPayout');
 }
 
-$db       = db();
-$auction  = $db->query("SELECT * FROM auction  ORDER BY id LIMIT 1")->fetch();
-$fees     = $db->query("SELECT * FROM fees     ORDER BY id LIMIT 1")->fetch();
-$customs  = $db->query("SELECT * FROM custom_deductions ORDER BY id")->fetchAll();
+$db = db();
+
+// Determine auction
+$activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;
+if (!$activeAuctionId) {
+    $first = $db->query("SELECT id FROM auction ORDER BY id LIMIT 1")->fetch();
+    $activeAuctionId = $first ? (int)$first['id'] : 0;
+}
+
+$auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch() : null;
+$fees     = $activeAuctionId ? $db->query("SELECT * FROM fees WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id LIMIT 1")->fetch() : null;
+$customs  = $activeAuctionId ? $db->query("SELECT * FROM custom_deductions WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll() : [];
 $fees['customDeductions'] = $customs;
-$vehicles = $db->query("SELECT * FROM vehicles ORDER BY id")->fetchAll();
-$members  = $db->query("SELECT * FROM members  ORDER BY id")->fetchAll();
+$members  = $activeAuctionId ? $db->query("SELECT * FROM members WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll() : [];
+$vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE m.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
 
 $printAll = isset($_GET['all']);
 $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
@@ -46,10 +54,11 @@ function renderStatement(array $m, array $s, array $fees, array $auction): strin
     foreach ($fees['customDeductions'] as $d) {
         $customRows .= "<div class='row dim'><span>" . h($d['name']) . " ×{$s['count']}</span><span>−" . fmt((float)$d['amount'] * $s['count']) . "</span></div>";
     }
+    $loc = !empty($auction['location']) ? ' · ' . h($auction['location']) : '';
     return "
     <div class='page'>
       <div class='hdr'>
-        <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . "</div></div>
+        <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $loc . "</div></div>
         <div class='meta'><strong>" . h($m['name']) . "</strong>" . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
@@ -68,7 +77,7 @@ function renderStatement(array $m, array $s, array $fees, array $auction): strin
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . " · AuctionKai Settlement System</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $loc . " · AuctionKai Settlement System</div>
     </div>";
 }
 ?>
@@ -76,7 +85,7 @@ function renderStatement(array $m, array $s, array $fees, array $auction): strin
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Statements — <?= h($auction['name']) ?></title>
+<title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -112,8 +121,8 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
 <div class="ctrl">
   <span>⚡ AuctionKai</span>
   <span style="color:#3A5570">|</span>
-  <a href="index.php?tab=statements">← Back</a>
-  <span style="margin-left:auto;color:#3A5570"><?= count($targets) ?> statement<?= count($targets)>1?'s':'' ?> · <?= h($auction['name']) ?></span>
+  <a href="index.php?tab=statements<?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>">← Back</a>
+  <span style="margin-left:auto;color:#3A5570"><?= count($targets) ?> statement<?= count($targets)>1?'s':'' ?> · <?= h($auction['name'] ?? '') ?></span>
   <button class="bp" onclick="window.print()">🖨 Print / Save PDF</button>
 </div>
 
