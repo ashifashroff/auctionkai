@@ -248,6 +248,78 @@ function showAddMsg(text, type) {
   msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
+// ─── ADD AUCTION (AJAX) ───────────────────────────
+function submitAddAuction(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  fetch('api.php', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Create';return;}
+    location.reload();
+  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='+ Create';});
+  return false;
+}
+
+// ─── ADD MEMBER (AJAX) ──────────────────────────────
+function submitAddMember(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  fetch('api.php', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'add_member', name:form.name.value, phone:form.phone.value, email:form.email.value})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Add';return;}
+    location.reload();
+  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='+ Add';});
+  return false;
+}
+
+// ─── SAVE AUCTION (AJAX) ────────────────────────────
+function submitSaveAuction(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type=submit]');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  fetch('api.php', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'save_auction', auction_id:activeAuctionId, name:form.name.value, date:form.date.value, commissionFee:form.commissionFee.value})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='Save';return;}
+    location.reload();
+  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='Save';});
+  return false;
+}
+
+// ─── REMOVE MEMBER (AJAX) ──────────────────────────
+function removeMember(id, name) {
+  if (!confirm('Remove ' + name + ' and all their vehicles?')) return;
+  fetch('api.php', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'remove_member', id:id})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){alert(d.error);return;}
+    location.reload();
+  }).catch(()=>alert('Error'));
+}
+
+// ─── TOGGLE SOLD (AJAX) ────────────────────────────
+function toggleSold(id, btn) {
+  btn.disabled = true;
+  fetch('api.php', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({action:'toggle_sold', id:id})
+  }).then(r=>r.json()).then(d=>{
+    if(d.error){alert(d.error);btn.disabled=false;return;}
+    location.reload();
+  }).catch(()=>{alert('Error');btn.disabled=false;});
+}
+
 // ─── VEHICLE TABLE SEARCH ──────────────────────────
 function filterVehicles() {
   const q = document.getElementById('vehicleSearch').value.toLowerCase();

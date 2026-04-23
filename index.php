@@ -249,7 +249,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   </div>
   <?php if ($auction): ?>
   <div class="flex items-center gap-2 flex-1 justify-center">
-    <?= postForm('save_auction', $tab, $tok) ?>
+    <form onsubmit="return submitSaveAuction(event)" style="display:contents">
       <div class="flex items-center gap-2 flex-wrap">
         <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
         <input class="inp w-36" type="date" name="date" value="<?= h($auction['date']) ?>">
@@ -294,7 +294,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 
 <!-- ─── ADD AUCTION FORM ─────────────────────────────── -->
 <div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-7 py-4 animate-slide-down">
-  <?= postForm('add_auction', 'members', $tok) ?>
+  <form onsubmit="return submitAddAuction(event)">
     <div class="add-row ar-auction mb-0">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" required></div>
       <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" required></div>
@@ -386,7 +386,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <h2 class="text-lg font-bold mb-5">Members / Sellers — <?= h($auction['name']) ?></h2>
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
-  <?= postForm('add_member', 'members', $tok) ?>
+  <form onsubmit="return submitAddMember(event)">
     <div class="grid grid-cols-4 gap-3">
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" required></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
@@ -430,10 +430,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     </div>
     <div class="flex gap-1.5 items-center">
       <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(<?= (int)$m['id'] ?>)">Edit</button>
-      <?= postForm('remove_member', 'members', $tok) ?>
-        <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
-        <button class="btn btn-ghost btn-sm" type="submit" onclick="return confirm('Remove <?= h($m['name']) ?> and all their vehicles?')">Remove</button>
-      </form>
+      <button class="btn btn-ghost btn-sm" onclick="removeMember(<?= (int)$m['id'] ?>, '<?= h(addslashes($m['name'])) ?>')">Remove</button>
     </div>
   </div>
   <?php endif; ?>
@@ -516,10 +513,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
           <?php else: ?>—<?php endif; ?>
         </td>
         <td data-field="status">
-          <?= postForm('toggle_sold', 'vehicles', $tok) ?>
-            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
-            <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" type="submit"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
-          </form>
+          <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" onclick="toggleSold(<?= (int)$v['id'] ?>, this)"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
         </td>
         <td class="whitespace-nowrap">
           <div class="flex gap-1 items-center">
