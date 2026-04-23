@@ -8,7 +8,7 @@ A premium dark-themed settlement management system for Japanese auto auctions. B
 
 | Login | Dashboard | Statements |
 |-------|-----------|-------------|
-| Dark themed auth | Stats + ranking | Full breakdown with PDF |
+| Dark themed auth with brute force protection | Stats + ranking | Full breakdown with PDF |
 
 ---
 
@@ -53,7 +53,7 @@ Navigate to `http://localhost/auctionkai/`
 | Username | Password | Role |
 |----------|----------|------|
 | `admin` | `password` | Admin |
-| `aliashroff` | `123@intel` | User |
+| `aliashroff` | `password` | User |
 
 Or register a new account via the **Register** link.
 
@@ -67,8 +67,11 @@ Or register a new account via the **Register** link.
 - Gold badge for #1 member
 - Each rank shows sold/unsold count + gross sales
 
-### 🔐 Authentication
+### 🔐 Authentication & Security
 - Login / Register with bcrypt passwords
+- **Brute force protection** — 5 failed attempts = 30s cooldown per username
+- **CSRF tokens** on all forms (login, register, and every POST action)
+- **Session regeneration** after login (prevents session fixation)
 - Session-based access control
 - User data isolation — each user sees only their own data
 - **Profile page** — edit name, email, change password (click username top-right)
@@ -156,7 +159,7 @@ auctionkai/
 │   └── app.js                 ← All client-side JS (modals, AJAX, autocomplete, search)
 ├── config.php                 ← DB credentials + PDO connection
 ├── schema.sql                 ← Full DB schema + seed data
-├── login.php                  ← Login & registration
+├── login.php                  ← Login & registration (with CSRF + brute force protection)
 ├── logout.php                 ← Session destroy & redirect
 ├── index.php                  ← Main app (dashboard, members, vehicles, statements)
 ├── profile.php                ← User profile & password change
@@ -219,19 +222,30 @@ members (id, user_id, name, phone, email, created_at)
 | Measure | Implementation |
 |---------|---------------|
 | SQL Injection | All queries use PDO prepared statements with `?` placeholders |
-| XSS | `htmlspecialchars()` on all output |
-| CSRF | Token verification on every POST form |
-| Passwords | `password_hash()` with bcrypt |
+| XSS | `htmlspecialchars()` on all output (`h()` helper) |
+| CSRF | Token verification on every POST form (login, register, and all index.php forms) |
+| Session Fixation | `session_regenerate_id(true)` after successful login |
+| Brute Force | 5 failed login attempts per username → 30s cooldown with countdown |
+| Passwords | `password_hash()` with bcrypt, never stored in plaintext |
 | Data Isolation | Every write query verifies `user_id` ownership via `auction.user_id` |
 | Vehicle Auth | DELETE/UPDATE verify `auction_id IN (SELECT id FROM auction WHERE user_id=?)` |
 | Member Auth | All member queries filter by `user_id` |
-| No Orphan Tables | Removed `vehicle_fees` reference from expiry cleanup |
+| Clean Schema | No orphan table references; `vehicle_fees` reference removed from expiry loop |
+| Seed Data | No real personal data in schema.sql; demo user uses generic name/email |
 
 ---
 
 ## 📝 Changelog
 
-### v2.1 — Dashboard + Search + Security Hardening
+### v2.2 — Security Hardening
+- 🔒 Brute force protection: 5 failed attempts = 30s cooldown per username
+- 🔒 CSRF tokens added to login.php (login + register forms)
+- 🔒 `session_regenerate_id(true)` after login
+- 🧹 Removed real personal data from seed user (Demo User / demo@example.com)
+- 🧹 Removed plaintext password comment from schema.sql
+- 🧹 Used proper `$2y$` bcrypt hash format
+
+### v2.1 — Dashboard + Search + Security
 - 📊 Dashboard tab with stats cards and member ranking by net payout
 - 🔍 Real-time vehicle search (filter by lot, member, make, model)
 - 🔒 All raw SQL queries converted to PDO prepared statements
@@ -302,6 +316,8 @@ members (id, user_id, name, phone, email, created_at)
 | Fields look invisible | Fixed — inputs use `--card` background now |
 | Nagare field missing | It's always visible, disabled when Sold is checked |
 | Vehicle search not working | Hard refresh browser (JS cache) |
+| Locked out of login | Wait 30 seconds, or clear browser session/cookies |
+| Login says "Invalid request" | CSRF token mismatch — hard refresh the login page |
 
 ---
 
