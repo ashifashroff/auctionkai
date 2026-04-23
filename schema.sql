@@ -65,10 +65,6 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Fee Items (per auction) ─────────────────────────────────────
-
-
--- ── Custom Deductions (per auction) ─────────────────────────────
 -- ─────────────────────────────────────────────────────────────────
 -- Seed Data
 -- ─────────────────────────────────────────────────────────────────
