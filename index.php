@@ -196,15 +196,18 @@ $vehicles = $activeAuctionId
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
 function calcStatement(int $memberId, array $vehicles, float $commissionFee): array {
-    $mv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
+    $all = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
+    $mv = array_values(array_filter($all, fn($v) => $v['sold']));
+    $uv = array_values(array_filter($all, fn($v) => !$v['sold']));
     $count       = count($mv);
+    $unsoldCount = count($uv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
     $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
     $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
     $listingFeeTotal = array_sum(array_map(fn($v) => (float)($v['listing_fee'] ?? 0), $mv));
     $soldFeeTotal    = array_sum(array_map(fn($v) => (float)($v['sold_fee'] ?? 0), $mv));
-    $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $mv));
-    $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $mv));
+    $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $uv)); // nagare for unsold only
+    $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $all));
 
     $commissionTotal = $commissionFee;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
@@ -212,7 +215,7 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
     $totalDed = $totalVehicleDed + $commissionTotal;
     $netPayout = $count > 0 ? $totalReceived - $totalDed : 0;
 
-    return compact('mv','count','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
+    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
@@ -413,7 +416,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     </div>
   </form>
 </div>
-<div class="card" style="overflow:hidden">
+<div class="card" style="overflow-x:auto">
   <table class="vt">
     <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th style="width:90px">Actions</th></tr></thead>
     <tbody>
@@ -493,9 +496,9 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
             <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" type="submit"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
           </form>
         </td>
-        <td>
+        <td style="white-space:nowrap">
           <div style="display:flex;gap:4px;align-items:center">
-            <a class="btn btn-dark btn-sm" href="?tab=vehicles&edit_vehicle=<?= (int)$v['id'] ?>" style="font-size:11px;padding:4px 10px">Edit</a>
+            <a class="btn btn-dark btn-sm" href="?tab=vehicles&edit_vehicle=<?= (int)$v['id'] ?>">Edit</a>
             <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
               <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
               <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
