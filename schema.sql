@@ -20,20 +20,21 @@ CREATE TABLE IF NOT EXISTS `auction` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Members (sellers) ────────────────────────────────────────────
+-- ── Members (sellers — global, shared across auctions) ───────────
 CREATE TABLE IF NOT EXISTS `members` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `auction_id`  INT UNSIGNED NOT NULL,
+  `user_id`     INT UNSIGNED NOT NULL,
   `name`        VARCHAR(200)  NOT NULL,
   `phone`       VARCHAR(50)   DEFAULT '',
   `email`       VARCHAR(200)  DEFAULT '',
   `created_at`  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Vehicles ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `vehicles` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `auction_id`  INT UNSIGNED NOT NULL,
   `member_id`   INT UNSIGNED NOT NULL,
   `make`        VARCHAR(100) NOT NULL,
   `model`       VARCHAR(100) DEFAULT '',
@@ -42,6 +43,7 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   `sold_price`  DECIMAL(12,0) DEFAULT 0,
   `sold`        TINYINT(1)   DEFAULT 1,
   `created_at`  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -104,28 +106,22 @@ INSERT INTO `fees` (`auction_id`, `entry_fee`, `commission_rate`, `tax_rate`, `t
 INSERT INTO `custom_deductions` (`auction_id`, `name`, `amount`) VALUES
   (1, 'Document Fee', 1500);
 
--- Sample members (Nagoya, user_id=1)
-INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
+-- Sample members (global, user_id=1)
+INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
   (1, 'Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
   (1, 'Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
-  (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com');
+  (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com'),
+  (1, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
+  (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
 
--- Sample members (Tokyo, user_id=1)
-INSERT INTO `members` (`auction_id`, `name`, `phone`, `email`) VALUES
-  (2, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
-  (2, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
-
--- Sample vehicles (Nagoya members)
-INSERT INTO `vehicles` (`member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
-  (1, 'Toyota',     'Prius',     '2019', 'A-001',  850000, 1),
-  (1, 'Honda',      'Fit',       '2018', 'A-002',  420000, 1),
-  (2, 'Nissan',     'Note',      '2020', 'B-001',  680000, 1),
-  (2, 'Mazda',      'CX-5',      '2021', 'B-002', 1250000, 1),
-  (3, 'Subaru',     'Forester',  '2019', 'C-001',  920000, 1),
-  (3, 'Mitsubishi', 'Outlander', '2018', 'C-002',       0, 0);
-
--- Sample vehicles (Tokyo members)
-INSERT INTO `vehicles` (`member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
-  (4, 'Honda',   'Civic',    '2020', 'T-001',  780000, 1),
-  (4, 'Toyota',  'Corolla',  '2019', 'T-002',  550000, 1),
-  (5, 'Lexus',   'IS 300',   '2021', 'T-003', 1800000, 1);
+-- Sample vehicles (Nagoya auction, members 1-5 are global)
+INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
+  (1, 1, 'Toyota',     'Prius',     '2019', 'A-001',  850000, 1),
+  (1, 1, 'Honda',      'Fit',       '2018', 'A-002',  420000, 1),
+  (1, 2, 'Nissan',     'Note',      '2020', 'B-001',  680000, 1),
+  (1, 2, 'Mazda',      'CX-5',      '2021', 'B-002', 1250000, 1),
+  (1, 3, 'Subaru',     'Forester',  '2019', 'C-001',  920000, 1),
+  (1, 3, 'Mitsubishi', 'Outlander', '2018', 'C-002',       0, 0),
+  (2, 4, 'Honda',   'Civic',    '2020', 'T-001',  780000, 1),
+  (2, 4, 'Toyota',  'Corolla',  '2019', 'T-002',  550000, 1),
+  (2, 5, 'Lexus',   'IS 300',   '2021', 'T-003', 1800000, 1);

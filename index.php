@@ -90,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'add_member') {
         $name = trim($_POST['name'] ?? '');
         if ($name !== '') {
-            $stmt = $db->prepare("INSERT INTO members (auction_id, name, phone, email) VALUES (?,?,?,?)");
-            $stmt->execute([$activeAuctionId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
+            $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
+            $stmt->execute([$userId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
         }
     }
 
@@ -104,9 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (member_id, make, model, year, lot, sold_price, sold) VALUES (?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, year, lot, sold_price, sold) VALUES (?,?,?,?,?,?,?,?)");
             $stmt->execute([
-                $memberId, $make,
+                $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
                 trim($_POST['year']     ?? ''),
                 trim($_POST['lot']      ?? ''),
@@ -169,11 +169,11 @@ if (!$fees && $activeAuctionId) {
 $customs  = $activeAuctionId
     ? $db->query("SELECT * FROM custom_deductions WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll()
     : [];
-$members  = $activeAuctionId
-    ? $db->query("SELECT * FROM members WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll()
+$members  = $userId
+    ? $db->query("SELECT * FROM members WHERE user_id=$userId ORDER BY id")->fetchAll()
     : [];
 $vehicles = $activeAuctionId
-    ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE m.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll()
+    ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " AND m.user_id=$userId ORDER BY v.id")->fetchAll()
     : [];
 
 $fees['customDeductions'] = $customs;

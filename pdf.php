@@ -33,8 +33,8 @@ $auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (i
 $fees     = $activeAuctionId ? $db->query("SELECT * FROM fees WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id LIMIT 1")->fetch() : null;
 $customs  = $activeAuctionId ? $db->query("SELECT * FROM custom_deductions WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll() : [];
 $fees['customDeductions'] = $customs;
-$members  = $activeAuctionId ? $db->query("SELECT * FROM members WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll() : [];
-$vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE m.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
+$members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
+$vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
 
 $printAll = isset($_GET['all']);
 $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
