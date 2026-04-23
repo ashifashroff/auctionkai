@@ -7,8 +7,8 @@ function toggleSoldFields(isSold) {
     if (!isSold) el.value = '';
   });
   document.querySelectorAll('.nagare-field').forEach(el => {
-    if (isSold) { el.classList.add('hidden'); const inp = el.querySelector('input'); inp.value = ''; inp.disabled = true; }
-    else { el.classList.remove('hidden'); el.querySelector('input').disabled = false; }
+    if (isSold) { const inp = el.querySelector('input'); inp.value = ''; inp.disabled = true; }
+    else { el.querySelector('input').disabled = false; }
   });
 }
 
@@ -20,8 +20,8 @@ function toggleModalSoldFields(isSold) {
   });
   document.querySelectorAll('.modal-nagare-field').forEach(el => {
     const inp = el.querySelector('input');
-    if (isSold) { el.classList.add('hidden'); inp.value = ''; inp.disabled = true; }
-    else { el.classList.remove('hidden'); inp.disabled = false; }
+    if (isSold) { inp.value = ''; inp.disabled = true; }
+    else { inp.disabled = false; }
   });
 }
 
