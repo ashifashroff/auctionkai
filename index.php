@@ -63,8 +63,7 @@ $expiredAuctions = $expiredQ->fetchAll();
 foreach ($expiredAuctions as $ea) {
     // Delete sold vehicles for this auction (keep unsold)
     $db->prepare("DELETE FROM vehicles WHERE auction_id=? AND sold=1")->execute([(int)$ea['id']]);
-    // Delete vehicle_fees for remaining vehicles (orphan cleanup)
-    $db->prepare("DELETE vf FROM vehicle_fees vf LEFT JOIN vehicles v ON vf.vehicle_id = v.id WHERE v.id IS NULL")->execute();
+
     // Delete the auction itself
     $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([(int)$ea['id'], $userId]);
 }
