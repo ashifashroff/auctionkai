@@ -85,7 +85,7 @@ INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
 
 -- User account (username: aliashroff, password: 123@intel)
 INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
-  ('aliashroff', '$2b$10$I2sF1pUJfEU1WL5jOb774.Bj2bTriThV9BkcM9hH6N1KXUIzDY3DW', 'Alavi Mohamed Ashroff Ali', 'ashifashroff@outlook.com', 'user');
+  ('aliashroff', '$2b$10$I2sF1pUJfEU1WL5jOb774.Bj2bTriThV9BkcM9hH6N1KXUIzDY3DW', 'Alavi Mohamed Ashroff Ali', 'ashifashroff@outlook.com', 'user', NOW());
 
 -- ─────────────────────────────────────────────────────────────────
 -- Seed: Multiple Japanese auctions
