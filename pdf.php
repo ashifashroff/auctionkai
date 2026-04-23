@@ -52,7 +52,7 @@ $targets = $printAll
 
 if (empty($targets)) { echo 'No members found.'; exit; }
 
-function renderStatement(array $m, array $s, array $fees, array $auction): string {
+function renderStatement(array $m, array $s, array $feeItems, array $auction): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
         $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td>" . h($v['year']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td></tr>";
@@ -135,7 +135,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
 <?php foreach ($targets as $m):
     $s = calcStatement((int)$m['id'], $vehicles, $feeItems);
     if ($s['count'] === 0) continue;
-    echo renderStatement($m, $s, $fees, $auction);
+    echo renderStatement($m, $s, $feeItems, $auction);
 endforeach; ?>
 
 <script>
