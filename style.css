@@ -152,6 +152,11 @@ input[type=number]{-moz-appearance:textfield}
 .logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--sans);transition:all .15s}
 .logout-btn:hover{border-color:var(--red);color:var(--red)}
 
+.expiry-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:6px}
+.expiry-badge.active{background:#1A3A2A;color:var(--green);border:1px solid #2A5A2A}
+.expiry-badge.expiring{background:#3A3A1A;color:#D4A84B;border:1px solid #5A5A2A}
+.expiry-badge.expired{background:#3A1A1A;color:var(--red);border:1px solid #5A2A2A}
+
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ─── MEMBER AUTOCOMPLETE ──────────────────────────────────────── */

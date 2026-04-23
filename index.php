@@ -53,6 +53,26 @@ if (!$auction && !empty($allAuctions)) {
     $_SESSION['auction_id'] = $activeAuctionId;
 }
 
+// ─── AUTO-EXPIRE: Delete sold vehicles and expired auctions ────────────────────
+$today = date('Y-m-d');
+$expiredAuctions = $db->query("SELECT id FROM auction WHERE user_id=$userId AND expires_at < '$today'")->fetchAll();
+foreach ($expiredAuctions as $ea) {
+    // Delete sold vehicles for this auction (keep unsold)
+    $db->prepare("DELETE FROM vehicles WHERE auction_id=? AND sold=1")->execute([(int)$ea['id']]);
+    // Delete vehicle_fees for remaining vehicles (orphan cleanup)
+    $db->prepare("DELETE vf FROM vehicle_fees vf LEFT JOIN vehicles v ON vf.vehicle_id = v.id WHERE v.id IS NULL")->execute();
+    // Delete the auction itself
+    $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([(int)$ea['id'], $userId]);
+}
+// Refresh if current auction was deleted
+if ($activeAuctionId && !$db->query("SELECT id FROM auction WHERE id=$activeAuctionId AND user_id=$userId")->fetch()) {
+    unset($_SESSION['auction_id']);
+    $allAuctions = $db->query("SELECT * FROM auction WHERE user_id=$userId ORDER BY date DESC, id DESC")->fetchAll();
+    $auction = !empty($allAuctions) ? $allAuctions[0] : null;
+    $activeAuctionId = $auction ? (int)$auction['id'] : 0;
+    $_SESSION['auction_id'] = $activeAuctionId;
+}
+
 // ─── HANDLE POSTS ────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['_tok'] ?? '') !== $tok) {
@@ -64,10 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'add_auction') {
         $name = trim($_POST['name'] ?? '');
         $date = trim($_POST['date'] ?? '');
-        $location = trim($_POST['location'] ?? '');
         if ($name !== '' && $date !== '') {
-            $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, location) VALUES (?,?,?,?)");
-            $stmt->execute([$userId, $name, $date, $location]);
+            $expiresAt = date('Y-m-d', strtotime($date . ' +14 days'));
+            $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, expires_at) VALUES (?,?,?,?)");
+            $stmt->execute([$userId, $name, $date, $expiresAt]);
             $newId = (int)$db->lastInsertId();
             $_SESSION['auction_id'] = $newId;
         }
@@ -80,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     elseif ($action === 'save_auction') {
-        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, location=? WHERE id=? AND user_id=?");
-        $stmt->execute([trim($_POST['name']), trim($_POST['date']), trim($_POST['location'] ?? ''), $activeAuctionId, $userId]);
+        $stmt = $db->prepare("UPDATE auction SET name=?, date=? WHERE id=? AND user_id=?");
+        $stmt->execute([trim($_POST['name']), trim($_POST['date']), $activeAuctionId, $userId]);
     }
 
     elseif ($action === 'add_member') {
@@ -320,7 +340,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?= postForm('save_auction', $tab, $tok) ?>
       <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
       <input class="inp" type="date" style="width:140px" name="date" value="<?= h($auction['date']) ?>">
-      <input class="inp" style="width:180px" name="location" value="<?= h($auction['location'] ?? '') ?>" placeholder="Location">
       <button class="btn btn-dark btn-sm" type="submit">Save</button>
     </form>
   </div>
@@ -342,14 +361,20 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?php foreach ($allAuctions as $a): ?>
       <a class="auction-chip <?= (int)$a['id'] === $activeAuctionId ? 'active' : '' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
         <?= h($a['name']) ?>
-        <?php if (!empty($a['location'])): ?><span class="chip-loc">📍 <?= h($a['location']) ?></span><?php endif; ?>
+        <span class="chip-loc">📅 <?= h($a['date']) ?></span>
+        <?php
+        $daysLeft = (int)((strtotime($a['expires_at']) - time()) / 86400);
+        $badgeClass = $daysLeft <= 0 ? 'expired' : ($daysLeft <= 3 ? 'expiring' : 'active');
+        $badgeText = $daysLeft <= 0 ? 'Expired' : ($daysLeft . 'd left');
+        ?>
+        <span class="expiry-badge <?= $badgeClass ?>"><?= $badgeText ?></span>
       </a>
     <?php endforeach; ?>
     <button class="auction-add" onclick="document.getElementById('addAuctionForm').style.display=document.getElementById('addAuctionForm').style.display==='none'?'flex':'none'">+ New Auction</button>
   </div>
   <?php if ($auction): ?>
   <div class="auction-meta">
-    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · <?= h($auction['location'] ?? 'No location') ?>
+    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
   </div>
   <?php endif; ?>
 </div>
@@ -359,8 +384,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <?= postForm('add_auction', 'members', $tok) ?>
     <div class="add-row ar-auction" style="margin-bottom:0">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" required></div>
-      <div><label class="lbl">Date *</label><input class="inp" type="date" name="date" required></div>
-      <div><label class="lbl">Location</label><input class="inp" name="location" placeholder="e.g. Odaiba, Tokyo"></div>
+      <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" required></div>
       <div style="display:flex;align-items:flex-end"><button class="btn btn-gold" type="submit">+ Create</button></div>
     </div>
   </form>

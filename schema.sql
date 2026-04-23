@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `auction` (
   `user_id`    INT UNSIGNED NOT NULL,
   `name`       VARCHAR(200) NOT NULL,
   `date`       DATE         NOT NULL,
-  `location`   VARCHAR(200) DEFAULT '',
+  `expires_at` DATE         NOT NULL COMMENT 'Auto-delete sold vehicles + auction after this date',
   `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
@@ -98,13 +98,13 @@ INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
 -- ─────────────────────────────────────────────────────────────────
 -- Seed: Multiple Japanese auctions
 -- ─────────────────────────────────────────────────────────────────
-INSERT INTO `auction` (`user_id`, `name`, `date`, `location`) VALUES
-  (1, 'Nagoya Auto Auction',       CURDATE(), 'Nagoya, Aichi'),
-  (1, 'Tokyo Bay Auto Auction',    CURDATE(), 'Odaiba, Tokyo'),
-  (1, 'Osaka JAA Auction',         CURDATE(), 'Izumiotsu, Osaka'),
-  (1, 'Yokohama Auto Auction',     CURDATE(), 'Yokohama, Kanagawa'),
-  (1, 'Fukuoka Auto Auction',      CURDATE(), 'Fukuoka, Fukuoka'),
-  (1, 'Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
+INSERT INTO `auction` (`user_id`, `name`, `date`, `expires_at`) VALUES
+  (1, 'Nagoya Auto Auction',       CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
+  (1, 'Tokyo Bay Auto Auction',    CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
+  (1, 'Osaka JAA Auction',         CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
+  (1, 'Yokohama Auto Auction',     CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
+  (1, 'Fukuoka Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
+  (1, 'Sapporo Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY));
 
 -- Fee items for Nagoya auction (id=1)
 -- Fee items per member (global members 1-5)

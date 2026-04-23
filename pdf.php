@@ -110,11 +110,11 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
     foreach ($s['vehicleCustomDetails'] as $vd) {
         $vehicleFeeRows .= "<div class='row dim'><span>" . h($vd['name']) . " (" . h($vd['lot'] ?: $vd['vehicle']) . ")</span><span>−" . fmt($vd['amount']) . "</span></div>";
     }
-    $loc = !empty($auction['location']) ? ' · ' . h($auction['location']) : '';
+    $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
     <div class='page'>
       <div class='hdr'>
-        <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $loc . "</div></div>
+        <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div></div>
         <div class='meta'><strong>" . h($m['name']) . "</strong>" . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
@@ -134,7 +134,7 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed'] + $s['vehicleCustomTotal']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $loc . " · AuctionKai Settlement System</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · AuctionKai Settlement System</div>
     </div>";
 }
 ?>
