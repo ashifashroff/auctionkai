@@ -106,7 +106,6 @@ INSERT INTO `auction` (`user_id`, `name`, `date`, `expires_at`) VALUES
   (1, 'Fukuoka Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
   (1, 'Sapporo Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY));
 
--- Fee items for Nagoya auction (id=1)
 -- Fee items per member (global members 1-5)
 INSERT INTO `fee_items` (`member_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
   (1, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
