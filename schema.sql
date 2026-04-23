@@ -8,6 +8,8 @@ CREATE DATABASE IF NOT EXISTS `auctionkai`
 
 USE `auctionkai`;
 
+SET FOREIGN_KEY_CHECKS=0;
+
 -- ── Users (login system — MUST be first due to foreign keys) ────
 CREATE TABLE IF NOT EXISTS `users` (
   `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -128,3 +130,5 @@ INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold
   (2, 4, 'Honda',   'Civic',    'T-001',  780000, 1),
   (2, 4, 'Toyota',  'Corolla',  'T-002',  550000, 1),
   (2, 5, 'Lexus',   'IS 300',   'T-003', 1800000, 1);
+
+SET FOREIGN_KEY_CHECKS=1;
