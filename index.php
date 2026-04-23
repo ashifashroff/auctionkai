@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$name, $date, $location]);
             $newId = (int)$db->lastInsertId();
             // Create default fees for new auction
-            $db->prepare("INSERT INTO fees (auction_id, entry_fee, commission_rate, tax_rate, transport_fee) VALUES (?,?,?,?)")
+            $db->prepare("INSERT INTO fees (auction_id, entry_fee, commission_rate, tax_rate, transport_fee) VALUES (?,?,?,?,?)")
                ->execute([$newId, 3000, 3.00, 10.00, 5000]);
             $_SESSION['auction_id'] = $newId;
         }
