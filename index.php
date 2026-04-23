@@ -391,12 +391,9 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <div class="add-row ar-vehicles">
       <div>
         <label class="lbl">Member *</label>
-        <select class="inp" name="memberId" required>
-          <option value="">Select member…</option>
-          <?php foreach ($members as $m): ?>
-            <option value="<?= (int)$m['id'] ?>"><?= h($m['name']) ?></option>
-          <?php endforeach; ?>
-        </select>
+        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showMemberResults()" oninput="filterMembers()">
+        <input type="hidden" id="memberId" name="memberId" required>
+        <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
       <div><label class="lbl">Make *</label><input class="inp" name="make" placeholder="Toyota" required></div>
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
@@ -430,11 +427,9 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
             <div class="add-row ar-vehicles" style="margin-bottom:0">
               <div>
                 <label class="lbl">Member *</label>
-                <select class="inp" name="memberId" required>
-                  <?php foreach ($members as $m): ?>
-                    <option value="<?= (int)$m['id'] ?>" <?= (int)$m['id'] === (int)$v['member_id'] ? 'selected' : '' ?>><?= h($m['name']) ?></option>
-                  <?php endforeach; ?>
-                </select>
+                <input class="inp edit-member-search" data-vid="<?= (int)$v['id'] ?>" placeholder="Type to search member…" autocomplete="off" value="<?= h($owner['name'] ?? '') ?>" oninput="filterEditMembers(this)">
+                <input type="hidden" name="memberId" value="<?= (int)$v['member_id'] ?>">
+                <div class="member-dropdown edit-member-dropdown" style="display:none"></div>
               </div>
               <div><label class="lbl">Make *</label><input class="inp" name="make" value="<?= h($v['make']) ?>" required></div>
               <div><label class="lbl">Model</label><input class="inp" name="model" value="<?= h($v['model']) ?>"></div>
@@ -584,5 +579,57 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 
 <?php endif; ?>
 </div>
+
+<script>
+const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;
+
+function filterMembers() {
+  const q = document.getElementById('memberSearch').value.toLowerCase();
+  const dd = document.getElementById('memberDropdown');
+  const hidden = document.getElementById('memberId');
+  hidden.value = '';
+  if (!q) { dd.style.display = 'none'; return; }
+  const filtered = membersData.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q));
+  if (!filtered.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = filtered.map(m => `<div class="member-dropdown-item" data-id="${m.id}" onclick="selectMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}<span class="mdi-phone">${m.phone}</span></div>`).join('');
+  dd.style.display = 'block';
+}
+
+function selectMember(id, name) {
+  document.getElementById('memberSearch').value = name;
+  document.getElementById('memberId').value = id;
+  document.getElementById('memberDropdown').style.display = 'none';
+}
+
+function showMemberResults() {
+  const q = document.getElementById('memberSearch').value;
+  if (q) filterMembers();
+}
+
+function filterEditMembers(el) {
+  const q = el.value.toLowerCase();
+  const dd = el.nextElementSibling.nextElementSibling;
+  const hidden = el.nextElementSibling;
+  hidden.value = '';
+  if (!q) { dd.style.display = 'none'; return; }
+  const filtered = membersData.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q));
+  if (!filtered.length) { dd.style.display = 'none'; return; }
+  dd.innerHTML = filtered.map(m => `<div class="member-dropdown-item" data-id="${m.id}" onclick="selectEditMember(this,${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}<span class="mdi-phone">${m.phone}</span></div>`).join('');
+  dd.style.display = 'block';
+}
+
+function selectEditMember(el, id, name) {
+  const row = el.closest('td');
+  row.querySelector('.edit-member-search').value = name;
+  row.querySelector('input[name=memberId]').value = id;
+  el.closest('.member-dropdown').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.member-dropdown').forEach(dd => {
+    if (!dd.contains(e.target) && e.target.id !== 'memberSearch' && !e.target.classList.contains('edit-member-search')) dd.style.display = 'none';
+  });
+});
+</script>
 </body>
 </html>
