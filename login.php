@@ -21,7 +21,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($username === '' || $password === '') {
+    // Brute force protection
+    $attemptKey = 'login_attempts_' . $username;
+    if (!isset($_SESSION[$attemptKey])) $_SESSION[$attemptKey] = ['count' => 0, 'last' => 0];
+    $att = &$_SESSION[$attemptKey];
+    if ($att['count'] >= 5 && (time() - $att['last']) < 30) {
+        $remaining = 30 - (time() - $att['last']);
+        $error = "Too many failed attempts. Try again in {$remaining}s.";
+    }
+    elseif ($username === '' || $password === '') {
         $error = 'Please fill in all fields.';
     } else {
         $stmt = $db->prepare("SELECT * FROM users WHERE username = ?");
@@ -29,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
+            unset($_SESSION[$attemptKey]);
             $_SESSION['user_id'] = (int)$user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
@@ -37,6 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             header('Location: index.php');
             exit;
         } else {
+            $att['count']++;
+            $att['last'] = time();
             $error = 'Invalid username or password.';
         }
     }
