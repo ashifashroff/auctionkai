@@ -8,20 +8,27 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
+    $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
+    $totalCount = count($allMv);
 
     $deductions = [];
     $totalDed   = 0;
     foreach ($feeItems as $f) {
         $amt = 0;
+        $scope = $f['scope'] ?? 'per_vehicle';
+
         if ($f['type'] === 'flat') {
-            $amt = (float)$f['amount'] * $count;
+            if ($scope === 'per_member') {
+                $amt = (float)$f['amount'];
+            } else {
+                $amt = (float)$f['amount'] * $count;
+            }
         } elseif ($f['type'] === 'percent') {
             $amt = $grossSales * (float)$f['amount'] / 100;
         } elseif ($f['type'] === 'per_vehicle') {
-            $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
-            $amt = (float)$f['amount'] * count($allMv);
+            $amt = (float)$f['amount'] * $totalCount;
         }
-        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'rate' => (float)$f['amount'], 'amount' => $amt];
+        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'scope' => $scope, 'rate' => (float)$f['amount'], 'amount' => $amt];
         $totalDed += $amt;
     }
 
@@ -60,7 +67,7 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
     $customRows = '';
     foreach ($s['deductions'] as $d) {
         $label = h($d['name']);
-        if ($d['type'] === 'flat') $label .= ' ×' . $s['count'];
+        if ($d['type'] === 'flat' && ($d['scope'] ?? 'per_vehicle') === 'per_vehicle') $label .= ' ×' . $s['count'];
         elseif ($d['type'] === 'percent') $label .= ' (' . $d['rate'] . '%)';
         $customRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
     }

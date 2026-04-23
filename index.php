@@ -70,14 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$userId, $name, $date, $location]);
             $newId = (int)$db->lastInsertId();
             // Create default fee items for new auction
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, sort_order) VALUES (?,?,?,?,?)")
-               ->execute([$newId, 'Entry Fee', 'flat', 3000, 1]);
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, sort_order) VALUES (?,?,?,?,?)")
-               ->execute([$newId, 'Commission', 'percent', 3.00, 2]);
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, sort_order) VALUES (?,?,?,?,?)")
-               ->execute([$newId, 'Consumption Tax', 'percent', 10.00, 3]);
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, sort_order) VALUES (?,?,?,?,?)")
-               ->execute([$newId, 'Transport Fee', 'flat', 5000, 4]);
+            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, scope, sort_order) VALUES (?,?,?,?,?,?)")
+               ->execute([$newId, 'Entry Fee', 'flat', 3000, 'per_vehicle', 1]);
+            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, scope, sort_order) VALUES (?,?,?,?,?,?)")
+               ->execute([$newId, 'Commission', 'percent', 3.00, 'per_vehicle', 2]);
+            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, scope, sort_order) VALUES (?,?,?,?,?,?)")
+               ->execute([$newId, 'Consumption Tax', 'percent', 10.00, 'per_vehicle', 3]);
+            $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, scope, sort_order) VALUES (?,?,?,?,?,?)")
+               ->execute([$newId, 'Transport Fee', 'flat', 5000, 'per_vehicle', 4]);
             $_SESSION['auction_id'] = $newId;
         }
     }
@@ -161,10 +161,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fname   = trim($_POST['feeName'] ?? '');
         $ftype   = trim($_POST['feeType'] ?? 'flat');
         $famount = (float)($_POST['feeAmount'] ?? 0);
+        $fscope  = trim($_POST['feeScope'] ?? 'per_vehicle');
         if ($fname !== '' && $famount > 0) {
             $maxSort = (int)$db->query("SELECT COALESCE(MAX(sort_order),0) FROM fee_items WHERE auction_id=$activeAuctionId")->fetchColumn();
-            $stmt = $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, sort_order) VALUES (?,?,?,?,?)");
-            $stmt->execute([$activeAuctionId, $fname, $ftype, $famount, $maxSort + 1]);
+            $stmt = $db->prepare("INSERT INTO fee_items (auction_id, name, type, amount, scope, sort_order) VALUES (?,?,?,?,?,?)");
+            $stmt->execute([$activeAuctionId, $fname, $ftype, $famount, $fscope, $maxSort + 1]);
         }
     }
 
@@ -173,9 +174,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fname   = trim($_POST['feeName'] ?? '');
         $ftype   = trim($_POST['feeType'] ?? 'flat');
         $famount = (float)($_POST['feeAmount'] ?? 0);
+        $fscope  = trim($_POST['feeScope'] ?? 'per_vehicle');
         if ($fname !== '' && $famount > 0) {
-            $stmt = $db->prepare("UPDATE fee_items SET name=?, type=?, amount=? WHERE id=? AND auction_id=?");
-            $stmt->execute([$fname, $ftype, $famount, $fid, $activeAuctionId]);
+            $stmt = $db->prepare("UPDATE fee_items SET name=?, type=?, amount=?, scope=? WHERE id=? AND auction_id=?");
+            $stmt->execute([$fname, $ftype, $famount, $fscope, $fid, $activeAuctionId]);
         }
     }
 
@@ -212,23 +214,27 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
+    $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
+    $totalCount = count($allMv);
 
     $deductions = [];
     $totalDed   = 0;
     foreach ($feeItems as $f) {
         $amt = 0;
+        $scope = $f['scope'] ?? 'per_vehicle';
+
         if ($f['type'] === 'flat') {
-            // Flat fee per sold vehicle
-            $amt = (float)$f['amount'] * $count;
+            if ($scope === 'per_member') {
+                $amt = (float)$f['amount'];
+            } else {
+                $amt = (float)$f['amount'] * $count;
+            }
         } elseif ($f['type'] === 'percent') {
-            // Percentage of gross sales
             $amt = $grossSales * (float)$f['amount'] / 100;
         } elseif ($f['type'] === 'per_vehicle') {
-            // Per vehicle (sold or not) — use total vehicles for this member
-            $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
-            $amt = (float)$f['amount'] * count($allMv);
+            $amt = (float)$f['amount'] * $totalCount;
         }
-        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'rate' => (float)$f['amount'], 'amount' => $amt];
+        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'scope' => $scope, 'rate' => (float)$f['amount'], 'amount' => $amt];
         $totalDed += $amt;
     }
 
@@ -500,17 +506,23 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <div class="card card-pad" style="margin-bottom:16px">
   <div class="sec-lbl">Add Fee Item</div>
   <?= postForm('add_fee_item', 'fees', $tok) ?>
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr auto;gap:10px;align-items:end">
       <div><label class="lbl">Fee Name *</label><input class="inp" name="feeName" placeholder="e.g. Entry Fee" required></div>
       <div>
         <label class="lbl">Type *</label>
         <select class="inp" name="feeType" required>
-          <option value="flat">Flat (¥ per vehicle)</option>
-          <option value="percent">Percent (% of sales)</option>
-          <option value="per_vehicle">Per Vehicle (¥ all)</option>
+          <option value="flat">Flat (¥)</option>
+          <option value="percent">Percent (%)</option>
         </select>
       </div>
       <div><label class="lbl">Amount *</label><input class="inp mono" type="number" name="feeAmount" placeholder="3000" min="0.01" step="any" required></div>
+      <div>
+        <label class="lbl">Scope *</label>
+        <select class="inp" name="feeScope" required>
+          <option value="per_vehicle">Per Vehicle (× count)</option>
+          <option value="per_member">Per Member (flat)</option>
+        </select>
+      </div>
       <div style="display:flex;align-items:flex-end"><button class="btn btn-gold" type="submit">+ Add</button></div>
     </div>
   </form>
@@ -528,14 +540,17 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <div class="ci" style="flex-wrap:wrap;gap:10px">
       <?= postForm('update_fee_item', 'fees', $tok) ?>
         <input type="hidden" name="feeId" value="<?= (int)$fi['id'] ?>">
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;flex:1">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1.5fr;gap:8px;flex:1">
           <input class="inp" name="feeName" value="<?= h($fi['name']) ?>" required>
           <select class="inp" name="feeType" required>
             <option value="flat" <?= $fi['type']==='flat'?'selected':'' ?>>Flat (¥)</option>
             <option value="percent" <?= $fi['type']==='percent'?'selected':'' ?>>Percent (%)</option>
-            <option value="per_vehicle" <?= $fi['type']==='per_vehicle'?'selected':'' ?>>Per Vehicle (¥)</option>
           </select>
           <input class="inp mono" type="number" name="feeAmount" value="<?= (float)$fi['amount'] ?>" min="0.01" step="any" required>
+          <select class="inp" name="feeScope" required>
+            <option value="per_vehicle" <?= ($fi['scope']??'per_vehicle')==='per_vehicle'?'selected':'' ?>>Per Vehicle</option>
+            <option value="per_member" <?= ($fi['scope']??'')==='per_member'?'selected':'' ?>>Per Member</option>
+          </select>
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn btn-gold btn-sm" type="submit">Save</button>
@@ -546,7 +561,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?php else: ?>
     <div class="ci">
       <span class="ci-name"><?= h($fi['name']) ?></span>
-      <span style="color:var(--muted);font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:10px"><?= $fi['type'] === 'flat' ? '¥/vehicle' : ($fi['type'] === 'percent' ? '%' : '¥/all') ?></span>
+      <span style="color:var(--muted);font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:10px"><?= $fi['type'] === 'flat' ? '¥' : '%' ?><?= ($fi['scope'] ?? 'per_vehicle') === 'per_member' ? '/member' : '/vehicle' ?></span>
       <span class="ci-amt"><?= $fi['type'] === 'percent' ? (float)$fi['amount'] . '%' : '¥' . number_format((float)$fi['amount']) ?></span>
       <a class="btn btn-dark btn-sm" href="?tab=fees&edit_fee=<?= (int)$fi['id'] ?>">Edit</a>
       <?= postForm('remove_fee_item', 'fees', $tok) ?>
@@ -598,7 +613,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div class="sr">
         <div class="ssl">Deductions</div>
         <?php foreach ($s['deductions'] as $d): ?>
-        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']==='flat'): ?>×<?= $s['count'] ?><?php elseif ($d['type']==='percent'): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
+        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']==='flat' && $d['scope']==='per_vehicle'): ?>×<?= $s['count'] ?><?php elseif ($d['type']==='percent'): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
         <?php endforeach; ?>
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
