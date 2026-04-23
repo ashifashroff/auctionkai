@@ -67,7 +67,7 @@ function renderStatement(array $m, array $s, array $auction): string {
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
       <table>
         <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Listing</th><th class='r'>Sold Fee</th><th class='r'>Nagare</th><th class='r'>Other</th><th class='r'>Net</th></tr></thead>
-        <tbody>{$rows}<tr class='tr'><td colspan='2'>Totals</td><td class='r'>" . fmt($s['grossSales']) . "</td><td class='r'>" . fmt($s['taxTotal']) . "</td><td class='r'>" . fmt($s['recycleTotal']) . "</td><td class='r' style='font-weight:700'>" . fmt($s['totalReceived']) . "</td></tr></tbody>
+        <tbody>{$rows}<tr class='tr'><td colspan='2'>Totals</td><td class='r'>" . fmt($s['grossSales']) . "</td><td class='r'>" . fmt($s['taxTotal']) . "</td><td class='r'>" . fmt($s['recycleTotal']) . "</td><td class='r'>" . fmt($s['listingFeeTotal']) . "</td><td class='r'>" . fmt($s['soldFeeTotal']) . "</td><td class='r'>" . fmt($s['nagareFeeTotal']) . "</td><td class='r'>" . fmt($s['otherFeeTotal']) . "</td><td class='r' style='font-weight:700'>" . fmt($s['netPayout']) . "</td></tr></tbody>
       </table>
       " . ($s['unsoldCount'] > 0 ? "
       <div class='sec'>Unsold Vehicles ({$s['unsoldCount']} units)</div>
