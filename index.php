@@ -31,9 +31,12 @@ if (empty($_SESSION['auction_id']) && !empty($allAuctions)) {
     $_SESSION['auction_id'] = (int)$allAuctions[0]['id'];
 }
 $activeAuctionId = (int)($_SESSION['auction_id'] ?? 0);
-$auction = $activeAuctionId
-    ? $db->prepare("SELECT * FROM auction WHERE id=?")->execute([$activeAuctionId]) || $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch()
-    : null;
+$auction = null;
+if ($activeAuctionId) {
+    $stmt = $db->prepare("SELECT * FROM auction WHERE id=?");
+    $stmt->execute([$activeAuctionId]);
+    $auction = $stmt->fetch();
+}
 if (!$auction && !empty($allAuctions)) {
     $auction = $allAuctions[0];
     $activeAuctionId = (int)$auction['id'];
