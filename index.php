@@ -232,107 +232,104 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<?php include 'css/tailwind-config.php'; ?>
 </head>
-<body>
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
-<!-- ─── TOP BAR ─────────────────────────────────────────────────── -->
-<div class="topbar">
+<!-- ─── TOP BAR ─────────────────────────────────────── -->
+<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down">
   <div>
-    <div class="brand">⚡ AuctionKai <span class="db-badge">MySQL</span></div>
-    <div class="brand-sub">Settlement Management System</div>
+    <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai <span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded ml-1 font-mono">MySQL</span></div>
+    <div class="text-ak-muted text-[11px]">Settlement Management System</div>
   </div>
   <?php if ($auction): ?>
-  <div class="auction-edit">
+  <div class="flex items-center gap-2 ml-auto">
     <?= postForm('save_auction', $tab, $tok) ?>
-      <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
-      <input class="inp" type="date" style="width:140px" name="date" value="<?= h($auction['date']) ?>">
-      <div style="display:flex;align-items:center;gap:4px"><span style="color:var(--muted);font-size:11px">Commission</span><input class="inp mono" style="width:60px" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span style="color:var(--muted);font-size:11px">¥/member</span></div>
+      <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
+      <input class="inp w-36" type="date" name="date" value="<?= h($auction['date']) ?>">
+      <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span class="text-ak-muted text-[11px]">¥/member</span></div>
       <button class="btn btn-dark btn-sm" type="submit">Save</button>
     </form>
   </div>
   <?php endif; ?>
-  <a href="profile.php" class="user-menu" style="text-decoration:none">
-    <div class="user-avatar"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
-    <div>
-      <div class="user-name"><?= h($userName) ?></div>
-      <div class="user-role"><?= h($userRole) ?></div>
-    </div>
+  <a href="profile.php" class="flex items-center gap-2 no-underline ml-auto hover:opacity-80 transition-opacity">
+    <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
+    <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
   </a>
-  <a href="logout.php" class="logout-btn">Logout</a>
+  <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
 </div>
 
-
-<!-- ─── AUCTION SELECTOR BAR ─────────────────────────────────────── -->
-<div class="auction-bar">
-  <div class="auction-select">
+<!-- ─── AUCTION SELECTOR ────────────────────────────── -->
+<div class="bg-ak-bg border-b border-ak-border px-7 py-3">
+  <div class="flex gap-2 flex-wrap items-center">
     <?php foreach ($allAuctions as $a): ?>
-      <a class="auction-chip <?= (int)$a['id'] === $activeAuctionId ? 'active' : '' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
+      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
         <?= h($a['name']) ?>
-        <span class="chip-loc">📅 <?= h($a['date']) ?></span>
+        <span class="text-[10px] opacity-70">📅 <?= h($a['date']) ?></span>
         <?php
         $daysLeft = (int)((strtotime($a['expires_at']) - time()) / 86400);
-        $badgeClass = $daysLeft <= 0 ? 'expired' : ($daysLeft <= 3 ? 'expiring' : 'active');
+        $badgeClass = $daysLeft <= 0 ? 'bg-ak-red/20 text-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-ak-green/20 text-ak-green');
         $badgeText = $daysLeft <= 0 ? 'Expired' : ($daysLeft . 'd left');
         ?>
-        <span class="expiry-badge <?= $badgeClass ?>"><?= $badgeText ?></span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded <?= $badgeClass ?>"><?= $badgeText ?></span>
       </a>
     <?php endforeach; ?>
-    <button class="auction-add" onclick="document.getElementById('addAuctionForm').style.display=document.getElementById('addAuctionForm').style.display==='none'?'flex':'none'">+ New Auction</button>
+    <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').style.display=document.getElementById('addAuctionForm').style.display==='none'?'flex':'none'">+ New Auction</button>
   </div>
   <?php if ($auction): ?>
-  <div class="auction-meta">
-    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/vehicle · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
+  <div class="text-ak-muted text-xs mt-2">
+    <b class="text-ak-text"><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
   </div>
   <?php endif; ?>
 </div>
 
-<!-- ─── ADD AUCTION FORM (hidden by default) ─────────────────────── -->
-<div id="addAuctionForm" style="display:none;padding:16px 28px;background:var(--bg2);border-bottom:1px solid var(--border)">
+<!-- ─── ADD AUCTION FORM ─────────────────────────────── -->
+<div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-7 py-4 animate-slide-down">
   <?= postForm('add_auction', 'members', $tok) ?>
-    <div class="add-row ar-auction" style="margin-bottom:0">
+    <div class="add-row ar-auction mb-0">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" required></div>
       <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" required></div>
-      <div style="display:flex;align-items:flex-end"><button class="btn btn-gold" type="submit">+ Create</button></div>
+      <div class="flex items-end"><button class="btn btn-gold" type="submit">+ Create</button></div>
     </div>
   </form>
 </div>
 
-<!-- ─── TABS ─────────────────────────────────────────────────────── -->
-<div class="tabs">
+<!-- ─── TABS ────────────────────────────────────────── -->
+<div class="bg-ak-bg border-b border-ak-border px-7 flex items-center gap-1">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="tab-btn <?= $tab === $key ? 'active' : '' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
-  <div class="tab-stats">
-    <span><b><?= count($members) ?></b> members</span>
-    <span><b class="g"><?= $totalSold ?></b> sold / <b><?= count($vehicles) ?></b> total</span>
+  <div class="ml-auto text-xs text-ak-muted flex gap-4">
+    <span><b class="text-ak-text"><?= count($members) ?></b> members</span>
+    <span><b class="text-ak-green"><?= $totalSold ?></b> sold / <b class="text-ak-text"><?= count($vehicles) ?></b> total</span>
   </div>
 </div>
 
-<!-- ─── CONTENT ───────────────────────────────────────────────────── -->
-<div class="content">
+<!-- ─── CONTENT ─────────────────────────────────────── -->
+<div class="p-7 max-w-[1400px] mx-auto animate-fade-in">
 
 <?php if (!$auction): ?>
-  <div class="no-auction">
-    <h2>No Auctions Yet</h2>
-    <p>Click <strong>"+ New Auction"</strong> above to create your first auction.</p>
+  <div class="text-center py-24">
+    <h2 class="text-2xl font-bold text-ak-muted mb-3">No Auctions Yet</h2>
+    <p class="text-ak-muted2">Click <strong class="text-ak-gold">"+ New Auction"</strong> above to create your first auction.</p>
   </div>
 
 <?php elseif ($tab === 'members'): ?>
-<h2>Members / Sellers — <?= h($auction['name']) ?></h2>
-<div class="card card-pad" style="margin-bottom:20px">
-  <div class="sec-lbl">Add New Member</div>
+<h2 class="text-lg font-bold mb-5">Members / Sellers — <?= h($auction['name']) ?></h2>
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
   <?= postForm('add_member', 'members', $tok) ?>
     <div class="add-row ar-members">
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" required></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com"></div>
-      <div style="display:flex;align-items:flex-end"><button class="btn btn-gold" type="submit">+ Add</button></div>
+      <div class="flex items-end"><button class="btn btn-gold" type="submit">+ Add</button></div>
     </div>
   </form>
 </div>
-<div style="display:flex;flex-direction:column;gap:10px">
+<div class="flex flex-col gap-2.5">
 <?php if (empty($members)): ?>
-  <div class="card card-pad" style="text-align:center;color:var(--muted);padding:48px">No members yet for this auction.</div>
+  <div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">No members yet for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
@@ -341,16 +338,16 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
   <?php if ($editing): ?>
-  <div class="card card-pad mi">
-    <div class="av"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
-    <div style="flex:1">
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 animate-fade-in">
+    <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
+    <div class="flex-1">
       <?= postForm('update_member', 'members', $tok) ?>
         <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
-        <div class="add-row ar-members" style="margin-bottom:0">
+        <div class="add-row ar-members mb-0">
           <div><label class="lbl">Full Name *</label><input class="inp" name="name" value="<?= h($m['name']) ?>" required></div>
           <div><label class="lbl">Phone</label><input class="inp" name="phone" value="<?= h($m['phone']) ?>"></div>
           <div><label class="lbl">Email</label><input class="inp" type="email" name="email" value="<?= h($m['email']) ?>"></div>
-          <div style="display:flex;align-items:flex-end;gap:6px">
+          <div class="flex items-end gap-1.5">
             <button class="btn btn-gold btn-sm" type="submit">Save</button>
             <a class="btn btn-dark btn-sm" href="?tab=members">Cancel</a>
           </div>
@@ -359,21 +356,21 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     </div>
   </div>
   <?php else: ?>
-  <div class="card mi">
-    <div class="av"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
-    <div style="flex:1;min-width:0">
-      <div class="mn"><?= h($m['name']) ?></div>
-      <div class="mm"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+    <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
+    <div class="flex-1 min-w-0">
+      <div class="text-ak-text font-semibold"><?= h($m['name']) ?></div>
+      <div class="text-ak-muted text-xs"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
     </div>
-    <div class="ms">
-      <div class="ms-big"><?= count($mv) ?></div>
-      <div class="ms-sm"><?= $soldCount ?> sold</div>
+    <div class="text-center px-3">
+      <div class="text-ak-text font-bold text-lg"><?= count($mv) ?></div>
+      <div class="text-ak-muted text-[10px]"><?= $soldCount ?> sold</div>
     </div>
-    <div class="mp">
-      <div class="mp-num"><?= fmt($s['netPayout']) ?></div>
-      <div class="ms-sm">net payout</div>
+    <div class="text-right px-3">
+      <div class="text-ak-gold font-mono font-bold"><?= fmt($s['netPayout']) ?></div>
+      <div class="text-ak-muted text-[10px]">net payout</div>
     </div>
-    <div style="display:flex;gap:6px;align-items:center">
+    <div class="flex gap-1.5 items-center">
       <a class="btn btn-dark btn-sm" href="?tab=members&edit_member=<?= (int)$m['id'] ?>">Edit</a>
       <?= postForm('remove_member', 'members', $tok) ?>
         <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
@@ -387,12 +384,12 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 
 <?php elseif ($tab === 'vehicles'): ?>
-<h2>Vehicle Listings — <?= h($auction['name']) ?></h2>
-<div class="card card-pad" style="margin-bottom:20px">
-  <div class="sec-lbl">Add Vehicle</div>
+<h2 class="text-lg font-bold mb-5">Vehicle Listings — <?= h($auction['name']) ?></h2>
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
   <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)">
     <div class="add-row ar-vehicles" id="addVehicleFields">
-      <div>
+      <div class="relative">
         <label class="lbl">Member *</label>
         <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showMemberResults()" oninput="filterMembers()">
         <input type="hidden" id="memberId" name="memberId" required>
@@ -401,58 +398,58 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" required></div>
       <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
-      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
-      <div class="nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" min="0" style="-moz-appearance:textfield"></div>
-      <div style="display:flex;align-items:flex-end;gap:8px">
-        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-          <input type="checkbox" id="add_sold" name="sold" checked style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" min="0"></div>
+      <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" min="0"></div>
+      <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0"></div>
+      <div class="nagare-field hidden"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0"></div>
+      <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" min="0"></div>
+      <div class="flex items-end gap-2">
+        <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
+          <input type="checkbox" id="add_sold" name="sold" checked class="accent-ak-gold" onchange="toggleSoldFields(this.checked)"> Sold
         </label>
         <button class="btn btn-gold" type="submit" id="addVehicleBtn">Add</button>
       </div>
     </div>
-    <div id="addVehicleMsg" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+    <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
-<div class="card" style="overflow-x:auto">
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th style="width:90px">Actions</th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
-      <tr><td colspan="14" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
+      <tr><td colspan="14" class="text-center text-ak-muted py-12">No vehicles yet for this auction.</td></tr>
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
       ?>
-      <tr data-vid="<?= (int)$v['id'] ?>">
+      <tr data-vid="<?= (int)$v['id'] ?>" class="animate-fade-in">
         <td><span class="lot"><?= h($v['lot'] ?: '—') ?></span></td>
         <td data-field="member"><?= h($owner['name'] ?? '?') ?></td>
-        <td style="color:var(--text2)" data-field="vehicle"><?= h($v['make'] . ' ' . $v['model']) ?></td>
-        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--green)' : 'var(--muted)' ?>" data-field="sold_price">
+        <td class="text-ak-text2" data-field="vehicle"><?= h($v['make'] . ' ' . $v['model']) ?></td>
+        <td class="text-right font-mono <?= $v['sold'] ? 'text-ak-green' : 'text-ak-muted' ?>" data-field="sold_price">
           <?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px" data-field="tax">
+        <td class="text-right font-mono text-ak-text2 text-xs" data-field="tax">
           <?= $v['sold'] ? fmt(round((float)$v['sold_price'] * 0.10)) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px" data-field="recycle">
+        <td class="text-right font-mono text-ak-text2 text-xs" data-field="recycle">
           <?= $v['sold'] && (float)($v['recycle_fee'] ?? 0) > 0 ? fmt((float)$v['recycle_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="listing">
+        <td class="text-right font-mono text-ak-red text-xs" data-field="listing">
           <?= $v['sold'] && (float)($v['listing_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['listing_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="sold_fee">
+        <td class="text-right font-mono text-ak-red text-xs" data-field="sold_fee">
           <?= $v['sold'] && (float)($v['sold_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['sold_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="nagare">
+        <td class="text-right font-mono text-ak-red text-xs" data-field="nagare">
           <?= !$v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="other">
+        <td class="text-right font-mono text-ak-red text-xs" data-field="other">
           <?= (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--gold)' : 'var(--muted)' ?>;font-weight:700" data-field="total">
+        <td class="text-right font-mono font-bold <?= $v['sold'] ? 'text-ak-gold' : 'text-ak-muted' ?>" data-field="total">
           <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0) - (float)($v['other_fee'] ?? 0); ?>
           <?= fmt($vTotal) ?>
           <?php else: ?>—<?php endif; ?>
@@ -463,8 +460,8 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
             <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" type="submit"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
           </form>
         </td>
-        <td style="white-space:nowrap">
-          <div style="display:flex;gap:4px;align-items:center">
+        <td class="whitespace-nowrap">
+          <div class="flex gap-1 items-center">
             <button class="btn btn-dark btn-sm" onclick="openEditModal(<?= (int)$v['id'] ?>)">Edit</button>
             <button class="btn-icon" onclick="deleteVehicle(<?= (int)$v['id'] ?>, this)">×</button>
           </div>
@@ -477,12 +474,12 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 
 <?php elseif ($tab === 'statements'): ?>
-<div class="st-top">
-  <h2>Settlement Statements — <?= h($auction['name']) ?></h2>
+<div class="flex justify-between items-center mb-6">
+  <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
   <a class="btn btn-dark" href="pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
 </div>
 <?php if (empty($members)): ?>
-  <div class="card nm">No sales history available for this auction.</div>
+  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sales history available for this auction.</div>
 <?php else: ?>
   <?php $hasSales = false; ?>
   <?php foreach ($members as $m):
@@ -492,7 +489,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
     $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>
-  <div class="card" style="overflow:hidden;margin-bottom:20px">
+  <div class="bg-ak-card rounded-xl border border-ak-border mb-5 overflow-hidden animate-fade-in-up">
     <div class="sh">
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
@@ -500,9 +497,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
-    <?php if ($s['count'] === 0): ?>
-      <div class="se">No sold vehicles for this member.</div>
-    <?php else: ?>
     <div class="sb2">
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
@@ -512,19 +506,19 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
           <span class="vr-p"><?= fmt((float)$v['sold_price']) ?></span>
         </div>
         <?php if ($vTax > 0 || $vRecycle > 0): ?>
-        <div style="padding:2px 0 6px 16px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
+        <div class="pl-4 py-0.5 pb-1.5 text-[11px] text-ak-muted flex justify-between">
           <span>+ Tax 10%: <?= fmt($vTax) ?><?php if ($vRecycle > 0): ?> + Recycle: <?= fmt($vRecycle) ?><?php endif; ?></span>
         </div>
         <?php endif; ?>
         <?php endforeach; ?>
         <div class="sg"><span class="sg-l">Gross Sales</span><span class="sg-n"><?= fmt($s['grossSales']) ?></span></div>
         <?php if ($s['taxTotal'] > 0): ?>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:var(--text2)">+ Consumption Tax 10%</span><span style="font-family:var(--mono);color:var(--green)"><?= fmt($s['taxTotal']) ?></span></div>
+        <div class="flex justify-between py-1 text-[13px]"><span class="text-ak-text2">+ Consumption Tax 10%</span><span class="font-mono text-ak-green"><?= fmt($s['taxTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['recycleTotal'] > 0): ?>
-        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:var(--text2)">+ Recycle Fees</span><span style="font-family:var(--mono);color:var(--green)"><?= fmt($s['recycleTotal']) ?></span></div>
+        <div class="flex justify-between py-1 text-[13px]"><span class="text-ak-text2">+ Recycle Fees</span><span class="font-mono text-ak-green"><?= fmt($s['recycleTotal']) ?></span></div>
         <?php endif; ?>
-        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:2px solid var(--border);margin-top:6px;font-weight:700"><span style="color:var(--gold)">Total Received</span><span style="font-family:var(--mono);color:var(--gold);font-size:15px"><?= fmt($s['totalReceived']) ?></span></div>
+        <div class="flex justify-between py-2 border-t-2 border-ak-border mt-1.5 font-bold"><span class="text-ak-gold">Total Received</span><span class="font-mono text-ak-gold text-[15px]"><?= fmt($s['totalReceived']) ?></span></div>
       </div>
       <div class="sr">
         <div class="ssl">Deductions</div>
@@ -547,7 +541,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
       </div>
     </div>
-    <?php endif; ?>
   </div>
   <?php endforeach; ?>
 <?php endif; ?>
@@ -556,18 +549,18 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
 <script src="js/app.js"></script>
 
-<!-- Edit Vehicle Modal (root level) -->
-<div id="editModal" class="modal-overlay" style="display:none">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>Edit Vehicle</h3>
-      <button class="modal-close" onclick="closeEditModal()">×</button>
+<!-- Edit Vehicle Modal -->
+<div id="editModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center hidden" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[720px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-ak-gold text-lg font-bold">Edit Vehicle</h3>
+      <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeEditModal()">×</button>
     </div>
-    <div id="modalMsg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+    <div id="modalMsg" class="hidden mb-3 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
     <form id="editForm" onsubmit="return submitEditForm(event)">
       <input type="hidden" id="edit_id" name="id">
-      <div class="modal-grid">
-        <div>
+      <div class="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
+        <div class="relative">
           <label class="lbl">Member *</label>
           <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" required>
           <input type="hidden" id="edit_memberId" name="memberId" required>
@@ -576,18 +569,18 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" required></div>
         <div><label class="lbl">Model</label><input class="inp" id="edit_model" name="model"></div>
         <div><label class="lbl">Lot #</label><input class="inp" id="edit_lot" name="lot"></div>
-        <div><label class="lbl">Sold Price (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" min="0"></div>
-        <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_recycleFee" name="recycleFee" min="0"></div>
-        <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" min="0"></div>
-        <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" min="0"></div>
-        <div class="modal-nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="edit_nagareFee" name="nagareFee" min="0"></div>
-        <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="edit_otherFee" name="otherFee" min="0"></div>
+        <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" min="0"></div>
+        <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_recycleFee" name="recycleFee" min="0"></div>
+        <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" min="0"></div>
+        <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" min="0"></div>
+        <div class="modal-nagare-field hidden"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="edit_nagareFee" name="nagareFee" min="0"></div>
+        <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="edit_otherFee" name="otherFee" min="0"></div>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-          <input type="checkbox" id="edit_sold" name="sold" style="accent-color:var(--gold)" onchange="toggleModalSoldFields(this.checked)"> Sold
+      <div class="flex items-center gap-3 mt-4 pt-4 border-t border-ak-border">
+        <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
+          <input type="checkbox" id="edit_sold" name="sold" class="accent-ak-gold" onchange="toggleModalSoldFields(this.checked)"> Sold
         </label>
-        <div style="flex:1"></div>
+        <div class="flex-1"></div>
         <button type="button" class="btn btn-dark btn-sm" onclick="closeEditModal()">Cancel</button>
         <button type="submit" class="btn btn-gold btn-sm" id="editSubmitBtn">Save Changes</button>
       </div>

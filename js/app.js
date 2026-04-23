@@ -247,7 +247,7 @@ function submitAddVehicle(e) {
 function showAddMsg(text, type) {
   const msg = document.getElementById('addVehicleMsg');
   msg.textContent = text;
-  msg.style.display = 'block';
+  msg.classList.remove('hidden');
   msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
   msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }

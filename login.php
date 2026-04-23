@@ -81,8 +81,9 @@ function h(string $s): string {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
+<?php include 'css/tailwind-config.php'; ?>
 </head>
-<body>
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
 <div class="login-wrap">
   <div class="login-card">
