@@ -533,7 +533,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="dr"><span class="dr-l">Sold Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['soldFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['nagareFeeTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Nagare Fee (unsold)</span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Nagare Fee ×<?= $s['unsoldCount'] ?></span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['otherFeeTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
