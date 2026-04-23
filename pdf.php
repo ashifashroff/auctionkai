@@ -4,20 +4,29 @@ require_once 'config.php';
 function fmt(float $n): string { return '¥' . number_format(round($n)); }
 function h(string $s): string  { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-function calcStatement(int $memberId, array $vehicles, array $fees): array {
+function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
-    $entryTotal  = $fees['entry_fee'] * $count;
-    $commTotal   = array_sum(array_map(fn($v) => $v['sold_price'] * $fees['commission_rate'] / 100, $mv));
-    $transTotal  = $fees['transport_fee'] * $count;
-    $customSum   = array_sum(array_column($fees['customDeductions'], 'amount'));
-    $customTotal = $customSum * $count;
-    $subtotal    = $entryTotal + $commTotal + $transTotal + $customTotal;
-    $tax         = $subtotal * $fees['tax_rate'] / 100;
-    $totalDed    = $subtotal + $tax;
-    $netPayout   = $grossSales - $totalDed;
-    return compact('mv','count','grossSales','entryTotal','commTotal','transTotal','customTotal','subtotal','tax','totalDed','netPayout');
+
+    $deductions = [];
+    $totalDed   = 0;
+    foreach ($feeItems as $f) {
+        $amt = 0;
+        if ($f['type'] === 'flat') {
+            $amt = (float)$f['amount'] * $count;
+        } elseif ($f['type'] === 'percent') {
+            $amt = $grossSales * (float)$f['amount'] / 100;
+        } elseif ($f['type'] === 'per_vehicle') {
+            $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
+            $amt = (float)$f['amount'] * count($allMv);
+        }
+        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'rate' => (float)$f['amount'], 'amount' => $amt];
+        $totalDed += $amt;
+    }
+
+    $netPayout = $grossSales - $totalDed;
+    return compact('mv','count','grossSales','deductions','totalDed','netPayout');
 }
 
 $db = db();
@@ -30,9 +39,7 @@ if (!$activeAuctionId) {
 }
 
 $auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch() : null;
-$fees     = $activeAuctionId ? $db->query("SELECT * FROM fees WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id LIMIT 1")->fetch() : null;
-$customs  = $activeAuctionId ? $db->query("SELECT * FROM custom_deductions WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY id")->fetchAll() : [];
-$fees['customDeductions'] = $customs;
+$feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY sort_order, id")->fetchAll() : [];
 $members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
 $vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
 
@@ -51,8 +58,11 @@ function renderStatement(array $m, array $s, array $fees, array $auction): strin
         $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td>" . h($v['year']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td></tr>";
     }
     $customRows = '';
-    foreach ($fees['customDeductions'] as $d) {
-        $customRows .= "<div class='row dim'><span>" . h($d['name']) . " ×{$s['count']}</span><span>−" . fmt((float)$d['amount'] * $s['count']) . "</span></div>";
+    foreach ($s['deductions'] as $d) {
+        $label = h($d['name']);
+        if ($d['type'] === 'flat') $label .= ' ×' . $s['count'];
+        elseif ($d['type'] === 'percent') $label .= ' (' . $d['rate'] . '%)';
+        $customRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
     }
     $loc = !empty($auction['location']) ? ' · ' . h($auction['location']) : '';
     return "
@@ -69,11 +79,7 @@ function renderStatement(array $m, array $s, array $fees, array $auction): strin
       <div class='sec'>Fee Breakdown</div>
       <div class='fees'>
         <div class='row'><span>Gross Sales</span><span>" . fmt($s['grossSales']) . "</span></div>
-        <div class='row dim sep'><span>Entry / Listing Fee ×{$s['count']}</span><span>−" . fmt($s['entryTotal']) . "</span></div>
-        <div class='row dim'><span>Commission {$fees['commission_rate']}% (落札手数料)</span><span>−" . fmt($s['commTotal']) . "</span></div>
-        <div class='row dim'><span>Transport ×{$s['count']}</span><span>−" . fmt($s['transTotal']) . "</span></div>
         {$customRows}
-        <div class='row dim sep'><span>Consumption Tax {$fees['tax_rate']}% on fees (消費税)</span><span>−" . fmt($s['tax']) . "</span></div>
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
@@ -127,7 +133,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
 </div>
 
 <?php foreach ($targets as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, $fees);
+    $s = calcStatement((int)$m['id'], $vehicles, $feeItems);
     if ($s['count'] === 0) continue;
     echo renderStatement($m, $s, $fees, $auction);
 endforeach; ?>

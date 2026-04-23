@@ -59,15 +59,14 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Fee Settings (per auction) ──────────────────────────────────
-CREATE TABLE IF NOT EXISTS `fees` (
-  `id`              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `auction_id`      INT UNSIGNED NOT NULL,
-  `entry_fee`       DECIMAL(10,0) NOT NULL DEFAULT 3000,
-  `commission_rate` DECIMAL(5,2)  NOT NULL DEFAULT 3.00,
-  `tax_rate`        DECIMAL(5,2)  NOT NULL DEFAULT 10.00,
-  `transport_fee`   DECIMAL(10,0) NOT NULL DEFAULT 5000,
-  `updated_at`      TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+-- ── Fee Items (custom, per auction) ─────────────────────────────
+CREATE TABLE IF NOT EXISTS `fee_items` (
+  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `auction_id`  INT UNSIGNED NOT NULL,
+  `name`        VARCHAR(200) NOT NULL,
+  `type`        VARCHAR(20) NOT NULL DEFAULT 'flat' COMMENT 'flat=per vehicle, percent=% of sold price, per_vehicle=per sold vehicle',
+  `amount`      DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `sort_order`  INT UNSIGNED NOT NULL DEFAULT 0,
   FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -99,17 +98,27 @@ INSERT INTO `auction` (`user_id`, `name`, `date`, `location`) VALUES
   (1, 'Fukuoka Auto Auction',      CURDATE(), 'Fukuoka, Fukuoka'),
   (1, 'Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
 
-INSERT INTO `fees` (`auction_id`, `entry_fee`, `commission_rate`, `tax_rate`, `transport_fee`) VALUES
-  (1, 3000, 3.00, 10.00, 5000),
-  (2, 3500, 3.50, 10.00, 6000),
-  (3, 2500, 2.50, 10.00, 4500),
-  (4, 3000, 3.00, 10.00, 5500),
-  (5, 2000, 2.00,  8.00, 4000),
-  (6, 2500, 2.50,  8.00, 7000);
+-- Fee items for Nagoya auction (id=1)
+INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `amount`, `sort_order`) VALUES
+  (1, 'Entry Fee',          'flat',        3000, 1),
+  (1, 'Commission',         'percent',     3.00, 2),
+  (1, 'Consumption Tax',    'percent',    10.00, 3),
+  (1, 'Transport Fee',      'flat',        5000, 4),
+  (1, 'Document Fee',       'flat',        1500, 5);
 
--- Custom deductions for Nagoya auction (user_id=1)
-INSERT INTO `custom_deductions` (`auction_id`, `name`, `amount`) VALUES
-  (1, 'Document Fee', 1500);
+-- Fee items for Tokyo auction (id=2)
+INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `amount`, `sort_order`) VALUES
+  (2, 'Entry Fee',          'flat',        3500, 1),
+  (2, 'Commission',         'percent',     3.50, 2),
+  (2, 'Consumption Tax',    'percent',    10.00, 3),
+  (2, 'Transport Fee',      'flat',        6000, 4);
+
+-- Fee items for Osaka auction (id=3)
+INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `amount`, `sort_order`) VALUES
+  (3, 'Entry Fee',          'flat',        2500, 1),
+  (3, 'Commission',         'percent',     2.50, 2),
+  (3, 'Consumption Tax',    'percent',    10.00, 3),
+  (3, 'Transport Fee',      'flat',        4500, 4);
 
 -- Sample members (global, user_id=1)
 INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
