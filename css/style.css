@@ -1,10 +1,35 @@
-/* ── AuctionKai — Tailwind Overrides & Non-Utility Styles ─── */
-/* Most styles are now Tailwind classes in HTML. This file only contains
-   things Tailwind can't handle (complex selectors, animations, print). */
+/* ── AuctionKai — Core Styles ──────────────────────────── */
+
+:root {
+    --bg:#0A1420;--bg2:#07101A;--card:#111E2D;--border:#1E3A5F;
+    --gold:#D4A84B;--text:#E8DCC8;--text2:#A8C4D8;--muted:#6A88A0;
+    --muted2:#3A5570;--green:#4CAF82;--red:#CC7777;--infield:#0A1724;
+    --mono:'Space Mono',monospace;--sans:'Noto Sans JP',sans-serif;
+}
+
+/* ── FORM ELEMENTS ─────────────────────────────────── */
+.inp{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,168,75,.15)}
+.inp::placeholder{color:var(--muted2)}
+.inp:disabled{opacity:.5;cursor:not-allowed;background:var(--infield)}
+.lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.5px}
+
+/* ── BUTTONS ───────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none;line-height:1.2}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:#E0B85C}
+.btn-dark{background:var(--card);color:var(--gold);border:1px solid var(--border)}
+.btn-dark:hover{border-color:var(--gold)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid transparent}
+.btn-ghost:hover{color:var(--red);border-color:var(--border)}
 
 /* ── MEMBER AUTOCOMPLETE DROPDOWN ─────────────────── */
 .member-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-top:4px;max-height:200px;overflow-y:auto;z-index:50}
-.member-dropdown-item{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;transition:background .15s}
+.member-dropdown-item{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text);transition:background .15s}
 .member-dropdown-item:hover{background:rgba(212,168,75,.1)}
 .mdi-phone{color:var(--muted);font-size:11px}
 
@@ -12,7 +37,7 @@
 .vt{width:100%;border-collapse:collapse;font-size:13px}
 .vt th{padding:12px 16px;text-align:left;color:var(--muted);font-weight:600;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;border-bottom:1px solid var(--border)}
 .vt th.r{text-align:right}
-.vt td{padding:11px 16px;border-bottom:1px solid #131F2E}
+.vt td{padding:11px 16px;border-bottom:1px solid #131F2E;color:var(--text)}
 .vt tr:last-child td{border-bottom:none}
 .vt tr:hover td{background:rgba(30,58,95,.2)}
 
@@ -36,7 +61,6 @@
 .ar-vehicles>div{min-width:120px}
 
 /* ── STATEMENT SECTIONS ────────────────────────────── */
-.st-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
 .sh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
 .sn2{font-size:16px;font-weight:700;color:var(--gold)}
 .sm{color:var(--muted);font-size:12px;margin-top:2px}
@@ -73,11 +97,13 @@
 @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse-gold{0%,100%{box-shadow:0 0 0 0 rgba(212,168,75,.3)}50%{box-shadow:0 0 0 8px rgba(212,168,75,0)}}
-@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .animate-fade-in{animation:fadeIn .3s ease-out}
 .animate-fade-in-up{animation:fadeInUp .4s ease-out}
 .animate-slide-down{animation:slideDown .25s ease-out}
 .animate-pulse-gold{animation:pulse-gold 2s infinite}
+
+/* ── PRELOADER SPINNER ─────────────────────────────── */
+.add-preloader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
 
 /* ── SCROLLBAR ─────────────────────────────────────── */
 ::-webkit-scrollbar{width:6px;height:6px}
@@ -89,18 +115,6 @@
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
 
-/* ── COMPONENT CLASSES (Tailwind covers layout, these cover form elements) ─── */
-.inp{width:100%;background:var(--infield);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
-.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,168,75,.1)}
-.inp::placeholder{color:var(--muted2)}
-.lbl{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.5px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none}
-.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.btn:active{transform:translateY(0)}
-.btn-gold{background:var(--gold);color:var(--bg)}
-.btn-gold:hover{background:#E0B85C}
-.btn-dark{background:var(--infield);color:var(--gold);border:1px solid var(--border)}
-.btn-dark:hover{border-color:var(--gold)}
-.btn-sm{padding:6px 14px;font-size:12px}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid transparent}
-.btn-ghost:hover{color:var(--red);border-color:var(--border)}
+/* ── FIXES ─────────────────────────────────────────── */
+a{color:inherit}
+table{border-collapse:collapse}
