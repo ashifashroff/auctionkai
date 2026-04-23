@@ -575,7 +575,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?> ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
         <?php endif; ?>
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
