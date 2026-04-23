@@ -100,8 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     elseif ($action === 'save_auction') {
-        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, commission_rate=? WHERE id=? AND user_id=?");
-        $stmt->execute([trim($_POST['name']), trim($_POST['date']), (float)($_POST['commissionRate'] ?? 3.00), $activeAuctionId, $userId]);
+        $stmt = $db->prepare("UPDATE auction SET name=?, date=?, commission_fee=? WHERE id=? AND user_id=?");
+        $stmt->execute([trim($_POST['name']), trim($_POST['date']), (float)($_POST['commissionFee'] ?? 3.00), $activeAuctionId, $userId]);
     }
 
     elseif ($action === 'add_member') {
@@ -195,7 +195,7 @@ $vehicles = $activeAuctionId
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
-function calcStatement(int $memberId, array $vehicles, float $commissionRate): array {
+function calcStatement(int $memberId, array $vehicles, float $commissionFee): array {
     $mv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
@@ -206,13 +206,13 @@ function calcStatement(int $memberId, array $vehicles, float $commissionRate): a
     $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $mv));
     $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $mv));
 
-    $commissionTotal = $grossSales * $commissionRate / 100;
+    $commissionTotal = $commissionFee * $count;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
     $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
     $totalDed = $totalVehicleDed + $commissionTotal;
     $netPayout = $totalReceived - $totalDed;
 
-    return compact('mv','count','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionRate','totalReceived','totalVehicleDed','totalDed','netPayout');
+    return compact('mv','count','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
@@ -243,7 +243,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?= postForm('save_auction', $tab, $tok) ?>
       <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
       <input class="inp" type="date" style="width:140px" name="date" value="<?= h($auction['date']) ?>">
-      <div style="display:flex;align-items:center;gap:4px"><span style="color:var(--muted);font-size:11px">Commission</span><input class="inp mono" style="width:60px" type="number" step="0.1" name="commissionRate" value="<?= (float)($auction['commission_rate'] ?? 3.00) ?>"><span style="color:var(--muted);font-size:11px">%</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><span style="color:var(--muted);font-size:11px">Commission</span><input class="inp mono" style="width:60px" type="number" step="0.1" name="commissionRate" value="<?= (float)($auction['commission_fee'] ?? 3000000) ?>"><span style="color:var(--muted);font-size:11px">%</span></div>
       <button class="btn btn-dark btn-sm" type="submit">Save</button>
     </form>
   </div>
@@ -278,7 +278,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   </div>
   <?php if ($auction): ?>
   <div class="auction-meta">
-    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: <?= (float)($auction['commission_rate'] ?? 3) ?>% · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
+    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3000000)) ?>/vehicle · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
   </div>
   <?php endif; ?>
 </div>
@@ -334,7 +334,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <?php foreach ($members as $m):
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
     $soldCount = count(array_filter($mv, fn($v) => $v['sold']));
-    $s         = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_rate'] ?? 3.00));
+    $s         = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3000000));
     $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
   <?php if ($editing): ?>
@@ -519,7 +519,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <div class="card nm">No members registered for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_rate'] ?? 3.00));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3000000));
     $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
     $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>
@@ -572,7 +572,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Commission <?= $s['commissionRate'] ?>%</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?> ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
         <?php endif; ?>
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>

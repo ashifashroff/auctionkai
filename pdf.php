@@ -4,7 +4,7 @@ require_once 'config.php';
 function fmt(float $n): string { return '¥' . number_format(round($n)); }
 function h(string $s): string  { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-function calcStatement(int $memberId, array $vehicles, float $commissionRate): array {
+function calcStatement(int $memberId, array $vehicles, float $commissionFee): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
@@ -15,12 +15,12 @@ function calcStatement(int $memberId, array $vehicles, float $commissionRate): a
     $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $mv));
     $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $mv));
 
-    $commissionTotal = $grossSales * $commissionRate / 100;
+    $commissionTotal = $commissionFee * $count;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
     $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
     $totalDed = $totalVehicleDed + $commissionTotal;
     $netPayout = $totalReceived - $totalDed;
-    return compact('mv','count','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionRate','totalReceived','totalVehicleDed','totalDed','netPayout');
+    return compact('mv','count','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
 
 $db = db();
@@ -73,7 +73,7 @@ function renderStatement(array $m, array $s, array $auction): string {
         " . ($s['soldFeeTotal'] > 0 ? "<div class='row dim'><span>− Sold Fees</span><span>" . fmt($s['soldFeeTotal']) . "</span></div>" : "") . "
         " . ($s['nagareFeeTotal'] > 0 ? "<div class='row dim'><span>− Nagare Fees</span><span>" . fmt($s['nagareFeeTotal']) . "</span></div>" : "") . "
         " . ($s['otherFeeTotal'] > 0 ? "<div class='row dim'><span>− Other Fees</span><span>" . fmt($s['otherFeeTotal']) . "</span></div>" : "") . "
-        " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission " . $s['commissionRate'] . "%</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
+        " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission ¥" . number_format($s['commissionFee']) . "×" . $s['count']</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
