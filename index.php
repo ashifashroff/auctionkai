@@ -293,7 +293,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <div class="add-row ar-auction mb-0">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" required></div>
       <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" required></div>
-      <div class="flex items-end"><button class="btn btn-gold" type="submit">+ Create</button></div>
+      <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Create</button></div>
     </div>
   </form>
 </div>
@@ -327,7 +327,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" required></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com"></div>
-      <div class="flex items-end"><button class="btn btn-gold" type="submit">+ Add</button></div>
+      <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Add</button></div>
     </div>
   </form>
 </div>
@@ -398,7 +398,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0"></div>
       <div class="nagare-field"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0" disabled></div>
       <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" min="0"></div>
-      <div class="flex items-end gap-2">
+      <div class="flex items-end pt-[22px] gap-2">
         <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
           <input type="checkbox" id="add_sold" name="sold" checked class="accent-ak-gold" onchange="toggleSoldFields(this.checked)"> Sold
         </label>
