@@ -323,7 +323,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
   <?= postForm('add_member', 'members', $tok) ?>
-    <div class="add-row ar-members">
+    <div class="grid grid-cols-4 gap-3">
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" required></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com"></div>
