@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
 INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
   ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Administrator', 'admin@auctionkai.com', 'admin');
 
--- Demo user account
+-- Demo user (username: demo, password: password)
 INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
-  ('aliashroff', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Demo User', 'demo@example.com', 'user');
+  ('demo', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Demo User', 'demo@example.com', 'user');
 
 -- ─────────────────────────────────────────────────────────────────
 -- Seed: Multiple Japanese auctions
