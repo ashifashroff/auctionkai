@@ -95,23 +95,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    elseif ($action === 'update_member') {
+        $id   = (int)$_POST['id'];
+        $name = trim($_POST['name'] ?? '');
+        if ($name !== '') {
+            $stmt = $db->prepare("UPDATE members SET name=?, phone=?, email=? WHERE id=? AND user_id=?");
+            $stmt->execute([$name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? ''), $id, $userId]);
+        }
+    }
+
     elseif ($action === 'remove_member') {
-        $stmt = $db->prepare("DELETE FROM members WHERE id=?");
-        $stmt->execute([(int)$_POST['id']]);
+        $stmt = $db->prepare("DELETE FROM members WHERE id=? AND user_id=?");
+        $stmt->execute([(int)$_POST['id'], $userId]);
     }
 
     elseif ($action === 'add_vehicle') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, year, lot, sold_price, sold) VALUES (?,?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, sold) VALUES (?,?,?,?,?,?,?)");
             $stmt->execute([
                 $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
-                trim($_POST['year']     ?? ''),
                 trim($_POST['lot']      ?? ''),
                 (float)($_POST['soldPrice'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
+            ]);
+        }
+    }
+
+    elseif ($action === 'update_vehicle') {
+        $id   = (int)$_POST['id'];
+        $make = trim($_POST['make'] ?? '');
+        if ($make !== '') {
+            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, sold=? WHERE id=?");
+            $stmt->execute([
+                (int)($_POST['memberId'] ?? 0),
+                $make,
+                trim($_POST['model'] ?? ''),
+                trim($_POST['lot']  ?? ''),
+                (float)($_POST['soldPrice'] ?? 0),
+                isset($_POST['sold']) ? 1 : 0,
+                $id,
             ]);
         }
     }
@@ -310,7 +335,27 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
     $soldCount = count(array_filter($mv, fn($v) => $v['sold']));
     $s         = calcStatement((int)$m['id'], $vehicles, $fees);
+    $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
+  <?php if ($editing): ?>
+  <div class="card card-pad mi">
+    <div class="av"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
+    <div style="flex:1">
+      <?= postForm('update_member', 'members', $tok) ?>
+        <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
+        <div class="add-row ar-members" style="margin-bottom:0">
+          <div><label class="lbl">Full Name *</label><input class="inp" name="name" value="<?= h($m['name']) ?>" required></div>
+          <div><label class="lbl">Phone</label><input class="inp" name="phone" value="<?= h($m['phone']) ?>"></div>
+          <div><label class="lbl">Email</label><input class="inp" type="email" name="email" value="<?= h($m['email']) ?>"></div>
+          <div style="display:flex;align-items:flex-end;gap:6px">
+            <button class="btn btn-gold btn-sm" type="submit">Save</button>
+            <a class="btn btn-dark btn-sm" href="?tab=members">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <?php else: ?>
   <div class="card mi">
     <div class="av"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
     <div style="flex:1;min-width:0">
@@ -325,11 +370,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div class="mp-num"><?= fmt($s['netPayout']) ?></div>
       <div class="ms-sm">net payout</div>
     </div>
-    <?= postForm('remove_member', 'members', $tok) ?>
-      <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
-      <button class="btn btn-ghost btn-sm" type="submit" onclick="return confirm('Remove <?= h($m['name']) ?> and all their vehicles?')">Remove</button>
-    </form>
+    <div style="display:flex;gap:6px;align-items:center">
+      <a class="btn btn-dark btn-sm" href="?tab=members&edit_member=<?= (int)$m['id'] ?>">Edit</a>
+      <?= postForm('remove_member', 'members', $tok) ?>
+        <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
+        <button class="btn btn-ghost btn-sm" type="submit" onclick="return confirm('Remove <?= h($m['name']) ?> and all their vehicles?')">Remove</button>
+      </form>
+    </div>
   </div>
+  <?php endif; ?>
   <?php endforeach; ?>
 <?php endif; ?>
 </div>
@@ -351,7 +400,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       </div>
       <div><label class="lbl">Make *</label><input class="inp" name="make" placeholder="Toyota" required></div>
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
-      <div><label class="lbl">Year</label><input class="inp" name="year" placeholder="2020" maxlength="4"></div>
       <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
       <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
@@ -365,19 +413,49 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 <div class="card" style="overflow:hidden">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th>Year</th><th class="r">Sold Price</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
-      <tr><td colspan="7" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
+      <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
+        $editingV = isset($_GET['edit_vehicle']) && (int)$_GET['edit_vehicle'] === (int)$v['id'];
       ?>
+      <?php if ($editingV): ?>
+      <tr>
+        <td colspan="6" style="padding:12px 16px;background:var(--infield)">
+          <?= postForm('update_vehicle', 'vehicles', $tok) ?>
+            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
+            <div class="add-row ar-vehicles" style="margin-bottom:0">
+              <div>
+                <label class="lbl">Member *</label>
+                <select class="inp" name="memberId" required>
+                  <?php foreach ($members as $m): ?>
+                    <option value="<?= (int)$m['id'] ?>" <?= (int)$m['id'] === (int)$v['member_id'] ? 'selected' : '' ?>><?= h($m['name']) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
+              <div><label class="lbl">Make *</label><input class="inp" name="make" value="<?= h($v['make']) ?>" required></div>
+              <div><label class="lbl">Model</label><input class="inp" name="model" value="<?= h($v['model']) ?>"></div>
+              <div><label class="lbl">Lot #</label><input class="inp" name="lot" value="<?= h($v['lot']) ?>"></div>
+              <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0"></div>
+              <div style="display:flex;align-items:flex-end;gap:8px">
+                <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
+                  <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)"> Sold
+                </label>
+                <button class="btn btn-gold btn-sm" type="submit">Save</button>
+                <a class="btn btn-dark btn-sm" href="?tab=vehicles">Cancel</a>
+              </div>
+            </div>
+          </form>
+        </td>
+      </tr>
+      <?php else: ?>
       <tr>
         <td><span class="lot"><?= h($v['lot'] ?: '—') ?></span></td>
         <td><?= h($owner['name'] ?? '?') ?></td>
         <td style="color:var(--text2)"><?= h($v['make'] . ' ' . $v['model']) ?></td>
-        <td style="color:var(--muted)"><?= h($v['year'] ?: '—') ?></td>
         <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--green)' : 'var(--muted)' ?>">
           <?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?>
         </td>
@@ -388,12 +466,16 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
           </form>
         </td>
         <td>
-          <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
-            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
-            <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
-          </form>
+          <div style="display:flex;gap:4px;align-items:center">
+            <a class="btn btn-dark btn-sm" href="?tab=vehicles&edit_vehicle=<?= (int)$v['id'] ?>" style="font-size:11px;padding:4px 10px">Edit</a>
+            <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
+              <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
+              <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
+            </form>
+          </div>
         </td>
       </tr>
+      <?php endif; ?>
       <?php endforeach; ?>
     <?php endif; ?>
     </tbody>
@@ -476,7 +558,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
         <?php foreach ($s['mv'] as $v): ?>
         <div class="vr">
-          <span class="vr-car"><span class="vr-lot"><?= h($v['lot'] ?: '—') ?></span><?= h($v['make'] . ' ' . $v['model']) ?> <span class="vr-yr"><?= h($v['year']) ?></span></span>
+          <span class="vr-car"><span class="vr-lot"><?= h($v['lot'] ?: '—') ?></span><?= h($v['make'] . ' ' . $v['model']) ?></span>
           <span class="vr-p"><?= fmt((float)$v['sold_price']) ?></span>
         </div>
         <?php endforeach; ?>
