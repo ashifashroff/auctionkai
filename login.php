@@ -12,7 +12,12 @@ $error = '';
 $success = '';
 $showRegister = isset($_GET['register']);
 
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
+$tok = $_SESSION['tok'];
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login') {
+    if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
+    else {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
@@ -35,9 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             $error = 'Invalid username or password.';
         }
     }
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'register') {
+    if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
+    else {
     $username = trim($_POST['username'] ?? '');
     $name     = trim($_POST['name'] ?? '');
     $email    = trim($_POST['email'] ?? '');
@@ -63,9 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
             $showRegister = false;
         }
     }
+    }
 }
-
-function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 ?>
@@ -105,6 +112,7 @@ function h(string $s): string {
       <!-- Register -->
       <form method="POST" action="login.php?register=1">
         <input type="hidden" name="form" value="register">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
@@ -142,6 +150,7 @@ function h(string $s): string {
       <!-- Login -->
       <form method="POST" action="login.php">
         <input type="hidden" name="form" value="login">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
         <div class="mb-4">
           <label class="lbl">Username</label>
