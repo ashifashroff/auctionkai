@@ -70,12 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$userId, $name, $date, $location]);
             $newId = (int)$db->lastInsertId();
             // Create default fee items for new auction
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
-               ->execute([$newId, 'Entry Fee', 'flat', 'listing', 3000, 'per_vehicle', 1]);
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
-               ->execute([$newId, 'Commission', 'percent', 'sold', 3.00, 'per_vehicle', 2]);
-            $db->prepare("INSERT INTO fee_items (auction_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
-               ->execute([$newId, 'Transport Fee', 'flat', 'sold', 5000, 'per_vehicle', 3]);
+            $db->prepare("INSERT INTO fee_items (user_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
+               ->execute([$userId, 'Entry Fee', 'flat', 'listing', 3000, 'per_vehicle', 1]);
+            $db->prepare("INSERT INTO fee_items (user_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
+               ->execute([$userId, 'Commission', 'percent', 'sold', 3.00, 'per_vehicle', 2]);
+            $db->prepare("INSERT INTO fee_items (user_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)")
+               ->execute([$userId, 'Transport Fee', 'flat', 'sold', 5000, 'per_vehicle', 3]);
             $_SESSION['auction_id'] = $newId;
         }
     }
@@ -179,9 +179,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fscope  = trim($_POST['feeScope'] ?? 'per_vehicle');
         $fcat    = trim($_POST['feeCategory'] ?? 'sold');
         if ($fname !== '' && $famount > 0) {
-            $maxSort = (int)$db->query("SELECT COALESCE(MAX(sort_order),0) FROM fee_items WHERE auction_id=$activeAuctionId")->fetchColumn();
-            $stmt = $db->prepare("INSERT INTO fee_items (auction_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)");
-            $stmt->execute([$activeAuctionId, $fname, $ftype, $fcat, $famount, $fscope, $maxSort + 1]);
+            $maxSort = (int)$db->query("SELECT COALESCE(MAX(sort_order),0) FROM fee_items WHERE user_id=$userId")->fetchColumn();
+            $stmt = $db->prepare("INSERT INTO fee_items (user_id, name, type, category, amount, scope, sort_order) VALUES (?,?,?,?,?,?,?)");
+            $stmt->execute([$userId, $fname, $ftype, $fcat, $famount, $fscope, $maxSort + 1]);
         }
     }
 
@@ -193,15 +193,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fscope  = trim($_POST['feeScope'] ?? 'per_vehicle');
         $fcat    = trim($_POST['feeCategory'] ?? 'sold');
         if ($fname !== '' && $famount > 0) {
-            $stmt = $db->prepare("UPDATE fee_items SET name=?, type=?, category=?, amount=?, scope=? WHERE id=? AND auction_id=?");
-            $stmt->execute([$fname, $ftype, $fcat, $famount, $fscope, $fid, $activeAuctionId]);
+            $stmt = $db->prepare("UPDATE fee_items SET name=?, type=?, category=?, amount=?, scope=? WHERE id=? AND user_id=?");
+            $stmt->execute([$fname, $ftype, $fcat, $famount, $fscope, $fid, $userId]);
         }
     }
 
     elseif ($action === 'remove_fee_item') {
         $fid = (int)$_POST['feeId'];
-        $stmt = $db->prepare("DELETE FROM fee_items WHERE id=? AND auction_id=?");
-        $stmt->execute([$fid, $activeAuctionId]);
+        $stmt = $db->prepare("DELETE FROM fee_items WHERE id=? AND user_id=?");
+        $stmt->execute([$fid, $userId]);
     }
 
     elseif ($action === 'save_fees') {
@@ -214,8 +214,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // ─── FETCH DATA (filtered by active auction) ─────────────────────────────────
-$feeItems = $activeAuctionId
-    ? $db->query("SELECT * FROM fee_items WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY sort_order, id")->fetchAll()
+$feeItems = $userId
+    ? $db->query("SELECT * FROM fee_items WHERE user_id=$userId ORDER BY sort_order, id")->fetchAll()
     : [];
 $members  = $userId
     ? $db->query("SELECT * FROM members WHERE user_id=$userId ORDER BY id")->fetchAll()

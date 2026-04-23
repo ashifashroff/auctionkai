@@ -66,7 +66,7 @@ if (!$activeAuctionId) {
 }
 
 $auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch() : null;
-$feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items WHERE auction_id=" . (int)$activeAuctionId . " ORDER BY sort_order, id")->fetchAll() : [];
+$feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items WHERE user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY sort_order, id")->fetchAll() : [];
 $members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
 $vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
 

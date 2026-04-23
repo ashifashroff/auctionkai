@@ -63,14 +63,14 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
 -- ── Fee Items (per auction) ─────────────────────────────────────
 CREATE TABLE IF NOT EXISTS `fee_items` (
   `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `auction_id`  INT UNSIGNED NOT NULL,
+  `user_id`     INT UNSIGNED NOT NULL,
   `name`        VARCHAR(200) NOT NULL,
   `type`        VARCHAR(20) NOT NULL DEFAULT 'flat' COMMENT 'flat=fixed amount, percent=% of sold price',
   `category`    VARCHAR(20) NOT NULL DEFAULT 'sold' COMMENT 'listing=per listed vehicle, sold=per sold vehicle, custom=additional per vehicle',
   `amount`      DECIMAL(12,2) NOT NULL DEFAULT 0,
   `scope`       VARCHAR(20) NOT NULL DEFAULT 'per_vehicle' COMMENT 'per_vehicle=multiplied by vehicle count, per_member=flat per member',
   `sort_order`  INT UNSIGNED NOT NULL DEFAULT 0,
-  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Vehicle Additional Fees (custom per vehicle) ────────────────
@@ -83,14 +83,6 @@ CREATE TABLE IF NOT EXISTS `vehicle_fees` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Custom Deductions (per auction) ─────────────────────────────
-CREATE TABLE IF NOT EXISTS `custom_deductions` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `auction_id` INT UNSIGNED NOT NULL,
-  `name`       VARCHAR(200)  NOT NULL,
-  `amount`     DECIMAL(10,0) NOT NULL DEFAULT 0,
-  FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- ─────────────────────────────────────────────────────────────────
 -- Seed Data
 -- ─────────────────────────────────────────────────────────────────
@@ -115,23 +107,11 @@ INSERT INTO `auction` (`user_id`, `name`, `date`, `location`) VALUES
   (1, 'Sapporo Auto Auction',      CURDATE(), 'Sapporo, Hokkaido');
 
 -- Fee items for Nagoya auction (id=1)
-INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
+INSERT INTO `fee_items` (`user_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
   (1, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
   (1, 'Commission',         'percent', 'sold',    3.00, 'per_vehicle', 2),
   (1, 'Transport Fee',      'flat',    'sold',    5000, 'per_vehicle', 3),
   (1, 'Document Fee',       'flat',    'sold',    1500, 'per_vehicle', 4);
-
--- Fee items for Tokyo auction (id=2)
-INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
-  (2, 'Entry Fee',          'flat',    'listing', 3500, 'per_vehicle', 1),
-  (2, 'Commission',         'percent', 'sold',    3.50, 'per_vehicle', 2),
-  (2, 'Transport Fee',      'flat',    'sold',    6000, 'per_vehicle', 3);
-
--- Fee items for Osaka auction (id=3)
-INSERT INTO `fee_items` (`auction_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
-  (3, 'Entry Fee',          'flat',    'listing', 2500, 'per_vehicle', 1),
-  (3, 'Commission',         'percent', 'sold',    2.50, 'per_vehicle', 2),
-  (3, 'Transport Fee',      'flat',    'sold',    4500, 'per_vehicle', 3);
 
 -- Sample members (global, user_id=1)
 INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
