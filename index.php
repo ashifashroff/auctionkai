@@ -390,30 +390,31 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <h2>Vehicle Listings — <?= h($auction['name']) ?></h2>
 <div class="card card-pad" style="margin-bottom:20px">
   <div class="sec-lbl">Add Vehicle</div>
-  <?= postForm('add_vehicle', 'vehicles', $tok) ?>
-    <div class="add-row ar-vehicles">
+  <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)">
+    <div class="add-row ar-vehicles" id="addVehicleFields">
       <div>
         <label class="lbl">Member *</label>
         <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showMemberResults()" oninput="filterMembers()">
         <input type="hidden" id="memberId" name="memberId" required>
         <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
-      <div><label class="lbl">Make *</label><input class="inp" name="make" placeholder="Toyota" required></div>
-      <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
-      <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
-      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
-      <div class="nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" placeholder="0" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" required></div>
+      <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
+      <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001"></div>
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
+      <div class="nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" min="0" style="-moz-appearance:textfield"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-          <input type="checkbox" name="sold" checked style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
+          <input type="checkbox" id="add_sold" name="sold" checked style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
         </label>
-        <button class="btn btn-gold" type="submit">Add</button>
+        <button class="btn btn-gold" type="submit" id="addVehicleBtn">Add</button>
       </div>
     </div>
+    <div id="addVehicleMsg" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
   </form>
 </div>
 <div class="card" style="overflow-x:auto">
@@ -552,7 +553,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <?php endif; ?>
 
 <?php endif; ?>
-<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;</script>
+<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
 <script src="js/app.js"></script>
 
 <!-- Edit Vehicle Modal (root level) -->

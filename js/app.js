@@ -182,6 +182,76 @@ function submitEditForm(e) {
   return false;
 }
 
+// ─── ADD VEHICLE (AJAX) ────────────────────────────
+function submitAddVehicle(e) {
+  e.preventDefault();
+  const fields = document.getElementById('addVehicleFields');
+  const btn = document.getElementById('addVehicleBtn');
+  const msg = document.getElementById('addVehicleMsg');
+  msg.style.display = 'none';
+
+  const payload = {
+    memberId:   parseInt(document.getElementById('memberId').value),
+    make:       document.getElementById('add_make').value.trim(),
+    model:      document.getElementById('add_model').value.trim(),
+    lot:        document.getElementById('add_lot').value.trim(),
+    soldPrice:  parseFloat(document.getElementById('add_soldPrice').value) || 0,
+    recycleFee: parseFloat(document.getElementById('add_recycleFee').value) || 0,
+    listingFee: parseFloat(document.getElementById('add_listingFee').value) || 0,
+    soldFee:    parseFloat(document.getElementById('add_soldFee').value) || 0,
+    nagareFee:  parseFloat(document.getElementById('add_nagareFee').value) || 0,
+    otherFee:   parseFloat(document.getElementById('add_otherFee').value) || 0,
+    sold:       document.getElementById('add_sold').checked,
+    auctionId:  activeAuctionId
+  };
+
+  if (!payload.memberId) { showAddMsg('Please select a member.', 'error'); return false; }
+  if (!payload.make) { showAddMsg('Make is required.', 'error'); return false; }
+  if (!payload.auctionId) { showAddMsg('No active auction selected.', 'error'); return false; }
+
+  // Fade + disable + preloader
+  fields.style.opacity = '0.4';
+  fields.style.pointerEvents = 'none';
+  btn.disabled = true;
+  btn.innerHTML = '<span class="add-preloader"></span> Adding…';
+
+  fetch('add_vehicle.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      showAddMsg(data.error, 'error');
+      return;
+    }
+    showAddMsg('Vehicle added successfully!', 'success');
+    document.getElementById('addVehicleForm').reset();
+    document.getElementById('memberId').value = '';
+    document.getElementById('memberSearch').value = '';
+    toggleSoldFields(true);
+    setTimeout(() => location.reload(), 600);
+  })
+  .catch(() => showAddMsg('Network error. Please try again.', 'error'))
+  .finally(() => {
+    fields.style.opacity = '1';
+    fields.style.pointerEvents = 'auto';
+    btn.disabled = false;
+    btn.textContent = 'Add';
+  });
+
+  return false;
+}
+
+function showAddMsg(text, type) {
+  const msg = document.getElementById('addVehicleMsg');
+  msg.textContent = text;
+  msg.style.display = 'block';
+  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
+  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
+}
+
 // ─── DELETE VEHICLE (AJAX) ─────────────────────────
 function deleteVehicle(vehicleId, btn) {
   if (!confirm('Remove this vehicle?')) return;

@@ -175,3 +175,7 @@ input[type=number]{-moz-appearance:textfield}
 .modal-close:hover{color:var(--text);background:var(--infield)}
 .modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:600px){.modal-grid{grid-template-columns:1fr}.modal-box{padding:20px}}
+
+/* ── PRELOADER SPINNER ─────────────────────────────── */
+.add-preloader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
