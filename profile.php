@@ -12,7 +12,6 @@ $userId = (int)$_SESSION['user_id'];
 $error = '';
 $success = '';
 
-// Fetch current user data
 $user = $db->prepare("SELECT * FROM users WHERE id = ?");
 $user->execute([$userId]);
 $user = $user->fetch();
@@ -23,14 +22,12 @@ if (!$user) {
     exit;
 }
 
-// Handle profile update
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['form'] ?? '';
 
     if ($action === 'update_profile') {
         $name  = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
-        $phone = trim($_POST['phone'] ?? '');
 
         if ($name === '') {
             $error = 'Name cannot be empty.';
@@ -39,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$name, $email, $userId]);
             $_SESSION['user_name'] = $name;
             $success = 'Profile updated successfully.';
-            // Refresh user data
             $user = $db->prepare("SELECT * FROM users WHERE id = ?");
             $user->execute([$userId]);
             $user = $user->fetch();
@@ -84,77 +80,85 @@ function h(string $s): string {
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
-<div class="login-wrap" style="align-items:flex-start;padding-top:60px">
-  <div class="login-card" style="max-width:500px">
-    <div class="login-logo">⚡ AuctionKai</div>
-    <div class="login-sub">Account Settings</div>
+<div class="min-h-screen flex items-start justify-center pt-16 px-4">
+  <div class="w-full max-w-lg">
 
+    <!-- Header -->
+    <div class="text-center mb-8 animate-fade-in">
+      <div class="w-16 h-16 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-2xl mx-auto mb-4"><?= mb_strtoupper(mb_substr($user['name'], 0, 1)) ?></div>
+      <h1 class="text-2xl font-bold text-ak-gold">⚡ AuctionKai</h1>
+      <p class="text-ak-muted text-sm mt-1">Account Settings</p>
+    </div>
+
+    <!-- Messages -->
     <?php if ($error): ?>
-      <div class="login-error"><?= h($error) ?></div>
+      <div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in"><?= h($error) ?></div>
     <?php endif; ?>
     <?php if ($success): ?>
-      <div class="login-success"><?= h($success) ?></div>
+      <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in"><?= h($success) ?></div>
     <?php endif; ?>
 
-    <!-- Profile Info -->
-    <div style="margin-bottom:28px">
-      <div class="sec-lbl" style="margin-bottom:16px">Profile Information</div>
+    <!-- Profile Info Card -->
+    <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
+      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Profile Information</div>
       <form method="POST" action="profile.php">
         <input type="hidden" name="form" value="update_profile">
 
-        <div class="login-field">
+        <div class="mb-4">
           <label class="lbl">Username</label>
-          <input class="inp" value="<?= h($user['username']) ?>" disabled style="opacity:0.5;cursor:not-allowed">
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">Username cannot be changed</div>
+          <input class="inp opacity-50 cursor-not-allowed" value="<?= h($user['username']) ?>" disabled>
+          <div class="text-[10px] text-ak-muted mt-1">Username cannot be changed</div>
         </div>
 
-        <div class="login-field">
+        <div class="mb-4">
           <label class="lbl">Full Name *</label>
           <input class="inp" name="name" value="<?= h($user['name']) ?>" required>
         </div>
 
-        <div class="login-field">
+        <div class="mb-4">
           <label class="lbl">Email</label>
           <input class="inp" type="email" name="email" value="<?= h($user['email']) ?>" placeholder="email@example.com">
         </div>
 
-        <div class="login-field">
+        <div class="mb-5">
           <label class="lbl">Role</label>
-          <input class="inp" value="<?= h($user['role']) ?>" disabled style="opacity:0.5;cursor:not-allowed;text-transform:capitalize">
+          <input class="inp opacity-50 cursor-not-allowed capitalize" value="<?= h($user['role']) ?>" disabled>
         </div>
 
-        <button class="btn btn-gold login-btn" type="submit">Save Changes</button>
+        <button class="btn btn-gold w-full" type="submit">Save Changes</button>
       </form>
     </div>
 
-    <!-- Password Change -->
-    <div>
-      <div class="sec-lbl" style="margin-bottom:16px">Change Password</div>
+    <!-- Password Card -->
+    <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
+      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Change Password</div>
       <form method="POST" action="profile.php">
         <input type="hidden" name="form" value="change_password">
 
-        <div class="login-field">
+        <div class="mb-4">
           <label class="lbl">Current Password *</label>
           <input class="inp" type="password" name="current_password" placeholder="Enter current password" required>
         </div>
 
-        <div class="login-field">
-          <label class="lbl">New Password * <span style="font-weight:400;color:var(--muted)">(min 6 chars)</span></label>
+        <div class="mb-4">
+          <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
           <input class="inp" type="password" name="new_password" placeholder="Enter new password" required>
         </div>
 
-        <div class="login-field">
+        <div class="mb-5">
           <label class="lbl">Confirm New Password *</label>
           <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" required>
         </div>
 
-        <button class="btn btn-gold login-btn" type="submit">Change Password</button>
+        <button class="btn btn-gold w-full" type="submit">Change Password</button>
       </form>
     </div>
 
-    <div class="login-switch" style="margin-top:24px">
-      <a href="index.php">← Back to Dashboard</a>
+    <!-- Back Link -->
+    <div class="text-center mt-5 animate-fade-in">
+      <a href="index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
     </div>
+
   </div>
 </div>
 
