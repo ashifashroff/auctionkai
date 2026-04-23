@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['user_username'] = $user['username'];
+            session_regenerate_id(true);
             header('Location: index.php');
             exit;
         } else {
