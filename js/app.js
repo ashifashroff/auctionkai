@@ -7,8 +7,7 @@ function toggleSoldFields(isSold) {
     if (!isSold) el.value = '';
   });
   document.querySelectorAll('.nagare-field').forEach(el => {
-    if (isSold) { const inp = el.querySelector('input'); inp.value = ''; inp.disabled = true; }
-    else { el.querySelector('input').disabled = false; }
+    el.querySelector('input').disabled = isSold;
   });
 }
 
@@ -19,9 +18,7 @@ function toggleModalSoldFields(isSold) {
     if (!isSold) el.value = '';
   });
   document.querySelectorAll('.modal-nagare-field').forEach(el => {
-    const inp = el.querySelector('input');
-    if (isSold) { inp.value = ''; inp.disabled = true; }
-    else { inp.disabled = false; }
+    el.querySelector('input').disabled = isSold;
   });
 }
 
