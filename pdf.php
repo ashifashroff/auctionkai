@@ -25,12 +25,15 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems, array $a
 
     $totalReceived = $grossSales + $taxTotal + $recycleTotal + $vehicleCustomTotal;
 
+    // Filter fees for this member only
+    $memberFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === $memberId);
+
     $listingFees = [];
     $soldFees = [];
     $totalListingDed = 0;
     $totalSoldDed = 0;
 
-    foreach ($feeItems as $f) {
+    foreach ($memberFees as $f) {
         $cat = $f['category'] ?? 'sold';
         $scope = $f['scope'] ?? 'per_vehicle';
         $amt = 0;
