@@ -106,6 +106,15 @@ INSERT INTO `auction` (`user_id`, `name`, `date`, `expires_at`) VALUES
   (1, 'Fukuoka Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY)),
   (1, 'Sapporo Auto Auction',      CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY));
 
+
+-- Sample members (global, user_id=1)
+INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
+  (1, 'Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
+  (1, 'Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
+  (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com'),
+  (1, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
+  (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
+
 -- Fee items per member (global members 1-5)
 INSERT INTO `fee_items` (`member_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
   (1, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
@@ -121,15 +130,6 @@ INSERT INTO `fee_items` (`member_id`, `name`, `type`, `category`, `amount`, `sco
   (4, 'Commission',         'percent', 'sold',    3.50, 'per_vehicle', 2),
   (5, 'Entry Fee',          'flat',    'listing', 3500, 'per_vehicle', 1),
   (5, 'Commission',         'percent', 'sold',    3.50, 'per_vehicle', 2);
-
--- Sample members (global, user_id=1)
-INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
-  (1, 'Ahmad Hassan',        '090-1234-5678', 'ahmad@example.com'),
-  (1, 'Mohammed Al-Rashid',  '080-9876-5432', 'm.rashid@example.com'),
-  (1, 'Chen Wei',            '070-5555-0001', 'cwei@example.com'),
-  (1, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
-  (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
-
 -- Sample vehicles (Nagoya & Tokyo auctions, members are global)
 INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold_price`, `recycle_fee`, `sold`) VALUES
   (1, 1, 'Toyota',     'Prius',     'A-001',  850000, 15000, 1),
