@@ -516,10 +516,13 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <a class="btn btn-dark" href="pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
 </div>
 <?php if (empty($members)): ?>
-  <div class="card nm">No members registered for this auction.</div>
+  <div class="card nm">No sales history available for this auction.</div>
 <?php else: ?>
+  <?php $hasSales = false; ?>
   <?php foreach ($members as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    if ($s['count'] === 0) continue;
+    $hasSales = true;
     $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
     $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>
