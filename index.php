@@ -32,7 +32,9 @@ function postForm(string $action, string $tabTarget, string $tok): string {
 $db = db();
 
 // ─── ACTIVE AUCTION (selected via navbar or session) ─────────────────────────
-$allAuctions = $db->query("SELECT * FROM auction WHERE user_id=$userId ORDER BY date DESC, id DESC")->fetchAll();
+$allAuctions_q = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC");
+$allAuctions_q->execute([$userId]);
+$allAuctions = $allAuctions_q->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['auction_id'])) {
     $_SESSION['auction_id'] = (int)$_GET['auction_id'];
@@ -55,7 +57,9 @@ if (!$auction && !empty($allAuctions)) {
 
 // ─── AUTO-EXPIRE: Delete sold vehicles and expired auctions ────────────────────
 $today = date('Y-m-d');
-$expiredAuctions = $db->query("SELECT id FROM auction WHERE user_id=$userId AND expires_at < '$today'")->fetchAll();
+$expiredQ = $db->prepare("SELECT id FROM auction WHERE user_id=? AND expires_at < ?");
+$expiredQ->execute([$userId, $today]);
+$expiredAuctions = $expiredQ->fetchAll();
 foreach ($expiredAuctions as $ea) {
     // Delete sold vehicles for this auction (keep unsold)
     $db->prepare("DELETE FROM vehicles WHERE auction_id=? AND sold=1")->execute([(int)$ea['id']]);
@@ -65,9 +69,10 @@ foreach ($expiredAuctions as $ea) {
     $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([(int)$ea['id'], $userId]);
 }
 // Refresh if current auction was deleted
-if ($activeAuctionId && !$db->query("SELECT id FROM auction WHERE id=$activeAuctionId AND user_id=$userId")->fetch()) {
+if ($activeAuctionId) { $chkAuc = $db->prepare("SELECT id FROM auction WHERE id=? AND user_id=?"); $chkAuc->execute([$activeAuctionId, $userId]); if (!$chkAuc->fetch()) $activeAuctionId = 0; }
     unset($_SESSION['auction_id']);
-    $allAuctions = $db->query("SELECT * FROM auction WHERE user_id=$userId ORDER BY date DESC, id DESC")->fetchAll();
+    $allAuctions = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC")->fetchAll();
+    $allAuctions->execute([$userId]); $allAuctions = $allAuctions->fetchAll();
     $auction = !empty($allAuctions) ? $allAuctions[0] : null;
     $activeAuctionId = $auction ? (int)$auction['id'] : 0;
     $_SESSION['auction_id'] = $activeAuctionId;
@@ -186,10 +191,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ─── FETCH DATA (filtered by active auction) ─────────────────────────────────
 $members  = $userId
-    ? $db->query("SELECT * FROM members WHERE user_id=$userId ORDER BY id")->fetchAll()
+    ? (function() use ($db, $userId) { $q = $db->prepare("SELECT * FROM members WHERE user_id=? ORDER BY id"); $q->execute([$userId]); return $q->fetchAll(); })()
     : [];
 $vehicles = $activeAuctionId
-    ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " AND m.user_id=$userId ORDER BY v.id")->fetchAll()
+    ? (function() use ($db, $activeAuctionId, $userId) { $q = $db->prepare("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=? AND m.user_id=? ORDER BY v.id"); $q->execute([$activeAuctionId, $userId]); return $q->fetchAll(); })()
     : [];
 
 
