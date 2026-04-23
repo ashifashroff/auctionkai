@@ -33,7 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             header('Location: index.php');
             exit;
         } else {
-            $error = 'Invalid username or password.';
+            // Debug: remove after fixing
+            if (!$user) {
+                $error = 'User not found.';
+            } else {
+                $error = 'Password mismatch. Hash starts with: ' . substr($user['password'], 0, 10);
+            }
         }
     }
 }
