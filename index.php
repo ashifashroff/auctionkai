@@ -398,15 +398,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Make *</label><input class="inp" name="make" placeholder="Toyota" required></div>
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
-      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono" type="number" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono" type="number" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
-      <div><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
+      <div class="nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
       <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" placeholder="0" min="0" style="-moz-appearance:textfield"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-          <input type="checkbox" name="sold" checked style="accent-color:var(--gold)"> Sold
+          <input type="checkbox" name="sold" checked style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
         </label>
         <button class="btn btn-gold" type="submit">Add</button>
       </div>
@@ -415,7 +415,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 <div class="card" style="overflow:hidden">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th style="width:90px">Actions</th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
       <tr><td colspan="14" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
@@ -439,15 +439,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
               <div><label class="lbl">Make *</label><input class="inp" name="make" value="<?= h($v['make']) ?>" required></div>
               <div><label class="lbl">Model</label><input class="inp" name="model" value="<?= h($v['model']) ?>"></div>
               <div><label class="lbl">Lot #</label><input class="inp" name="lot" value="<?= h($v['lot']) ?>"></div>
-              <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0"></div>
-              <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" value="<?= (float)($v['recycle_fee'] ?? 0) ?>" min="0"></div>
-              <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono" type="number" name="listingFee" value="<?= (float)($v['listing_fee'] ?? 0) ?>" min="0"></div>
-              <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono" type="number" name="soldFee" value="<?= (float)($v['sold_fee'] ?? 0) ?>" min="0"></div>
-              <div><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" value="<?= (float)($v['nagare_fee'] ?? 0) ?>" min="0"></div>
+              <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
+              <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" name="recycleFee" value="<?= (float)($v['recycle_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
+              <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" name="listingFee" value="<?= (float)($v['listing_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
+              <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" name="soldFee" value="<?= (float)($v['sold_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
+              <div class="nagare-field" <?= $v['sold'] ? 'style="display:none"' : '' ?>><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" value="<?= (float)($v['nagare_fee'] ?? 0) ?>" min="0" <?= $v['sold'] ? 'disabled' : '' ?>></div>
               <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" value="<?= (float)($v['other_fee'] ?? 0) ?>" min="0"></div>
               <div style="display:flex;align-items:flex-end;gap:8px">
                 <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-                  <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)"> Sold
+                  <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
                 </label>
                 <button class="btn btn-gold btn-sm" type="submit">Save</button>
                 <a class="btn btn-dark btn-sm" href="?tab=vehicles">Cancel</a>
@@ -477,7 +477,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
           <?= $v['sold'] && (float)($v['sold_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['sold_fee']) : '—' ?>
         </td>
         <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
-          <?= $v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
+          <?= !$v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
         </td>
         <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
           <?= $v['sold'] && (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
@@ -590,6 +590,17 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 
 <script>
+function toggleSoldFields(isSold) {
+  document.querySelectorAll('.sold-fields').forEach(el => {
+    el.disabled = !isSold;
+    if (!isSold) el.value = '';
+  });
+  document.querySelectorAll('.nagare-field').forEach(el => {
+    el.style.display = isSold ? 'none' : '';
+    if (isSold) el.querySelector('input').value = '';
+  });
+}
+
 const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;
 
 function filterMembers() {
