@@ -425,72 +425,38 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
-        $editingV = isset($_GET['edit_vehicle']) && (int)$_GET['edit_vehicle'] === (int)$v['id'];
       ?>
-      <?php if ($editingV): ?>
-      <tr>
-        <td colspan="9" style="padding:16px;background:var(--infield)">
-          <?= postForm('update_vehicle', 'vehicles', $tok) ?>
-            <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
-            <div class="add-row ar-vehicles" style="margin-bottom:0">
-              <div>
-                <label class="lbl">Member *</label>
-                <input class="inp edit-member-search" data-vid="<?= (int)$v['id'] ?>" placeholder="Type to search member…" autocomplete="off" value="<?= h($owner['name'] ?? '') ?>" oninput="filterEditMembers(this)">
-                <input type="hidden" name="memberId" value="<?= (int)$v['member_id'] ?>">
-                <div class="member-dropdown edit-member-dropdown" style="display:none"></div>
-              </div>
-              <div><label class="lbl">Make *</label><input class="inp" name="make" value="<?= h($v['make']) ?>" required></div>
-              <div><label class="lbl">Model</label><input class="inp" name="model" value="<?= h($v['model']) ?>"></div>
-              <div><label class="lbl">Lot #</label><input class="inp" name="lot" value="<?= h($v['lot']) ?>"></div>
-              <div><label class="lbl">Sold Price (¥)</label><input class="inp mono sold-fields" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
-              <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono sold-fields" type="number" name="recycleFee" value="<?= (float)($v['recycle_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
-              <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono sold-fields" type="number" name="listingFee" value="<?= (float)($v['listing_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
-              <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono sold-fields" type="number" name="soldFee" value="<?= (float)($v['sold_fee'] ?? 0) ?>" min="0" <?= !$v['sold'] ? 'disabled' : '' ?>></div>
-              <div class="nagare-field" <?= $v['sold'] ? 'style="display:none"' : '' ?>><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" value="<?= (float)($v['nagare_fee'] ?? 0) ?>" min="0" <?= $v['sold'] ? 'disabled' : '' ?>></div>
-              <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" value="<?= (float)($v['other_fee'] ?? 0) ?>" min="0"></div>
-              <div style="display:flex;align-items:flex-end;gap:8px">
-                <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
-                  <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)" onchange="toggleSoldFields(this.checked)"> Sold
-                </label>
-                <button class="btn btn-gold btn-sm" type="submit">Save</button>
-                <a class="btn btn-dark btn-sm" href="?tab=vehicles">Cancel</a>
-              </div>
-            </div>
-          </form>
-        </td>
-      </tr>
-      <?php else: ?>
-      <tr>
+      <tr data-vid="<?= (int)$v['id'] ?>">
         <td><span class="lot"><?= h($v['lot'] ?: '—') ?></span></td>
-        <td><?= h($owner['name'] ?? '?') ?></td>
-        <td style="color:var(--text2)"><?= h($v['make'] . ' ' . $v['model']) ?></td>
-        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--green)' : 'var(--muted)' ?>">
+        <td data-field="member"><?= h($owner['name'] ?? '?') ?></td>
+        <td style="color:var(--text2)" data-field="vehicle"><?= h($v['make'] . ' ' . $v['model']) ?></td>
+        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--green)' : 'var(--muted)' ?>" data-field="sold_price">
           <?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px">
+        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px" data-field="tax">
           <?= $v['sold'] ? fmt(round((float)$v['sold_price'] * 0.10)) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px">
+        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px" data-field="recycle">
           <?= $v['sold'] && (float)($v['recycle_fee'] ?? 0) > 0 ? fmt((float)$v['recycle_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="listing">
           <?= $v['sold'] && (float)($v['listing_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['listing_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="sold_fee">
           <?= $v['sold'] && (float)($v['sold_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['sold_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="nagare">
           <?= !$v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
-          <?= $v['sold'] && (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px" data-field="other">
+          <?= (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
         </td>
-        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--gold)' : 'var(--muted)' ?>;font-weight:700">
+        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--gold)' : 'var(--muted)' ?>;font-weight:700" data-field="total">
           <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0) - (float)($v['other_fee'] ?? 0); ?>
           <?= fmt($vTotal) ?>
           <?php else: ?>—<?php endif; ?>
         </td>
-        <td>
+        <td data-field="status">
           <?= postForm('toggle_sold', 'vehicles', $tok) ?>
             <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
             <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" type="submit"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
@@ -498,7 +464,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         </td>
         <td style="white-space:nowrap">
           <div style="display:flex;gap:4px;align-items:center">
-            <a class="btn btn-dark btn-sm" href="?tab=vehicles&edit_vehicle=<?= (int)$v['id'] ?>">Edit</a>
+            <button class="btn btn-dark btn-sm" onclick="openEditModal(<?= (int)$v['id'] ?>)">Edit</button>
             <?= postForm('remove_vehicle', 'vehicles', $tok) ?>
               <input type="hidden" name="id" value="<?= (int)$v['id'] ?>">
               <button class="btn-icon" type="submit" onclick="return confirm('Remove this vehicle?')">×</button>
@@ -506,7 +472,6 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
           </div>
         </td>
       </tr>
-      <?php endif; ?>
       <?php endforeach; ?>
     <?php endif; ?>
     </tbody>
@@ -590,6 +555,43 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <?php endif; ?>
 
 <?php endif; ?>
+<!-- Edit Vehicle Modal -->
+<div id="editModal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Edit Vehicle</h3>
+      <button class="modal-close" onclick="closeEditModal()">×</button>
+    </div>
+    <div id="modalMsg" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;font-size:13px"></div>
+    <form id="editForm" onsubmit="return submitEditForm(event)">
+      <input type="hidden" id="edit_id" name="id">
+      <div class="modal-grid">
+        <div>
+          <label class="lbl">Member *</label>
+          <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" required>
+          <input type="hidden" id="edit_memberId" name="memberId" required>
+          <div id="edit_memberDropdown" class="member-dropdown" style="display:none"></div>
+        </div>
+        <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" required></div>
+        <div><label class="lbl">Model</label><input class="inp" id="edit_model" name="model"></div>
+        <div><label class="lbl">Lot #</label><input class="inp" id="edit_lot" name="lot"></div>
+        <div><label class="lbl">Sold Price (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" min="0"></div>
+        <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_recycleFee" name="recycleFee" min="0"></div>
+        <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" min="0"></div>
+        <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" min="0"></div>
+        <div class="modal-nagare-field" style="display:none"><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" id="edit_nagareFee" name="nagareFee" min="0"></div>
+        <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" id="edit_otherFee" name="otherFee" min="0"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
+          <input type="checkbox" id="edit_sold" name="sold" style="accent-color:var(--gold)" onchange="toggleModalSoldFields(this.checked)"> Sold
+        </label>
+        <div style="flex:1"></div>
+        <button type="button" class="btn btn-dark btn-sm" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-gold btn-sm" id="editSubmitBtn">Save Changes</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -601,6 +603,19 @@ function toggleSoldFields(isSold) {
   document.querySelectorAll('.nagare-field').forEach(el => {
     el.style.display = isSold ? 'none' : '';
     if (isSold) el.querySelector('input').value = '';
+  });
+}
+
+function toggleModalSoldFields(isSold) {
+  document.querySelectorAll('.modal-sold-field').forEach(el => {
+    el.disabled = !isSold;
+    if (!isSold) el.value = '';
+  });
+  document.querySelectorAll('.modal-nagare-field').forEach(el => {
+    el.style.display = isSold ? 'none' : '';
+    const inp = el.querySelector('input');
+    if (isSold) inp.value = '';
+    inp.disabled = isSold;
   });
 }
 
@@ -629,28 +644,148 @@ function showMemberResults() {
   if (q) filterMembers();
 }
 
-function filterEditMembers(el) {
-  const q = el.value.toLowerCase();
-  const dd = el.nextElementSibling.nextElementSibling;
-  const hidden = el.nextElementSibling;
+// ─── MODAL MEMBER SEARCH ────────────────────────────────
+function filterModalMembers() {
+  const q = document.getElementById('edit_memberSearch').value.toLowerCase();
+  const dd = document.getElementById('edit_memberDropdown');
+  const hidden = document.getElementById('edit_memberId');
   hidden.value = '';
   if (!q) { dd.style.display = 'none'; return; }
   const filtered = membersData.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q));
   if (!filtered.length) { dd.style.display = 'none'; return; }
-  dd.innerHTML = filtered.map(m => `<div class="member-dropdown-item" data-id="${m.id}" onclick="selectEditMember(this,${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}<span class="mdi-phone">${m.phone}</span></div>`).join('');
+  dd.innerHTML = filtered.map(m => `<div class="member-dropdown-item" onclick="selectModalMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}<span class="mdi-phone">${m.phone}</span></div>`).join('');
   dd.style.display = 'block';
 }
 
-function selectEditMember(el, id, name) {
-  const row = el.closest('td');
-  row.querySelector('.edit-member-search').value = name;
-  row.querySelector('input[name=memberId]').value = id;
-  el.closest('.member-dropdown').style.display = 'none';
+function selectModalMember(id, name) {
+  document.getElementById('edit_memberSearch').value = name;
+  document.getElementById('edit_memberId').value = id;
+  document.getElementById('edit_memberDropdown').style.display = 'none';
 }
+
+// ─── EDIT MODAL ────────────────────────────────────────
+function openEditModal(vehicleId) {
+  const modal = document.getElementById('editModal');
+  const msg = document.getElementById('modalMsg');
+  msg.style.display = 'none';
+
+  // Reset form
+  document.getElementById('editForm').reset();
+  document.getElementById('edit_id').value = '';
+  document.getElementById('edit_memberId').value = '';
+  document.getElementById('edit_memberSearch').value = '';
+
+  // Show loading state
+  document.getElementById('editSubmitBtn').disabled = true;
+  document.getElementById('editSubmitBtn').textContent = 'Loading…';
+  modal.style.display = 'flex';
+  toggleModalSoldFields(true);
+
+  // Fetch vehicle data
+  fetch(`get_vehicle.php?id=${vehicleId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        showModalMsg(data.error, 'error');
+        return;
+      }
+      document.getElementById('edit_id').value = data.id;
+      document.getElementById('edit_memberId').value = data.member_id;
+      document.getElementById('edit_memberSearch').value = data.member_name;
+      document.getElementById('edit_make').value = data.make;
+      document.getElementById('edit_model').value = data.model;
+      document.getElementById('edit_lot').value = data.lot;
+      document.getElementById('edit_soldPrice').value = data.sold_price || '';
+      document.getElementById('edit_recycleFee').value = data.recycle_fee || '';
+      document.getElementById('edit_listingFee').value = data.listing_fee || '';
+      document.getElementById('edit_soldFee').value = data.sold_fee || '';
+      document.getElementById('edit_nagareFee').value = data.nagare_fee || '';
+      document.getElementById('edit_otherFee').value = data.other_fee || '';
+      document.getElementById('edit_sold').checked = data.sold;
+      toggleModalSoldFields(data.sold);
+    })
+    .catch(() => showModalMsg('Failed to load vehicle data.', 'error'))
+    .finally(() => {
+      document.getElementById('editSubmitBtn').disabled = false;
+      document.getElementById('editSubmitBtn').textContent = 'Save Changes';
+    });
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+}
+
+function showModalMsg(text, type) {
+  const msg = document.getElementById('modalMsg');
+  msg.textContent = text;
+  msg.style.display = 'block';
+  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
+  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
+}
+
+function submitEditForm(e) {
+  e.preventDefault();
+  const btn = document.getElementById('editSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const msg = document.getElementById('modalMsg');
+  msg.style.display = 'none';
+
+  const payload = {
+    id:        parseInt(document.getElementById('edit_id').value),
+    memberId:  parseInt(document.getElementById('edit_memberId').value),
+    make:      document.getElementById('edit_make').value.trim(),
+    model:     document.getElementById('edit_model').value.trim(),
+    lot:       document.getElementById('edit_lot').value.trim(),
+    soldPrice: parseFloat(document.getElementById('edit_soldPrice').value) || 0,
+    recycleFee:parseFloat(document.getElementById('edit_recycleFee').value) || 0,
+    listingFee:parseFloat(document.getElementById('edit_listingFee').value) || 0,
+    soldFee:   parseFloat(document.getElementById('edit_soldFee').value) || 0,
+    nagareFee: parseFloat(document.getElementById('edit_nagareFee').value) || 0,
+    otherFee:  parseFloat(document.getElementById('edit_otherFee').value) || 0,
+    sold:      document.getElementById('edit_sold').checked,
+  };
+
+  // Frontend validation
+  if (!payload.memberId) { showModalMsg('Please select a member.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
+  if (!payload.make) { showModalMsg('Make is required.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
+
+  fetch('update_vehicle.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      showModalMsg(data.error, 'error');
+      return;
+    }
+    showModalMsg('Vehicle updated successfully!', 'success');
+    setTimeout(() => { closeEditModal(); location.reload(); }, 800);
+  })
+  .catch(() => showModalMsg('Network error. Please try again.', 'error'))
+  .finally(() => {
+    btn.disabled = false;
+    btn.textContent = 'Save Changes';
+  });
+
+  return false;
+}
+
+// Close modal on overlay click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeEditModal();
+});
 
 document.addEventListener('click', function(e) {
   document.querySelectorAll('.member-dropdown').forEach(dd => {
-    if (!dd.contains(e.target) && e.target.id !== 'memberSearch' && !e.target.classList.contains('edit-member-search')) dd.style.display = 'none';
+    if (!dd.contains(e.target) && e.target.id !== 'memberSearch' && e.target.id !== 'edit_memberSearch') dd.style.display = 'none';
   });
 });
 
