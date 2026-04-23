@@ -243,7 +243,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?= postForm('save_auction', $tab, $tok) ?>
       <input class="inp" style="width:220px" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
       <input class="inp" type="date" style="width:140px" name="date" value="<?= h($auction['date']) ?>">
-      <div style="display:flex;align-items:center;gap:4px"><span style="color:var(--muted);font-size:11px">Commission</span><input class="inp mono" style="width:60px" type="number" step="0.1" name="commissionRate" value="<?= (float)($auction['commission_fee'] ?? 3000000) ?>"><span style="color:var(--muted);font-size:11px">%</span></div>
+      <div style="display:flex;align-items:center;gap:4px"><span style="color:var(--muted);font-size:11px">Commission</span><input class="inp mono" style="width:60px" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span style="color:var(--muted);font-size:11px">¥/member</span></div>
       <button class="btn btn-dark btn-sm" type="submit">Save</button>
     </form>
   </div>
@@ -278,7 +278,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   </div>
   <?php if ($auction): ?>
   <div class="auction-meta">
-    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3000000)) ?>/vehicle · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
+    <b><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/vehicle · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
   </div>
   <?php endif; ?>
 </div>
@@ -334,7 +334,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <?php foreach ($members as $m):
     $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
     $soldCount = count(array_filter($mv, fn($v) => $v['sold']));
-    $s         = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3000000));
+    $s         = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
     $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
   <?php if ($editing): ?>
@@ -519,7 +519,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <div class="card nm">No members registered for this auction.</div>
 <?php else: ?>
   <?php foreach ($members as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3000000));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
     $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
     $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>

@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `auction` (
   `user_id`         INT UNSIGNED NOT NULL,
   `name`            VARCHAR(200) NOT NULL,
   `date`            DATE         NOT NULL,
-  `commission_fee` DECIMAL(12,0) NOT NULL DEFAULT 3000 COMMENT 'Commission fee per member',
+  `commission_fee` DECIMAL(12,0) NOT NULL DEFAULT 3300 COMMENT 'Commission fee per member',
   `expires_at`      DATE         NOT NULL COMMENT 'Auto-delete sold vehicles + auction after this date',
   `created_at`      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   `updated_at`      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
