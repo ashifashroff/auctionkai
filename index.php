@@ -206,7 +206,7 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
     $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $mv));
     $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $mv));
 
-    $commissionTotal = $commissionFee * $count;
+    $commissionTotal = $commissionFee;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
     $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
     $totalDed = $totalVehicleDed + $commissionTotal;
