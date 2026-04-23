@@ -8,6 +8,17 @@ CREATE DATABASE IF NOT EXISTS `auctionkai`
 
 USE `auctionkai`;
 
+-- ── Users (login system — MUST be first due to foreign keys) ────
+CREATE TABLE IF NOT EXISTS `users` (
+  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `username`   VARCHAR(100) NOT NULL UNIQUE,
+  `password`   VARCHAR(255) NOT NULL,
+  `name`       VARCHAR(200) NOT NULL,
+  `email`      VARCHAR(200) DEFAULT '',
+  `role`       ENUM('admin','user') NOT NULL DEFAULT 'user',
+  `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ── Auctions (multiple auctions) ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `auction` (
   `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +49,6 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   `member_id`   INT UNSIGNED NOT NULL,
   `make`        VARCHAR(100) NOT NULL,
   `model`       VARCHAR(100) DEFAULT '',
-  `year`        CHAR(4)      DEFAULT '',
   `lot`         VARCHAR(50)  DEFAULT '',
   `sold_price`  DECIMAL(12,0) DEFAULT 0,
   `sold`        TINYINT(1)   DEFAULT 1,
@@ -68,16 +78,9 @@ CREATE TABLE IF NOT EXISTS `custom_deductions` (
   FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ── Users (login system) ─────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `users` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `username`   VARCHAR(100) NOT NULL UNIQUE,
-  `password`   VARCHAR(255) NOT NULL,
-  `name`       VARCHAR(200) NOT NULL,
-  `email`      VARCHAR(200) DEFAULT '',
-  `role`       ENUM('admin','user') NOT NULL DEFAULT 'user',
-  `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- ─────────────────────────────────────────────────────────────────
+-- Seed Data
+-- ─────────────────────────────────────────────────────────────────
 
 -- Default admin user (username: admin, password: password)
 INSERT INTO `users` (`username`, `password`, `name`, `email`, `role`) VALUES
@@ -118,14 +121,14 @@ INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
   (1, 'Tanaka Yuki',         '090-2222-3333', 'tanaka@example.com'),
   (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
 
--- Sample vehicles (Nagoya auction, members 1-5 are global)
-INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `year`, `lot`, `sold_price`, `sold`) VALUES
-  (1, 1, 'Toyota',     'Prius',     '2019', 'A-001',  850000, 1),
-  (1, 1, 'Honda',      'Fit',       '2018', 'A-002',  420000, 1),
-  (1, 2, 'Nissan',     'Note',      '2020', 'B-001',  680000, 1),
-  (1, 2, 'Mazda',      'CX-5',      '2021', 'B-002', 1250000, 1),
-  (1, 3, 'Subaru',     'Forester',  '2019', 'C-001',  920000, 1),
-  (1, 3, 'Mitsubishi', 'Outlander', '2018', 'C-002',       0, 0),
-  (2, 4, 'Honda',   'Civic',    '2020', 'T-001',  780000, 1),
-  (2, 4, 'Toyota',  'Corolla',  '2019', 'T-002',  550000, 1),
-  (2, 5, 'Lexus',   'IS 300',   '2021', 'T-003', 1800000, 1);
+-- Sample vehicles (Nagoya & Tokyo auctions, members are global)
+INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold_price`, `sold`) VALUES
+  (1, 1, 'Toyota',     'Prius',     'A-001',  850000, 1),
+  (1, 1, 'Honda',      'Fit',       'A-002',  420000, 1),
+  (1, 2, 'Nissan',     'Note',      'B-001',  680000, 1),
+  (1, 2, 'Mazda',      'CX-5',      'B-002', 1250000, 1),
+  (1, 3, 'Subaru',     'Forester',  'C-001',  920000, 1),
+  (1, 3, 'Mitsubishi', 'Outlander', 'C-002',       0, 0),
+  (2, 4, 'Honda',   'Civic',    'T-001',  780000, 1),
+  (2, 4, 'Toyota',  'Corolla',  'T-002',  550000, 1),
+  (2, 5, 'Lexus',   'IS 300',   'T-003', 1800000, 1);
