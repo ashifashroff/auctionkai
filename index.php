@@ -363,7 +363,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
     <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
     <div class="flex-1 min-w-0">
-      <div class="text-ak-text font-semibold"><?= h($m['name']) ?></div>
+      <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(<?= (int)$m['id'] ?>)"><?= h($m['name']) ?></div>
       <div class="text-ak-muted text-xs"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
     </div>
     <div class="text-center px-3">
@@ -589,6 +589,23 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <button type="submit" class="btn btn-gold btn-sm" id="editSubmitBtn">Save Changes</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Member Detail Modal -->
+<div id="memberDetailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[800px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="text-ak-gold text-lg font-bold" id="mdName">Member</h3>
+        <div class="text-ak-muted text-xs mt-1" id="mdContact"></div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a id="mdPdfLink" class="btn btn-gold btn-sm" href="#" target="_blank">↓ PDF</a>
+        <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeMemberDetail()">×</button>
+      </div>
+    </div>
+    <div id="mdContent"><div class="text-center text-ak-muted py-12">Loading…</div></div>
   </div>
 </div>
 

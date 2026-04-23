@@ -248,6 +248,65 @@ function showAddMsg(text, type) {
   msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
+// ─── MEMBER DETAIL MODAL ──────────────────────────
+function openMemberDetail(memberId) {
+  const modal = document.getElementById('memberDetailModal');
+  document.getElementById('mdContent').innerHTML = '<div class="text-center text-ak-muted py-12">Loading…</div>';
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  fetch(`get_member_detail.php?member_id=${memberId}&auction_id=${activeAuctionId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { document.getElementById('mdContent').innerHTML = `<div class="text-ak-red text-center py-8">${data.error}</div>`; return; }
+
+      document.getElementById('mdName').textContent = data.member.name;
+      document.getElementById('mdContact').textContent = `${data.member.email || '—'} · ${data.member.phone || '—'}`;
+      document.getElementById('mdPdfLink').href = `pdf.php?member=${data.member.id}&auction_id=${data.auction.id}`;
+
+      let html = '';
+
+      // Sold vehicles
+      if (data.soldCount > 0) {
+        html += `<div class="ssl">Sold Vehicles (${data.soldCount})</div>`;
+        html += `<table class="vt"><thead><tr><th>Lot</th><th>Vehicle</th><th class="r">Price</th><th class="r">Tax</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Other</th><th class="r">Net</th></tr></thead><tbody>`;
+        data.sold.forEach(v => {
+          html += `<tr><td><span class="lot">${v.lot || '—'}</span></td><td class="text-ak-text2">${v.make} ${v.model}</td><td class="text-right font-mono text-ak-green">¥${Math.round(v.sold_price).toLocaleString()}</td><td class="text-right font-mono text-ak-text2 text-xs">¥${Math.round(v.tax).toLocaleString()}</td><td class="text-right font-mono text-ak-text2 text-xs">${v.recycle_fee > 0 ? '¥'+Math.round(v.recycle_fee).toLocaleString() : '—'}</td><td class="text-right font-mono text-ak-red text-xs">${v.listing_fee > 0 ? '−¥'+Math.round(v.listing_fee).toLocaleString() : '—'}</td><td class="text-right font-mono text-ak-red text-xs">${v.sold_fee > 0 ? '−¥'+Math.round(v.sold_fee).toLocaleString() : '—'}</td><td class="text-right font-mono text-ak-red text-xs">${v.other_fee > 0 ? '−¥'+Math.round(v.other_fee).toLocaleString() : '—'}</td><td class="text-right font-mono text-ak-gold font-bold">¥${Math.round(v.net).toLocaleString()}</td></tr>`;
+        });
+        html += '</tbody></table>';
+      }
+
+      // Unsold vehicles
+      if (data.unsoldCount > 0) {
+        html += `<div class="ssl mt-5">Unsold Vehicles (${data.unsoldCount})</div>`;
+        html += `<table class="vt"><thead><tr><th>Lot</th><th>Vehicle</th><th class="r">Nagare</th><th class="r">Other</th></tr></thead><tbody>`;
+        data.unsold.forEach(v => {
+          html += `<tr><td><span class="lot">${v.lot || '—'}</span></td><td class="text-ak-text2">${v.make} ${v.model}</td><td class="text-right font-mono text-ak-red text-xs">${v.nagare_fee > 0 ? '−¥'+Math.round(v.nagare_fee).toLocaleString() : '—'}</td><td class="text-right font-mono text-ak-red text-xs">${v.other_fee > 0 ? '−¥'+Math.round(v.other_fee).toLocaleString() : '—'}</td></tr>`;
+        });
+        html += '</tbody></table>';
+      }
+
+      if (data.soldCount === 0 && data.unsoldCount === 0) {
+        html = '<div class="text-ak-muted text-center py-8">No vehicles assigned to this member.</div>';
+      }
+
+      document.getElementById('mdContent').innerHTML = html;
+    })
+    .catch(() => {
+      document.getElementById('mdContent').innerHTML = '<div class="text-ak-red text-center py-8">Failed to load member details.</div>';
+    });
+}
+
+function closeMemberDetail() {
+  document.getElementById('memberDetailModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// Close member modal on overlay click
+document.getElementById('memberDetailModal').addEventListener('click', function(e) {
+  if (e.target === this) closeMemberDetail();
+});
+
 // ─── DELETE VEHICLE (AJAX) ─────────────────────────
 function deleteVehicle(vehicleId, btn) {
   if (!confirm('Remove this vehicle?')) return;
