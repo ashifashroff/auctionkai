@@ -342,21 +342,11 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
   ?>
   <?php if ($editing): ?>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 animate-fade-in">
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-gold/30 flex items-center gap-4 animate-fade-in">
     <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
-    <div class="flex-1">
-      <?= postForm('update_member', 'members', $tok) ?>
-        <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
-        <div class="add-row ar-members mb-0">
-          <div><label class="lbl">Full Name *</label><input class="inp" name="name" value="<?= h($m['name']) ?>" required></div>
-          <div><label class="lbl">Phone</label><input class="inp" name="phone" value="<?= h($m['phone']) ?>"></div>
-          <div><label class="lbl">Email</label><input class="inp" type="email" name="email" value="<?= h($m['email']) ?>"></div>
-          <div class="flex items-end gap-1.5">
-            <button class="btn btn-gold btn-sm" type="submit">Save</button>
-            <a class="btn btn-dark btn-sm" href="?tab=members">Cancel</a>
-          </div>
-        </div>
-      </form>
+    <div class="flex-1 min-w-0">
+      <div class="text-ak-text font-semibold"><?= h($m['name']) ?></div>
+      <div class="text-ak-muted text-xs"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
     </div>
   </div>
   <?php else: ?>
@@ -375,7 +365,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div class="text-ak-muted text-[10px]">net payout</div>
     </div>
     <div class="flex gap-1.5 items-center">
-      <a class="btn btn-dark btn-sm" href="?tab=members&edit_member=<?= (int)$m['id'] ?>">Edit</a>
+      <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(<?= (int)$m['id'] ?>)">Edit</button>
       <?= postForm('remove_member', 'members', $tok) ?>
         <input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
         <button class="btn btn-ghost btn-sm" type="submit" onclick="return confirm('Remove <?= h($m['name']) ?> and all their vehicles?')">Remove</button>
@@ -606,6 +596,27 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       </div>
     </div>
     <div id="mdContent"><div class="text-center text-ak-muted py-12">Loading…</div></div>
+  </div>
+</div>
+
+<!-- Edit Member Modal -->
+<div id="editMemberModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[500px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-ak-gold text-lg font-bold">Edit Member</h3>
+      <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeEditMemberModal()">×</button>
+    </div>
+    <div id="editMemberMsg" class="hidden mb-3 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
+    <form id="editMemberForm" onsubmit="return submitEditMember(event)">
+      <input type="hidden" id="em_id" name="id">
+      <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" id="em_name" name="name" required></div>
+      <div class="mb-4"><label class="lbl">Phone</label><input class="inp" id="em_phone" name="phone" placeholder="090-xxxx-xxxx"></div>
+      <div class="mb-5"><label class="lbl">Email</label><input class="inp" type="email" id="em_email" name="email" placeholder="email@example.com"></div>
+      <div class="flex justify-end gap-2 pt-4 border-t border-ak-border">
+        <button type="button" class="btn btn-dark btn-sm" onclick="closeEditMemberModal()">Cancel</button>
+        <button type="submit" class="btn btn-gold btn-sm" id="emSubmitBtn">Save</button>
+      </div>
+    </form>
   </div>
 </div>
 

@@ -248,6 +248,88 @@ function showAddMsg(text, type) {
   msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
+// ─── EDIT MEMBER MODAL ────────────────────────────
+function openEditMemberModal(memberId) {
+  const modal = document.getElementById('editMemberModal');
+  const msg = document.getElementById('editMemberMsg');
+  msg.classList.add('hidden');
+  document.getElementById('editMemberForm').reset();
+  document.getElementById('em_id').value = '';
+  document.getElementById('em_name').value = '';
+  document.getElementById('em_phone').value = '';
+  document.getElementById('em_email').value = '';
+  document.getElementById('emSubmitBtn').disabled = true;
+  document.getElementById('emSubmitBtn').textContent = 'Loading…';
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  fetch(`update_member.php?id=${memberId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { showEditMemberMsg(data.error, 'error'); return; }
+      document.getElementById('em_id').value = data.id;
+      document.getElementById('em_name').value = data.name;
+      document.getElementById('em_phone').value = data.phone;
+      document.getElementById('em_email').value = data.email;
+    })
+    .catch(() => showEditMemberMsg('Failed to load member data.', 'error'))
+    .finally(() => {
+      document.getElementById('emSubmitBtn').disabled = false;
+      document.getElementById('emSubmitBtn').textContent = 'Save';
+    });
+}
+
+function closeEditMemberModal() {
+  document.getElementById('editMemberModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function showEditMemberMsg(text, type) {
+  const msg = document.getElementById('editMemberMsg');
+  msg.textContent = text;
+  msg.classList.remove('hidden');
+  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
+  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
+}
+
+function submitEditMember(e) {
+  e.preventDefault();
+  const btn = document.getElementById('emSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const msg = document.getElementById('editMemberMsg');
+  msg.classList.add('hidden');
+
+  const payload = {
+    id: parseInt(document.getElementById('em_id').value),
+    name: document.getElementById('em_name').value.trim(),
+    phone: document.getElementById('em_phone').value.trim(),
+    email: document.getElementById('em_email').value.trim(),
+  };
+
+  if (!payload.name) { showEditMemberMsg('Name is required.', 'error'); btn.disabled = false; btn.textContent = 'Save'; return false; }
+
+  fetch('update_member.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) { showEditMemberMsg(data.error, 'error'); return; }
+    showEditMemberMsg('Member updated!', 'success');
+    setTimeout(() => { closeEditMemberModal(); location.reload(); }, 600);
+  })
+  .catch(() => showEditMemberMsg('Network error.', 'error'))
+  .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
+  return false;
+}
+
+// Close edit member modal on overlay click
+document.getElementById('editMemberModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditMemberModal();
+});
+
 // ─── MEMBER DETAIL MODAL ──────────────────────────
 function openMemberDetail(memberId) {
   const modal = document.getElementById('memberDetailModal');
