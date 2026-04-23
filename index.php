@@ -130,13 +130,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, sold) VALUES (?,?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, other_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([
                 $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
                 trim($_POST['lot']      ?? ''),
                 (float)($_POST['soldPrice'] ?? 0),
                 (float)($_POST['recycleFee'] ?? 0),
+                (float)($_POST['listingFee'] ?? 0),
+                (float)($_POST['soldFee'] ?? 0),
+                (float)($_POST['nagareFee'] ?? 0),
+                (float)($_POST['otherFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
             ]);
         }
@@ -146,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id   = (int)$_POST['id'];
         $make = trim($_POST['make'] ?? '');
         if ($make !== '') {
-            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, sold=? WHERE id=?");
+            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, other_fee=?, sold=? WHERE id=?");
             $stmt->execute([
                 (int)($_POST['memberId'] ?? 0),
                 $make,
@@ -154,6 +158,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 trim($_POST['lot']  ?? ''),
                 (float)($_POST['soldPrice'] ?? 0),
                 (float)($_POST['recycleFee'] ?? 0),
+                (float)($_POST['listingFee'] ?? 0),
+                (float)($_POST['soldFee'] ?? 0),
+                (float)($_POST['nagareFee'] ?? 0),
+                (float)($_POST['otherFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
                 $id,
             ]);
@@ -234,11 +242,16 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
     $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
     $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
-
-    // Filter fee items for this member only
-    $memberFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === $memberId);
+    $listingFeeTotal = array_sum(array_map(fn($v) => (float)($v['listing_fee'] ?? 0), $mv));
+    $soldFeeTotal    = array_sum(array_map(fn($v) => (float)($v['sold_fee'] ?? 0), $mv));
+    $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $mv));
+    $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $mv));
 
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
+    $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
+
+    // Member-level fees from fee_items table
+    $memberFees = array_filter($feeItems, fn($f) => (int)$f['member_id'] === $memberId);
 
     $listingFees = [];
     $soldFees = [];
@@ -272,10 +285,10 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
         }
     }
 
-    $totalDed = $totalListingDed + $totalSoldDed;
+    $totalDed = $totalVehicleDed + $totalListingDed + $totalSoldDed;
     $netPayout = $totalReceived - $totalDed;
 
-    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
+    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','totalReceived','totalVehicleDed','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
@@ -461,7 +474,11 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
       <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
-      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono" type="number" name="listingFee" placeholder="3000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono" type="number" name="soldFee" placeholder="25500" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" placeholder="8000" min="0" style="-moz-appearance:textfield"></div>
+      <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" placeholder="0" min="0" style="-moz-appearance:textfield"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
           <input type="checkbox" name="sold" checked style="accent-color:var(--gold)"> Sold
@@ -473,10 +490,10 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 <div class="card" style="overflow:hidden">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Total</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
-      <tr><td colspan="9" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
+      <tr><td colspan="14" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
@@ -499,6 +516,10 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
               <div><label class="lbl">Lot #</label><input class="inp" name="lot" value="<?= h($v['lot']) ?>"></div>
               <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0"></div>
               <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" value="<?= (float)($v['recycle_fee'] ?? 0) ?>" min="0"></div>
+              <div><label class="lbl">Listing Fee (¥)</label><input class="inp mono" type="number" name="listingFee" value="<?= (float)($v['listing_fee'] ?? 0) ?>" min="0"></div>
+              <div><label class="lbl">Sold Fee (¥)</label><input class="inp mono" type="number" name="soldFee" value="<?= (float)($v['sold_fee'] ?? 0) ?>" min="0"></div>
+              <div><label class="lbl">Nagare Fee (¥)</label><input class="inp mono" type="number" name="nagareFee" value="<?= (float)($v['nagare_fee'] ?? 0) ?>" min="0"></div>
+              <div><label class="lbl">Other Fee (¥)</label><input class="inp mono" type="number" name="otherFee" value="<?= (float)($v['other_fee'] ?? 0) ?>" min="0"></div>
               <div style="display:flex;align-items:flex-end;gap:8px">
                 <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
                   <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)"> Sold
@@ -524,8 +545,22 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px">
           <?= $v['sold'] && (float)($v['recycle_fee'] ?? 0) > 0 ? fmt((float)$v['recycle_fee']) : '—' ?>
         </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+          <?= $v['sold'] && (float)($v['listing_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['listing_fee']) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+          <?= $v['sold'] && (float)($v['sold_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['sold_fee']) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+          <?= $v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--red);font-size:12px">
+          <?= $v['sold'] && (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
+        </td>
         <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--gold)' : 'var(--muted)' ?>;font-weight:700">
-          <?= $v['sold'] ? fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0)) : '—' ?>
+          <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0) - (float)($v['other_fee'] ?? 0); ?>
+          <?= fmt($vTotal) ?>
+          <?php else: ?>—<?php endif; ?>
         </td>
         <td>
           <?= postForm('toggle_sold', 'vehicles', $tok) ?>
@@ -715,34 +750,36 @@ foreach ($members as $m) {
         <?php endif; ?>
         <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:2px solid var(--border);margin-top:6px;font-weight:700"><span style="color:var(--gold)">Total Received</span><span style="font-family:var(--mono);color:var(--gold);font-size:15px"><?= fmt($s['totalReceived']) ?></span></div>
       </div>
-      <div class="sr">
-        <div class="ssl">Listing Fees (per listed vehicle)</div>
-        <?php foreach ($s['listingFees'] as $d): ?>
-        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']==='flat' && $d['scope']==='per_vehicle'): ?>×<?= $s['totalCount'] ?><?php elseif ($d['type']==='percent'): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
-        <?php endforeach; ?>
+        <div class="ssl">Vehicle Fee Deductions</div>
+        <?php if ($s['listingFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Listing Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['listingFeeTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['soldFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Sold Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['soldFeeTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['nagareFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Nagare Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['otherFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
+        <?php endif; ?>
+
         <?php if (!empty($s['listingFees'])): ?>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-weight:600"><span style="color:var(--muted);font-size:12px">Subtotal Listing Fees</span><span style="font-family:var(--mono);color:var(--red);font-size:13px">−<?= fmt($s['totalListingDed']) ?></span></div>
-        <?php endif; ?>
-
-        <div class="ssl" style="margin-top:12px">Sold Fees (per sold vehicle)</div>
-        <?php foreach ($s['soldFees'] as $d): ?>
-        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']==='flat' && $d['scope']==='per_vehicle'): ?>×<?= $s['count'] ?><?php elseif ($d['type']==='percent'): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
+        <div class="ssl" style="margin-top:12px">Member Listing Fees</div>
+        <?php foreach ($s['listingFees'] as $d): ?>
+        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']===('flat') && $d['scope']===('per_vehicle')): ?>×<?= $s['totalCount'] ?><?php elseif ($d['type']===('percent')): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
         <?php endforeach; ?>
-        <?php if (!empty($s['soldFees'])): ?>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-weight:600"><span style="color:var(--muted);font-size:12px">Subtotal Sold Fees</span><span style="font-family:var(--mono);color:var(--red);font-size:13px">−<?= fmt($s['totalSoldDed']) ?></span></div>
         <?php endif; ?>
 
-        <?php if ($s['vehicleCustomTotal'] > 0): ?>
-        <div class="ssl" style="margin-top:12px">Additional Vehicle Fees</div>
-        <?php foreach ($s['vehicleCustomDetails'] as $vd): ?>
-        <div class="dr"><span class="dr-l"><?= h($vd['name']) ?> (<?= h($vd['lot'] ?: $vd['vehicle']) ?>)</span><span class="dr-a">−<?= fmt($vd['amount']) ?></span></div>
+        <?php if (!empty($s['soldFees'])): ?>
+        <div class="ssl" style="margin-top:12px">Member Sold Fees</div>
+        <?php foreach ($s['soldFees'] as $d): ?>
+        <div class="dr"><span class="dr-l"><?= h($d['name']) ?> <?php if ($d['type']===('flat') && $d['scope']===('per_vehicle')): ?>×<?= $s['count'] ?><?php elseif ($d['type']===('percent')): ?>(<?= $d['rate'] ?>%)<?php endif; ?></span><span class="dr-a">−<?= fmt($d['amount']) ?></span></div>
         <?php endforeach; ?>
         <?php endif; ?>
 
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
-      </div>
-    </div>
     <?php endif; ?>
   </div>
   <?php endforeach; ?>
