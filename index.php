@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id   = (int)$_POST['id'];
         $make = trim($_POST['make'] ?? '');
         if ($make !== '') {
-            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, other_fee=?, sold=? WHERE id=?");
+            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, other_fee=?, sold=? WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
             $stmt->execute([
                 (int)($_POST['memberId'] ?? 0),
                 $make,
@@ -169,18 +169,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (float)($_POST['otherFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
                 $id,
+                $userId,
             ]);
         }
     }
 
     elseif ($action === 'remove_vehicle') {
-        $stmt = $db->prepare("DELETE FROM vehicles WHERE id=?");
-        $stmt->execute([(int)$_POST['id']]);
+        $stmt = $db->prepare("DELETE FROM vehicles WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
+        $stmt->execute([(int)$_POST['id'], $userId]);
     }
 
     elseif ($action === 'toggle_sold') {
-        $stmt = $db->prepare("UPDATE vehicles SET sold = NOT sold WHERE id=?");
-        $stmt->execute([(int)$_POST['id']]);
+        $stmt = $db->prepare("UPDATE vehicles SET sold = NOT sold WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
+        $stmt->execute([(int)$_POST['id'], $userId]);
     }
 
 
