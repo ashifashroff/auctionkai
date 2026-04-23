@@ -22,7 +22,7 @@ function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 function postForm(string $action, string $tabTarget, string $tok): string {
-    return "<form method='POST' action='index.php'>"
+    return "<form method='POST' action='index.php' style='display:contents'>"
          . "<input type='hidden' name='action' value='" . h($action) . "'>"
          . "<input type='hidden' name='tab'    value='" . h($tabTarget) . "'>"
          . "<input type='hidden' name='_tok'   value='" . h($tok) . "'>";
@@ -238,25 +238,29 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
 <div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down">
-  <div>
+  <div class="shrink-0">
     <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai <span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded ml-1 font-mono">MySQL</span></div>
     <div class="text-ak-muted text-[11px]">Settlement Management System</div>
   </div>
   <?php if ($auction): ?>
-  <div class="flex items-center gap-2 ml-auto">
+  <div class="flex items-center gap-2 flex-1 justify-center">
     <?= postForm('save_auction', $tab, $tok) ?>
-      <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
-      <input class="inp w-36" type="date" name="date" value="<?= h($auction['date']) ?>">
-      <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span class="text-ak-muted text-[11px]">¥/member</span></div>
-      <button class="btn btn-dark btn-sm" type="submit">Save</button>
+      <div class="flex items-center gap-2 flex-wrap">
+        <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
+        <input class="inp w-36" type="date" name="date" value="<?= h($auction['date']) ?>">
+        <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span class="text-ak-muted text-[11px]">¥/member</span></div>
+        <button class="btn btn-dark btn-sm" type="submit">Save</button>
+      </div>
     </form>
   </div>
   <?php endif; ?>
-  <a href="profile.php" class="flex items-center gap-2 no-underline ml-auto hover:opacity-80 transition-opacity">
-    <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
-    <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
-  </a>
-  <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
+  <div class="flex items-center gap-3 shrink-0 ml-auto">
+    <a href="profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
+      <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
+      <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
+    </a>
+    <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
+  </div>
 </div>
 
 <!-- ─── AUCTION SELECTOR ────────────────────────────── -->
