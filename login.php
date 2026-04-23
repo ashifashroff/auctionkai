@@ -2,7 +2,6 @@
 require_once 'config.php';
 session_start();
 
-// ─── If already logged in, redirect ───────────────────────────────────────────
 if (!empty($_SESSION['user_id'])) {
     header('Location: index.php');
     exit;
@@ -13,7 +12,6 @@ $error = '';
 $success = '';
 $showRegister = isset($_GET['register']);
 
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -38,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     }
 }
 
-// ─── REGISTER ─────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'register') {
     $username = trim($_POST['username'] ?? '');
     $name     = trim($_POST['name'] ?? '');
@@ -53,7 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
-        // Check if username exists
         $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->execute([$username]);
         if ($stmt->fetch()) {
@@ -85,62 +81,87 @@ function h(string $s): string {
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
-<div class="login-wrap">
-  <div class="login-card">
-    <div class="login-logo">⚡ AuctionKai</div>
-    <div class="login-sub"><?= $showRegister ? 'Create Your Account' : 'Settlement Management System' ?></div>
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
 
-    <?php if ($error): ?>
-      <div class="login-error"><?= h($error) ?></div>
-    <?php endif; ?>
-    <?php if ($success): ?>
-      <div class="login-success"><?= h($success) ?></div>
-    <?php endif; ?>
+    <!-- Logo -->
+    <div class="text-center mb-8 animate-fade-in">
+      <div class="text-4xl font-bold text-ak-gold tracking-tight">⚡ AuctionKai</div>
+      <div class="text-ak-muted text-sm mt-2"><?= $showRegister ? 'Create Your Account' : 'Settlement Management System' ?></div>
+    </div>
 
-    <?php if ($showRegister): ?>
-    <!-- ─── REGISTER FORM ─────────────────────────────────────────── -->
-    <form method="POST" action="login.php?register=1">
-      <input type="hidden" name="form" value="register">
-      <div class="login-field">
-        <label class="lbl">Full Name *</label>
-        <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" required>
-      </div>
-      <div class="login-field">
-        <label class="lbl">Username *</label>
-        <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" required>
-      </div>
-      <div class="login-field">
-        <label class="lbl">Email</label>
-        <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>">
-      </div>
-      <div class="login-field">
-        <label class="lbl">Password * <span style="font-weight:400;color:var(--muted)">(min 6 chars)</span></label>
-        <input class="inp" type="password" name="password" placeholder="••••••" required>
-      </div>
-      <div class="login-field">
-        <label class="lbl">Confirm Password *</label>
-        <input class="inp" type="password" name="confirm" placeholder="••••••" required>
-      </div>
-      <button class="btn btn-gold login-btn" type="submit">Create Account</button>
-    </form>
-    <div class="login-switch">Already have an account? <a href="login.php">Log in</a></div>
+    <!-- Card -->
+    <div class="bg-ak-card border border-ak-border rounded-xl p-8 animate-fade-in-up">
 
-    <?php else: ?>
-    <!-- ─── LOGIN FORM ─────────────────────────────────────────────── -->
-    <form method="POST" action="login.php">
-      <input type="hidden" name="form" value="login">
-      <div class="login-field">
-        <label class="lbl">Username</label>
-        <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" required autofocus>
+      <?php if ($error): ?>
+        <div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-5"><?= h($error) ?></div>
+      <?php endif; ?>
+      <?php if ($success): ?>
+        <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-5"><?= h($success) ?></div>
+      <?php endif; ?>
+
+      <?php if ($showRegister): ?>
+      <!-- Register -->
+      <form method="POST" action="login.php?register=1">
+        <input type="hidden" name="form" value="register">
+
+        <div class="mb-4">
+          <label class="lbl">Full Name *</label>
+          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="lbl">Username *</label>
+          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="lbl">Email</label>
+          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>">
+        </div>
+
+        <div class="mb-4">
+          <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
+          <input class="inp" type="password" name="password" placeholder="••••••" required>
+        </div>
+
+        <div class="mb-5">
+          <label class="lbl">Confirm Password *</label>
+          <input class="inp" type="password" name="confirm" placeholder="••••••" required>
+        </div>
+
+        <button class="btn btn-gold w-full" type="submit">Create Account</button>
+      </form>
+
+      <div class="text-center mt-5 text-sm text-ak-muted">
+        Already have an account? <a href="login.php" class="text-ak-gold hover:underline">Log in</a>
       </div>
-      <div class="login-field">
-        <label class="lbl">Password</label>
-        <input class="inp" type="password" name="password" placeholder="••••••" required>
+
+      <?php else: ?>
+      <!-- Login -->
+      <form method="POST" action="login.php">
+        <input type="hidden" name="form" value="login">
+
+        <div class="mb-4">
+          <label class="lbl">Username</label>
+          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" required autofocus>
+        </div>
+
+        <div class="mb-5">
+          <label class="lbl">Password</label>
+          <input class="inp" type="password" name="password" placeholder="••••••" required>
+        </div>
+
+        <button class="btn btn-gold w-full" type="submit">Log In</button>
+      </form>
+
+      <div class="text-center mt-5 text-sm text-ak-muted">
+        Don't have an account? <a href="login.php?register=1" class="text-ak-gold hover:underline">Register</a>
       </div>
-      <button class="btn btn-gold login-btn" type="submit">Log In</button>
-    </form>
-    <div class="login-switch">Don't have an account? <a href="login.php?register=1">Register</a></div>
-    <?php endif; ?>
+      <?php endif; ?>
+
+    </div>
+
   </div>
 </div>
 
