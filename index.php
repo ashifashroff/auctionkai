@@ -527,16 +527,16 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div class="sr">
         <div class="ssl">Deductions</div>
         <?php if ($s['listingFeeTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Listing Fee</span><span class="dr-a">−<?= fmt($s['listingFeeTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Listing Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['listingFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['soldFeeTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Sold Fee</span><span class="dr-a">−<?= fmt($s['soldFeeTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Sold Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['soldFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['nagareFeeTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Nagare Fee (unsold)</span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['otherFeeTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Other Fee</span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
+        <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
