@@ -248,6 +248,15 @@ function showAddMsg(text, type) {
   msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
+// ─── VEHICLE TABLE SEARCH ──────────────────────────
+function filterVehicles() {
+  const q = document.getElementById('vehicleSearch').value.toLowerCase();
+  document.querySelectorAll('tr[data-vid]').forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = !q || text.includes(q) ? '' : 'none';
+  });
+}
+
 // ─── EDIT MEMBER MODAL ────────────────────────────
 function openEditMemberModal(memberId) {
   const modal = document.getElementById('editMemberModal');

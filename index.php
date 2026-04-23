@@ -443,6 +443,9 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <?php elseif ($tab === 'vehicles'): ?>
 <h2 class="text-lg font-bold mb-5">Vehicle Listings — <?= h($auction['name']) ?></h2>
+<div class="mb-4">
+  <input class="inp max-w-md" id="vehicleSearch" placeholder="🔍 Search by lot, member, make, model…" oninput="filterVehicles()">
+</div>
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
   <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)">
