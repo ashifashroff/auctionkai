@@ -4,39 +4,56 @@ require_once 'config.php';
 function fmt(float $n): string { return '¥' . number_format(round($n)); }
 function h(string $s): string  { return htmlspecialchars($s, ENT_QUOTES, 'UTF-8'); }
 
-function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
+function calcStatement(int $memberId, array $vehicles, array $feeItems, array $allVehicleFees): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
+    $allMv       = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
+    $totalCount  = count($allMv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
     $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
     $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
-    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
-    $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
-    $totalCount = count($allMv);
 
-    $deductions = [];
-    $totalDed   = 0;
+    $vehicleCustomTotal = 0;
+    $vehicleCustomDetails = [];
+    foreach ($mv as $v) {
+        $vFees = array_filter($allVehicleFees, fn($f) => (int)$f['vehicle_id'] === (int)$v['id']);
+        foreach ($vFees as $vf) {
+            $vehicleCustomTotal += (float)$vf['amount'];
+            $vehicleCustomDetails[] = ['vehicle' => $v['make'] . ' ' . $v['model'], 'lot' => $v['lot'], 'name' => $vf['name'], 'amount' => (float)$vf['amount']];
+        }
+    }
+
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal + $vehicleCustomTotal;
+
+    $listingFees = [];
+    $soldFees = [];
+    $totalListingDed = 0;
+    $totalSoldDed = 0;
+
     foreach ($feeItems as $f) {
-        $amt = 0;
+        $cat = $f['category'] ?? 'sold';
         $scope = $f['scope'] ?? 'per_vehicle';
+        $amt = 0;
 
         if ($f['type'] === 'flat') {
+            $multiplier = ($cat === 'listing') ? $totalCount : $count;
             if ($scope === 'per_member') {
                 $amt = (float)$f['amount'];
             } else {
-                $amt = (float)$f['amount'] * $count;
+                $amt = (float)$f['amount'] * $multiplier;
             }
         } elseif ($f['type'] === 'percent') {
             $amt = $grossSales * (float)$f['amount'] / 100;
-        } elseif ($f['type'] === 'per_vehicle') {
-            $amt = (float)$f['amount'] * $totalCount;
         }
-        $deductions[] = ['name' => $f['name'], 'type' => $f['type'], 'scope' => $scope, 'rate' => (float)$f['amount'], 'amount' => $amt];
-        $totalDed += $amt;
+
+        $item = ['name' => $f['name'], 'type' => $f['type'], 'scope' => $scope, 'rate' => (float)$f['amount'], 'amount' => $amt];
+        if ($cat === 'listing') { $listingFees[] = $item; $totalListingDed += $amt; }
+        else { $soldFees[] = $item; $totalSoldDed += $amt; }
     }
 
+    $totalDed = $totalListingDed + $totalSoldDed;
     $netPayout = $totalReceived - $totalDed;
-    return compact('mv','count','grossSales','taxTotal','recycleTotal','totalReceived','deductions','totalDed','netPayout');
+    return compact('mv','count','totalCount','grossSales','taxTotal','recycleTotal','vehicleCustomTotal','vehicleCustomDetails','totalReceived','listingFees','soldFees','totalListingDed','totalSoldDed','totalDed','netPayout');
 }
 
 $db = db();
@@ -53,6 +70,11 @@ $feeItems = $activeAuctionId ? $db->query("SELECT * FROM fee_items WHERE auction
 $members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
 $vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
 
+$vehicleIds = array_column($vehicles, 'id');
+$allVehicleFees = !empty($vehicleIds)
+    ? $db->query("SELECT * FROM vehicle_fees WHERE vehicle_id IN (" . implode(',', array_map('intval', $vehicleIds)) . ") ORDER BY id")->fetchAll()
+    : [];
+
 $printAll = isset($_GET['all']);
 $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
 
@@ -67,12 +89,23 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
     foreach ($s['mv'] as $v) {
         $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0)) . "</td></tr>";
     }
-    $customRows = '';
-    foreach ($s['deductions'] as $d) {
+    $listingRows = '';
+    foreach ($s['listingFees'] as $d) {
+        $label = h($d['name']);
+        if ($d['type'] === 'flat' && ($d['scope'] ?? 'per_vehicle') === 'per_vehicle') $label .= ' ×' . $s['totalCount'];
+        elseif ($d['type'] === 'percent') $label .= ' (' . $d['rate'] . '%)';
+        $listingRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
+    }
+    $soldRows = '';
+    foreach ($s['soldFees'] as $d) {
         $label = h($d['name']);
         if ($d['type'] === 'flat' && ($d['scope'] ?? 'per_vehicle') === 'per_vehicle') $label .= ' ×' . $s['count'];
         elseif ($d['type'] === 'percent') $label .= ' (' . $d['rate'] . '%)';
-        $customRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
+        $soldRows .= "<div class='row dim'><span>" . $label . "</span><span>−" . fmt($d['amount']) . "</span></div>";
+    }
+    $vehicleFeeRows = '';
+    foreach ($s['vehicleCustomDetails'] as $vd) {
+        $vehicleFeeRows .= "<div class='row dim'><span>" . h($vd['name']) . " (" . h($vd['lot'] ?: $vd['vehicle']) . ")</span><span>−" . fmt($vd['amount']) . "</span></div>";
     }
     $loc = !empty($auction['location']) ? ' · ' . h($auction['location']) : '';
     return "
@@ -92,8 +125,10 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
         <div class='row'><span>+ Consumption Tax 10%</span><span>" . fmt($s['taxTotal']) . "</span></div>
         <div class='row'><span>+ Recycle Fees</span><span>" . fmt($s['recycleTotal']) . "</span></div>
         <div class='row' style='font-weight:700;border-top:1px solid #ccc;padding-top:8px'><span>Total Received</span><span>" . fmt($s['totalReceived']) . "</span></div>
-        {$customRows}
-        <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
+        " . (!empty($listingRows) ? "<div class='sec'>Listing Fees</div>" . $listingRows : "") . "
+        " . (!empty($soldRows) ? "<div class='sec'>Sold Fees</div>" . $soldRows : "") . "
+        " . (!empty($vehicleFeeRows) ? "<div class='sec'>Additional Vehicle Fees</div>" . $vehicleFeeRows : "") . "
+        <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed'] + $s['vehicleCustomTotal']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
       <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $loc . " · AuctionKai Settlement System</div>
