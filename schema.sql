@@ -23,13 +23,14 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- ── Auctions (multiple auctions) ────────────────────────────────
 CREATE TABLE IF NOT EXISTS `auction` (
-  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `user_id`    INT UNSIGNED NOT NULL,
-  `name`       VARCHAR(200) NOT NULL,
-  `date`       DATE         NOT NULL,
-  `expires_at` DATE         NOT NULL COMMENT 'Auto-delete sold vehicles + auction after this date',
-  `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id`              INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `user_id`         INT UNSIGNED NOT NULL,
+  `name`            VARCHAR(200) NOT NULL,
+  `date`            DATE         NOT NULL,
+  `commission_rate` DECIMAL(5,2) NOT NULL DEFAULT 3.00 COMMENT 'Commission % applied to gross sales',
+  `expires_at`      DATE         NOT NULL COMMENT 'Auto-delete sold vehicles + auction after this date',
+  `created_at`      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -65,18 +66,6 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── Fee Items (per auction) ─────────────────────────────────────
-CREATE TABLE IF NOT EXISTS `fee_items` (
-  `id`          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `member_id`   INT UNSIGNED NOT NULL,
-  `name`        VARCHAR(200) NOT NULL,
-  `type`        VARCHAR(20) NOT NULL DEFAULT 'flat' COMMENT 'flat=fixed amount, percent=% of sold price',
-  `category`    VARCHAR(20) NOT NULL DEFAULT 'sold' COMMENT 'listing=per listed vehicle, sold=per sold vehicle',
-  `amount`      DECIMAL(12,2) NOT NULL DEFAULT 0,
-  `scope`       VARCHAR(20) NOT NULL DEFAULT 'per_vehicle' COMMENT 'per_vehicle=multiplied by vehicle count, per_member=flat per member',
-  `sort_order`  INT UNSIGNED NOT NULL DEFAULT 0,
-  FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 
 
 -- ── Custom Deductions (per auction) ─────────────────────────────
@@ -113,20 +102,6 @@ INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
   (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
 
 -- Fee items per member (global members 1-5)
-INSERT INTO `fee_items` (`member_id`, `name`, `type`, `category`, `amount`, `scope`, `sort_order`) VALUES
-  (1, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
-  (1, 'Commission',         'percent', 'sold',    3.00, 'per_vehicle', 2),
-  (1, 'Transport Fee',      'flat',    'sold',    5000, 'per_vehicle', 3),
-  (2, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
-  (2, 'Commission',         'percent', 'sold',    3.00, 'per_vehicle', 2),
-  (2, 'Transport Fee',      'flat',    'sold',    5000, 'per_vehicle', 3),
-  (3, 'Entry Fee',          'flat',    'listing', 3000, 'per_vehicle', 1),
-  (3, 'Commission',         'percent', 'sold',    3.00, 'per_vehicle', 2),
-  (3, 'Document Fee',       'flat',    'sold',    1500, 'per_member',  4),
-  (4, 'Entry Fee',          'flat',    'listing', 3500, 'per_vehicle', 1),
-  (4, 'Commission',         'percent', 'sold',    3.50, 'per_vehicle', 2),
-  (5, 'Entry Fee',          'flat',    'listing', 3500, 'per_vehicle', 1),
-  (5, 'Commission',         'percent', 'sold',    3.50, 'per_vehicle', 2);
 -- Sample vehicles (Nagoya & Tokyo auctions, members are global)
 INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold_price`, `recycle_fee`, `listing_fee`, `sold_fee`, `nagare_fee`, `other_fee`, `sold`) VALUES
   (1, 1, 'Toyota',     'Prius',     'A-001',  850000, 15000, 3000, 25500, 8000, 0, 1),
