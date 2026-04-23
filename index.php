@@ -382,8 +382,8 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
   <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)">
-    <div class="add-row ar-vehicles" id="addVehicleFields">
-      <div class="relative">
+    <div class="grid grid-cols-6 gap-2" id="addVehicleFields">
+      <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
         <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showMemberResults()" oninput="filterMembers()">
         <input type="hidden" id="memberId" name="memberId" required>
