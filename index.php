@@ -184,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
 
-    $tab = $_POST['tab'] ?? 'members';
+    $tab = $_POST['tab'] ?? 'dashboard';
     header("Location: index.php?tab=$tab");
     exit;
 }
@@ -224,7 +224,7 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
-$tab      = $_GET['tab'] ?? 'members';
+$tab      = $_GET['tab'] ?? 'dashboard';
 $tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'statements'=>['icon'=>'📄','label'=>'Statements']];
 $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 ?>
