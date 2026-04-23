@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   `model`       VARCHAR(100) DEFAULT '',
   `lot`         VARCHAR(50)  DEFAULT '',
   `sold_price`  DECIMAL(12,0) DEFAULT 0,
+  `recycle_fee` DECIMAL(12,0) DEFAULT 0,
   `sold`        TINYINT(1)   DEFAULT 1,
   `created_at`  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE,
@@ -134,15 +135,15 @@ INSERT INTO `members` (`user_id`, `name`, `phone`, `email`) VALUES
   (1, 'Sato Kenji',          '080-4444-5555', 'sato@example.com');
 
 -- Sample vehicles (Nagoya & Tokyo auctions, members are global)
-INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold_price`, `sold`) VALUES
-  (1, 1, 'Toyota',     'Prius',     'A-001',  850000, 1),
-  (1, 1, 'Honda',      'Fit',       'A-002',  420000, 1),
-  (1, 2, 'Nissan',     'Note',      'B-001',  680000, 1),
-  (1, 2, 'Mazda',      'CX-5',      'B-002', 1250000, 1),
-  (1, 3, 'Subaru',     'Forester',  'C-001',  920000, 1),
-  (1, 3, 'Mitsubishi', 'Outlander', 'C-002',       0, 0),
-  (2, 4, 'Honda',   'Civic',    'T-001',  780000, 1),
-  (2, 4, 'Toyota',  'Corolla',  'T-002',  550000, 1),
-  (2, 5, 'Lexus',   'IS 300',   'T-003', 1800000, 1);
+INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold_price`, `recycle_fee`, `sold`) VALUES
+  (1, 1, 'Toyota',     'Prius',     'A-001',  850000, 15000, 1),
+  (1, 1, 'Honda',      'Fit',       'A-002',  420000, 12000, 1),
+  (1, 2, 'Nissan',     'Note',      'B-001',  680000, 13000, 1),
+  (1, 2, 'Mazda',      'CX-5',      'B-002', 1250000, 18000, 1),
+  (1, 3, 'Subaru',     'Forester',  'C-001',  920000, 16000, 1),
+  (1, 3, 'Mitsubishi', 'Outlander', 'C-002',       0,     0, 0),
+  (2, 4, 'Honda',   'Civic',    'T-001',  780000, 14000, 1),
+  (2, 4, 'Toyota',  'Corolla',  'T-002',  550000, 12000, 1),
+  (2, 5, 'Lexus',   'IS 300',   'T-003', 1800000, 20000, 1);
 
 SET FOREIGN_KEY_CHECKS=1;

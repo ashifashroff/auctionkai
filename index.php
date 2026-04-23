@@ -119,12 +119,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, sold) VALUES (?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, sold) VALUES (?,?,?,?,?,?,?,?)");
             $stmt->execute([
                 $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
                 trim($_POST['lot']      ?? ''),
                 (float)($_POST['soldPrice'] ?? 0),
+                (float)($_POST['recycleFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
             ]);
         }
@@ -134,13 +135,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id   = (int)$_POST['id'];
         $make = trim($_POST['make'] ?? '');
         if ($make !== '') {
-            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, sold=? WHERE id=?");
+            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, sold=? WHERE id=?");
             $stmt->execute([
                 (int)($_POST['memberId'] ?? 0),
                 $make,
                 trim($_POST['model'] ?? ''),
                 trim($_POST['lot']  ?? ''),
                 (float)($_POST['soldPrice'] ?? 0),
+                (float)($_POST['recycleFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
                 $id,
             ]);
@@ -214,6 +216,9 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
+    $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv)); // 10% consumption tax
+    $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal; // Total customer pays
     $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
     $totalCount = count($allMv);
 
@@ -238,8 +243,8 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
         $totalDed += $amt;
     }
 
-    $netPayout = $grossSales - $totalDed;
-    return compact('mv','count','grossSales','deductions','totalDed','netPayout');
+    $netPayout = $totalReceived - $totalDed;
+    return compact('mv','count','grossSales','taxTotal','recycleTotal','totalReceived','deductions','totalDed','netPayout');
 }
 
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
@@ -421,6 +426,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
       <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" placeholder="15000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
           <input type="checkbox" name="sold" checked style="accent-color:var(--gold)"> Sold
@@ -432,10 +438,10 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 </div>
 <div class="card" style="overflow:hidden">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Total</th><th>Status</th><th></th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
-      <tr><td colspan="6" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
+      <tr><td colspan="9" style="padding:48px;text-align:center;color:var(--muted)">No vehicles yet for this auction.</td></tr>
     <?php else: ?>
       <?php foreach ($vehicles as $v):
         $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
@@ -457,6 +463,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
               <div><label class="lbl">Model</label><input class="inp" name="model" value="<?= h($v['model']) ?>"></div>
               <div><label class="lbl">Lot #</label><input class="inp" name="lot" value="<?= h($v['lot']) ?>"></div>
               <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" value="<?= (float)$v['sold_price'] ?>" min="0"></div>
+              <div><label class="lbl">Recycle Fee (¥)</label><input class="inp mono" type="number" name="recycleFee" value="<?= (float)($v['recycle_fee'] ?? 0) ?>" min="0"></div>
               <div style="display:flex;align-items:flex-end;gap:8px">
                 <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
                   <input type="checkbox" name="sold" <?= $v['sold'] ? 'checked' : '' ?> style="accent-color:var(--gold)"> Sold
@@ -475,6 +482,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <td style="color:var(--text2)"><?= h($v['make'] . ' ' . $v['model']) ?></td>
         <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--green)' : 'var(--muted)' ?>">
           <?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px">
+          <?= $v['sold'] ? fmt(round((float)$v['sold_price'] * 0.10)) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:var(--text2);font-size:12px">
+          <?= $v['sold'] && (float)($v['recycle_fee'] ?? 0) > 0 ? fmt((float)$v['recycle_fee']) : '—' ?>
+        </td>
+        <td style="text-align:right;font-family:var(--mono);color:<?= $v['sold'] ? 'var(--gold)' : 'var(--muted)' ?>;font-weight:700">
+          <?= $v['sold'] ? fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0)) : '—' ?>
         </td>
         <td>
           <?= postForm('toggle_sold', 'vehicles', $tok) ?>
@@ -602,13 +618,25 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <div class="sb2">
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
-        <?php foreach ($s['mv'] as $v): ?>
+        <?php foreach ($s['mv'] as $v): $vTax = round((float)$v['sold_price'] * 0.10); $vRecycle = (float)($v['recycle_fee'] ?? 0); ?>
         <div class="vr">
           <span class="vr-car"><span class="vr-lot"><?= h($v['lot'] ?: '—') ?></span><?= h($v['make'] . ' ' . $v['model']) ?></span>
           <span class="vr-p"><?= fmt((float)$v['sold_price']) ?></span>
         </div>
+        <?php if ($vTax > 0 || $vRecycle > 0): ?>
+        <div style="padding:2px 0 6px 16px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between">
+          <span>+ Tax 10%: <?= fmt($vTax) ?><?php if ($vRecycle > 0): ?> + Recycle: <?= fmt($vRecycle) ?><?php endif; ?></span>
+        </div>
+        <?php endif; ?>
         <?php endforeach; ?>
         <div class="sg"><span class="sg-l">Gross Sales</span><span class="sg-n"><?= fmt($s['grossSales']) ?></span></div>
+        <?php if ($s['taxTotal'] > 0): ?>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:var(--text2)">+ Consumption Tax 10%</span><span style="font-family:var(--mono);color:var(--green)"><?= fmt($s['taxTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['recycleTotal'] > 0): ?>
+        <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:var(--text2)">+ Recycle Fees</span><span style="font-family:var(--mono);color:var(--green)"><?= fmt($s['recycleTotal']) ?></span></div>
+        <?php endif; ?>
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:2px solid var(--border);margin-top:6px;font-weight:700"><span style="color:var(--gold)">Total Received</span><span style="font-family:var(--mono);color:var(--gold);font-size:15px"><?= fmt($s['totalReceived']) ?></span></div>
       </div>
       <div class="sr">
         <div class="ssl">Deductions</div>

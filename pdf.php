@@ -8,6 +8,9 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
     $mv          = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId && $v['sold']));
     $count       = count($mv);
     $grossSales  = array_sum(array_column($mv, 'sold_price'));
+    $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
+    $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
     $allMv = array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId);
     $totalCount = count($allMv);
 
@@ -32,8 +35,8 @@ function calcStatement(int $memberId, array $vehicles, array $feeItems): array {
         $totalDed += $amt;
     }
 
-    $netPayout = $grossSales - $totalDed;
-    return compact('mv','count','grossSales','deductions','totalDed','netPayout');
+    $netPayout = $totalReceived - $totalDed;
+    return compact('mv','count','grossSales','taxTotal','recycleTotal','totalReceived','deductions','totalDed','netPayout');
 }
 
 $db = db();
@@ -62,7 +65,7 @@ if (empty($targets)) { echo 'No members found.'; exit; }
 function renderStatement(array $m, array $s, array $feeItems, array $auction): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
-        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td></tr>";
+        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0)) . "</td></tr>";
     }
     $customRows = '';
     foreach ($s['deductions'] as $d) {
@@ -80,12 +83,15 @@ function renderStatement(array $m, array $s, array $feeItems, array $auction): s
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
       <table>
-        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th></tr></thead>
-        <tbody>{$rows}<tr class='tr'><td colspan='3'>Gross Sales Total</td><td class='r'>" . fmt($s['grossSales']) . "</td></tr></tbody>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Total</th></tr></thead>
+        <tbody>{$rows}<tr class='tr'><td colspan='2'>Totals</td><td class='r'>" . fmt($s['grossSales']) . "</td><td class='r'>" . fmt($s['taxTotal']) . "</td><td class='r'>" . fmt($s['recycleTotal']) . "</td><td class='r' style='font-weight:700'>" . fmt($s['totalReceived']) . "</td></tr></tbody>
       </table>
       <div class='sec'>Fee Breakdown</div>
       <div class='fees'>
         <div class='row'><span>Gross Sales</span><span>" . fmt($s['grossSales']) . "</span></div>
+        <div class='row'><span>+ Consumption Tax 10%</span><span>" . fmt($s['taxTotal']) . "</span></div>
+        <div class='row'><span>+ Recycle Fees</span><span>" . fmt($s['recycleTotal']) . "</span></div>
+        <div class='row' style='font-weight:700;border-top:1px solid #ccc;padding-top:8px'><span>Total Received</span><span>" . fmt($s['totalReceived']) . "</span></div>
         {$customRows}
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
