@@ -398,7 +398,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><label class="lbl">Make *</label><input class="inp" name="make" placeholder="Toyota" required></div>
       <div><label class="lbl">Model</label><input class="inp" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" name="lot" placeholder="A-001"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0"></div>
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp mono" type="number" name="soldPrice" placeholder="850000" min="0" style="-moz-appearance:textfield" oninput="this.value=this.value.replace(/[^0-9]/g,'')"></div>
       <div style="display:flex;align-items:flex-end;gap:8px">
         <label style="display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;cursor:pointer">
           <input type="checkbox" name="sold" checked style="accent-color:var(--gold)"> Sold
