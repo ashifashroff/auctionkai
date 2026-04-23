@@ -542,6 +542,9 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     </div>
   </div>
   <?php endforeach; ?>
+<?php if (!$hasSales): ?>
+  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sold vehicles recorded for this auction yet.</div>
+<?php endif; ?>
 <?php endif; ?>
 
 <?php endif; ?>
