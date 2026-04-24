@@ -443,14 +443,14 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="grid grid-cols-6 gap-2" id="addVehicleFields">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
-        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showMemberResults()" oninput="filterMembers()">
+        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" data-parsley-required-message="Member is required" onfocus="showMemberResults()" oninput="filterMembers()">
         <input type="hidden" id="memberId" name="memberId" data-parsley-required="true">
         <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
-      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required></div>
+      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required="true" data-parsley-required-message="Make is required"></div>
       <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001" data-parsley-minlength="1"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" data-parsley-type="number" data-parsley-min="0"></div>
+      <div><label class="lbl">Sold Price (¥) *</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" data-parsley-required="true" data-parsley-type="number" data-parsley-min="0" data-parsley-required-message="Sold price is required"></div>
       <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" data-parsley-type="number" data-parsley-min="0"></div>

@@ -181,6 +181,14 @@ function submitEditForm(e) {
 // ─── ADD VEHICLE (AJAX) ────────────────────────────
 function submitAddVehicle(e) {
   e.preventDefault();
+
+  // Let Parsley validate first
+  const form = document.getElementById('addVehicleForm');
+  if (!$(form).parsley().isValid()) {
+    $(form).parsley().validate();
+    return false;
+  }
+
   const fields = document.getElementById('addVehicleFields');
   const btn = document.getElementById('addVehicleBtn');
   const msg = document.getElementById('addVehicleMsg');
@@ -201,8 +209,6 @@ function submitAddVehicle(e) {
     auctionId:  activeAuctionId
   };
 
-  if (!payload.memberId) { showAddMsg('Please select a member.', 'error'); return false; }
-  if (!payload.make) { showAddMsg('Make is required.', 'error'); return false; }
   if (!payload.auctionId) { showAddMsg('No active auction selected.', 'error'); return false; }
 
   // Fade + disable + preloader
