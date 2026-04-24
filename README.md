@@ -26,7 +26,6 @@ After major updates, drop the entire `auctionkai` database and re-import `schema
 **Default logins:**
 
 - `admin` / `password` (admin role)
-- `demo` / `password` (user role)
 
 Or register a new account.
 
@@ -74,12 +73,21 @@ No sold vehicles means ¥0 net payout.
 
 ```
 auctionkai/
+├── api/
+│   ├── add_vehicle.php
+│   ├── delete_vehicle.php
+│   ├── get_vehicle.php
+│   ├── update_vehicle.php
+│   ├── get_member_detail.php
+│   └── update_member.php
 ├── css/
 │   ├── style.css              ← Custom styles (forms, tables, statements)
 │   ├── pdf.css                ← PDF print layout
 │   └── tailwind-config.php    ← Tailwind CDN + theme colors
 ├── js/
 │   └── app.js                 ← All client-side JS
+├── .htaccess                  ← Protect config.php and schema.sql from browser access
+├── .gitignore                 ← Exclude config.php, logs, OS files
 ├── config.php                 ← Database connection
 ├── schema.sql                 ← Full schema + seed data
 ├── login.php                  ← Login & registration
@@ -89,12 +97,6 @@ auctionkai/
 ├── pdf.php                    ← A4 PDF statements
 ├── delete_auction.php         ← Delete auction with confirmation page
 ├── api.php                    ← AJAX endpoint (add/save/delete auctions, members, toggle sold)
-├── add_vehicle.php            ← AJAX: add vehicle
-├── get_vehicle.php            ← AJAX: fetch vehicle for edit
-├── update_vehicle.php         ← AJAX: save vehicle edit
-├── delete_vehicle.php         ← AJAX: delete vehicle
-├── get_member_detail.php      ← AJAX: member detail modal
-├── update_member.php          ← AJAX: save member edit
 └── README.md
 ```
 
@@ -117,6 +119,7 @@ users ──< auction ──< vehicles >── members
 ## Security
 
 Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
+- schema.sql seed data uses placeholder credentials only — never commit real usernames or passwords to public repos
 
 ---
 

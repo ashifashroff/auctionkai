@@ -1,0 +1,9 @@
+# Protect sensitive files from direct browser access
+<Files "config.php">
+ Order allow,deny
+ Deny from all
+</Files>
+<Files "schema.sql">
+ Order allow,deny
+ Deny from all
+</Files>
