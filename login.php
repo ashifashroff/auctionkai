@@ -152,12 +152,12 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" data-parsley-required="true" required>
+          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" data-parsley-required="true">
         </div>
 
         <div class="mb-4">
           <label class="lbl">Username *</label>
-          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" required>
+          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3">
         </div>
 
         <div class="mb-4">
@@ -167,12 +167,12 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" required>
+          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
-          <input class="inp" type="password" name="confirm" placeholder="••••••" data-parsley-required="true" required>
+          <input class="inp" type="password" name="confirm" placeholder="••••••" data-parsley-required="true">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
@@ -190,12 +190,12 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Username</label>
-          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" required autofocus>
+          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" autofocus>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Password</label>
-          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" required>
+          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Log In</button>
@@ -210,7 +210,7 @@ function h(string $s): string {
           <input type="hidden" name="_tok" value="<?= h($tok) ?>">
           <div class="mb-4">
             <label class="lbl">Email Address</label>
-            <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email" required>
+            <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email">
           </div>
           <button class="btn btn-gold w-full" type="submit">Send Reset Link</button>
           <div class="text-center mt-3">

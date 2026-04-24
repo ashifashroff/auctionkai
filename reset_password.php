@@ -98,12 +98,12 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">New Password <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" placeholder="••••••••" data-parsley-required data-parsley-minlength="8" required>
+          <input class="inp" type="password" name="password" placeholder="••••••••" data-parsley-required data-parsley-minlength="8">
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password</label>
-          <input class="inp" type="password" name="confirm" placeholder="••••••••" data-parsley-required data-parsley-equalto="[name='password']" required>
+          <input class="inp" type="password" name="confirm" placeholder="••••••••" data-parsley-required data-parsley-equalto="[name='password']">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Reset Password</button>

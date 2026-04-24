@@ -111,7 +111,7 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" value="<?= h($user['name']) ?>" data-parsley-required="true" required>
+          <input class="inp" name="name" value="<?= h($user['name']) ?>" data-parsley-required="true">
         </div>
 
         <div class="mb-4">
@@ -136,17 +136,17 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Current Password *</label>
-          <input class="inp" type="password" name="current_password" placeholder="Enter current password" data-parsley-required="true" required>
+          <input class="inp" type="password" name="current_password" placeholder="Enter current password" data-parsley-required="true">
         </div>
 
         <div class="mb-4">
           <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-          <input class="inp" type="password" name="new_password" placeholder="Enter new password" data-parsley-required="true" required>
+          <input class="inp" type="password" name="new_password" placeholder="Enter new password" data-parsley-required="true">
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password *</label>
-          <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" data-parsley-required="true" required>
+          <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" data-parsley-required="true">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Change Password</button>

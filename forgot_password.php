@@ -88,7 +88,7 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Email Address</label>
-          <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email" required>
+          <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Send Reset Link</button>

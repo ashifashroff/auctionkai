@@ -353,11 +353,11 @@ $tabs = [
 
     <div class="mb-4">
       <label class="lbl">Username *</label>
-      <input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true" required>
+      <input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true">
     </div>
     <div class="mb-4">
       <label class="lbl">Full Name *</label>
-      <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true" required>
+      <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true">
     </div>
     <div class="mb-4">
       <label class="lbl">Email</label>
@@ -365,7 +365,7 @@ $tabs = [
     </div>
     <div class="mb-4">
       <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-      <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true" required>
+      <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true">
     </div>
     <div class="mb-5">
       <label class="lbl">Role</label>
@@ -388,11 +388,11 @@ $tabs = [
 
     <div class="mb-4">
       <label class="lbl">Username *</label>
-      <input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true" required>
+      <input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true">
     </div>
     <div class="mb-4">
       <label class="lbl">Full Name *</label>
-      <input class="inp" name="name" value="<?= h($admin['name'] ?? '') ?>" data-parsley-required="true" required>
+      <input class="inp" name="name" value="<?= h($admin['name'] ?? '') ?>" data-parsley-required="true">
     </div>
     <div class="mb-4">
       <label class="lbl">Email</label>
@@ -431,11 +431,11 @@ $tabs = [
       <input type="hidden" name="_tok" value="<?= h($tok) ?>">
       <div class="mb-4">
         <label class="lbl">Username *</label>
-        <input class="inp" name="username" id="eu_username" data-parsley-required="true" required>
+        <input class="inp" name="username" id="eu_username" data-parsley-required="true">
       </div>
       <div class="mb-4">
         <label class="lbl">Full Name *</label>
-        <input class="inp" name="name" id="eu_name" data-parsley-required="true" required>
+        <input class="inp" name="name" id="eu_name" data-parsley-required="true">
       </div>
       <div class="mb-4">
         <label class="lbl">Email</label>
@@ -470,11 +470,11 @@ $tabs = [
       <div class="mb-2 text-ak-muted text-sm">Suspending: <b class="text-ak-text" id="sus_name"></b></div>
       <div class="mb-4">
         <label class="lbl">Reason</label>
-        <input class="inp" name="reason" placeholder="e.g. Policy violation" data-parsley-required="true" required>
+        <input class="inp" name="reason" placeholder="e.g. Policy violation" data-parsley-required="true">
       </div>
       <div class="mb-5">
         <label class="lbl">Duration (days)</label>
-        <input class="inp font-mono" type="number" name="days" value="7" data-parsley-type="number" data-parsley-min="1" required>
+        <input class="inp font-mono" type="number" name="days" value="7" data-parsley-type="number" data-parsley-min="1">
       </div>
       <div class="flex justify-end gap-2 pt-4 border-t border-ak-border">
         <button type="button" class="btn btn-dark btn-sm" onclick="closeSuspendModal()">Cancel</button>

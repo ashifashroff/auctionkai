@@ -318,8 +318,8 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-7 py-4 animate-slide-down">
   <form onsubmit="return submitAddAuction(event)" data-parsley-validate>
     <div class="add-row ar-auction mb-0">
-      <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" data-parsley-required="true" required></div>
-      <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true" required></div>
+      <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" data-parsley-required="true"></div>
+      <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true"></div>
       <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Create</button></div>
     </div>
   </form>
@@ -410,7 +410,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
   <form onsubmit="return submitAddMember(event)" data-parsley-validate>
     <div class="grid grid-cols-4 gap-3">
-      <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true" required></div>
+      <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
       <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Add</button></div>
@@ -471,14 +471,14 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="grid grid-cols-6 gap-2" id="addVehicleFields">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
-        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" required onfocus="showMemberResults()" oninput="filterMembers()">
-        <input type="hidden" id="memberId" name="memberId" data-parsley-required="true" required>
+        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showMemberResults()" oninput="filterMembers()">
+        <input type="hidden" id="memberId" name="memberId" data-parsley-required="true">
         <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
-      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required required></div>
+      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required></div>
       <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
       <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001" data-parsley-minlength="1"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0" data-parsley-type="number" data-parsley-min="0"></div>
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" data-parsley-type="number" data-parsley-min="0"></div>
@@ -642,11 +642,11 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
       <div class="grid grid-cols-2 gap-3 max-[600px]:grid-cols-1">
         <div class="relative">
           <label class="lbl">Member *</label>
-          <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" data-parsley-required="true" required>
-          <input type="hidden" id="edit_memberId" name="memberId" data-parsley-required="true" required>
+          <input class="inp" id="edit_memberSearch" placeholder="Type to search member…" autocomplete="off" oninput="filterModalMembers()" data-parsley-required="true">
+          <input type="hidden" id="edit_memberId" name="memberId" data-parsley-required="true">
           <div id="edit_memberDropdown" class="member-dropdown" style="display:none"></div>
         </div>
-        <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" data-parsley-required="true" required></div>
+        <div><label class="lbl">Make *</label><input class="inp" id="edit_make" name="make" data-parsley-required="true"></div>
         <div><label class="lbl">Model</label><input class="inp" id="edit_model" name="model"></div>
         <div><label class="lbl">Lot #</label><input class="inp" id="edit_lot" name="lot"></div>
         <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_soldPrice" name="soldPrice" data-parsley-type="number" data-parsley-min="0"></div>
@@ -695,7 +695,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div id="editMemberMsg" class="hidden mb-3 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
     <form id="editMemberForm" onsubmit="return submitEditMember(event)" data-parsley-validate>
       <input type="hidden" id="em_id" name="id">
-      <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" id="em_name" name="name" data-parsley-required="true" required></div>
+      <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" id="em_name" name="name" data-parsley-required="true"></div>
       <div class="mb-4"><label class="lbl">Phone</label><input class="inp" id="em_phone" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div class="mb-5"><label class="lbl">Email</label><input class="inp" type="email" id="em_email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
       <div class="flex justify-end gap-2 pt-4 border-t border-ak-border">
