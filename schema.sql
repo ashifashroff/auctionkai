@@ -69,6 +69,15 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ─────────────────────────────────────────────────────────────────
+-- Indexes
+-- ─────────────────────────────────────────────────────────────────
+CREATE INDEX idx_vehicles_auction_id ON vehicles(auction_id);
+CREATE INDEX idx_vehicles_sold ON vehicles(sold);
+CREATE INDEX idx_vehicles_member_id ON vehicles(member_id);
+CREATE INDEX idx_auction_user_id ON auction(user_id);
+CREATE INDEX idx_members_user_id ON members(user_id);
+
+-- ─────────────────────────────────────────────────────────────────
 -- Seed Data
 -- ─────────────────────────────────────────────────────────────────
 
