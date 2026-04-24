@@ -1,5 +1,43 @@
+# ─── Sensitive Config ────────────────────────
 config.php
+includes/db.php
+
+# ─── Database ────────────────────────────────
+*.sql.bak
+*.sql.gz
+
+# ─── Logs ────────────────────────────────────
 *.log
+/logs/
+error_log
+
+# ─── OS Files ────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ─── IDE / Editor ────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+nbproject/
+
+# ─── PHP ─────────────────────────────────────
 /vendor/
+composer.lock
+
+# ─── Environment ─────────────────────────────
+.env
+.env.local
+.env.production
+
+# ─── Upload folders (if added later) ─────────
+/uploads/
+/storage/
+
+# ─── Backup files ────────────────────────────
+*.bak
+*.backup
+*.tmp
+*~
