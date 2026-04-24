@@ -4,7 +4,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 session_start();
 
 if (!empty($_SESSION['user_id'])) {
-    header('Location: /auctionkai/index.php');
+    header('Location: ../index.php');
     exit;
 }
 
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_username'] = $user['username'];
                 session_regenerate_id(true);
-                header('Location: /auctionkai/index.php');
+                header('Location: ../index.php');
                 exit;
             }
         } else {
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <title>AuctionKai — <?= $showRegister ? 'Register' : 'Login' ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/auctionkai/css/style.css">
+<link rel="stylesheet" href="../css/style.css">
 <?php include __DIR__ . '/../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
       <?php if ($showRegister): ?>
       <!-- Register -->
-      <form method="POST" action="/auctionkai/auth/login.php?register=1" data-parsley-validate>
+      <form method="POST" action="login.php?register=1" data-parsley-validate>
         <input type="hidden" name="form" value="register">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
@@ -177,12 +177,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
       </form>
 
       <div class="text-center mt-5 text-sm text-ak-muted">
-        Already have an account? <a href="/auctionkai/auth/login.php" class="text-ak-gold hover:underline">Log in</a>
+        Already have an account? <a href="login.php" class="text-ak-gold hover:underline">Log in</a>
       </div>
 
       <?php else: ?>
       <!-- Login -->
-      <form method="POST" action="/auctionkai/auth/login.php" id="loginForm" data-parsley-validate>
+      <form method="POST" action="login.php" id="loginForm" data-parsley-validate>
         <input type="hidden" name="form" value="login">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
@@ -204,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         <a href="#" onclick="document.getElementById('forgotForm').style.display='block';document.getElementById('forgotToggle').style.display='none';return false;" class="text-ak-gold hover:underline text-sm">Forgot password?</a>
       </div>
       <div id="forgotForm" style="display:none">
-        <form method="POST" action="/auctionkai/auth/forgot_password.php" data-parsley-validate class="mt-4 pt-4 border-t border-ak-border">
+        <form method="POST" action="forgot_password.php" data-parsley-validate class="mt-4 pt-4 border-t border-ak-border">
           <input type="hidden" name="_tok" value="<?= h($tok) ?>">
           <div class="mb-4">
             <label class="lbl">Email Address</label>
@@ -218,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
       </div>
 
       <div class="text-center mt-5 text-sm text-ak-muted">
-        Don't have an account? <a href="/auctionkai/auth/login.php?register=1" class="text-ak-gold hover:underline">Register</a>
+        Don't have an account? <a href="login.php?register=1" class="text-ak-gold hover:underline">Register</a>
       </div>
       <?php endif; ?>
 

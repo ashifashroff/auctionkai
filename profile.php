@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/db.php';
 session_start();
 
 if (empty($_SESSION['user_id'])) {
-    header('Location: /auctionkai/auth/login.php');
+    header('Location: auth/login.php');
     exit;
 }
 
@@ -18,7 +18,7 @@ $user = $user->fetch();
 
 if (!$user) {
     session_destroy();
-    header('Location: /auctionkai/auth/login.php');
+    header('Location: auth/login.php');
     exit;
 }
 
@@ -153,7 +153,7 @@ require_once __DIR__ . '/includes/helpers.php';
 
     <!-- Back Link -->
     <div class="text-center mt-5 animate-fade-in">
-      <a href="/auctionkai/index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
+      <a href="index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
     </div>
 
   </div>
