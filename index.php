@@ -276,6 +276,16 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
       <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
     </a>
+    <?php if (!empty($_SESSION['original_admin_id'])): ?>
+      <form method="POST" action="admin.php" style="display:inline">
+        <input type="hidden" name="action" value="return_to_admin">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
+        <button type="submit" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-ak-gold/20 text-ak-gold border border-ak-gold/30 hover:bg-ak-gold/30 transition-colors">← Return to Admin Panel</button>
+      </form>
+    <?php endif; ?>
+    <?php if ($userRole === 'admin'): ?>
+      <a href="admin.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">⚙️ Admin</a>
+    <?php endif; ?>
     <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
   </div>
 </div>

@@ -37,14 +37,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            unset($_SESSION[$attemptKey]);
-            $_SESSION['user_id'] = (int)$user['id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['user_username'] = $user['username'];
-            session_regenerate_id(true);
-            header('Location: index.php');
-            exit;
+            // Check suspended status
+            $userStatus = $user['status'] ?? 'active';
+            if ($userStatus === 'suspended') {
+                $suspendedUntil = $user['suspended_until'] ?? null;
+                if ($suspendedUntil && strtotime($suspendedUntil) > time()) {
+                    $untilFormatted = date('M j, Y g:i A', strtotime($suspendedUntil));
+                    $reason = $user['suspend_reason'] ?? 'No reason provided';
+                    $error = "Your account is suspended until {$untilFormatted}. Reason: {$reason}";
+                } else {
+                    // Suspension expired — reactivate
+                    $db->prepare("UPDATE users SET status='active', suspended_until=NULL, suspend_reason=NULL WHERE id=?")->execute([(int)$user['id']]);
+                    $userStatus = 'active';
+                }
+            }
+            if ($userStatus === 'restricted') {
+                $error = 'Your account has been restricted. Contact an administrator.';
+            }
+            if ($userStatus === 'active') {
+                unset($_SESSION[$attemptKey]);
+                $_SESSION['user_id'] = (int)$user['id'];
+                $_SESSION['user_name'] = $user['name'];
+                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['user_username'] = $user['username'];
+                session_regenerate_id(true);
+                header('Location: index.php');
+                exit;
+            }
         } else {
             $att['count']++;
             $att['last'] = time();
