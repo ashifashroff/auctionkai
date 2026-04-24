@@ -184,10 +184,9 @@ function submitAddVehicle(e) {
 
   // Let Parsley validate first
   const form = document.getElementById('addVehicleForm');
-  if (!$(form).parsley().isValid()) {
-    $(form).parsley().validate();
-    return false;
-  }
+  const parsleyForm = $(form).parsley();
+  parsleyForm.validate();
+  if (!parsleyForm.isValid()) return false;
 
   const fields = document.getElementById('addVehicleFields');
   const btn = document.getElementById('addVehicleBtn');
@@ -210,6 +209,7 @@ function submitAddVehicle(e) {
   };
 
   if (!payload.auctionId) { showAddMsg('No active auction selected.', 'error'); return false; }
+  if (payload.sold && !payload.soldPrice) { showAddMsg('Sold price is required for sold vehicles.', 'error'); return false; }
 
   // Fade + disable + preloader
   fields.style.opacity = '0.4';
