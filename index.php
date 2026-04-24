@@ -22,7 +22,7 @@ function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 function postForm(string $action, string $tabTarget, string $tok): string {
-    return "<form method='POST' action='index.php' style='display:contents'>"
+    return "<form method='POST' action='index.php' style='display:contents' data-parsley-validate>"
          . "<input type='hidden' name='action' value='" . h($action) . "'>"
          . "<input type='hidden' name='tab'    value='" . h($tabTarget) . "'>"
          . "<input type='hidden' name='_tok'   value='" . h($tok) . "'>";
@@ -260,7 +260,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
   </div>
   <?php if ($auction): ?>
   <div class="flex items-center gap-2 flex-1 justify-center">
-    <form onsubmit="return submitSaveAuction(event)" style="display:contents">
+    <form onsubmit="return submitSaveAuction(event)" style='display:contents' data-parsley-validate>
       <div class="flex items-center gap-2 flex-wrap">
         <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
         <input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled>
@@ -277,7 +277,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
     </a>
     <?php if (!empty($_SESSION['original_admin_id'])): ?>
-      <form method="POST" action="admin.php" style="display:inline">
+      <form method="POST" action="admin.php" style="display:inline" data-parsley-validate>
         <input type="hidden" name="action" value="return_to_admin">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
         <button type="submit" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-ak-gold/20 text-ak-gold border border-ak-gold/30 hover:bg-ak-gold/30 transition-colors">← Return to Admin Panel</button>

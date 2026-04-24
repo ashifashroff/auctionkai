@@ -310,7 +310,7 @@ $tabs = [
         <td class="px-4 py-3 text-center">
           <div class="flex gap-1.5 justify-center flex-wrap">
             <?php if ((int)$u['id'] !== $userId): ?>
-              <form method="POST" action="admin.php?tab=users" style="display:inline">
+              <form method="POST" action="admin.php?tab=users" style="display:inline" data-parsley-validate>
                 <input type="hidden" name="action" value="login_as">
                 <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                 <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -320,7 +320,7 @@ $tabs = [
             <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>, '<?= h(addslashes($u['username'])) ?>', '<?= h(addslashes($u['name'])) ?>', '<?= h(addslashes($u['email'])) ?>', '<?= h($u['role']) ?>')">Edit</button>
             <?php if ((int)$u['id'] !== $userId): ?>
               <?php if ($st === 'suspended'): ?>
-                <form method="POST" action="admin.php?tab=users" style="display:inline">
+                <form method="POST" action="admin.php?tab=users" style="display:inline" data-parsley-validate>
                   <input type="hidden" name="action" value="unsuspend_user">
                   <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                   <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -329,7 +329,7 @@ $tabs = [
               <?php else: ?>
                 <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>, '<?= h(addslashes($u['name'])) ?>')">Suspend</button>
               <?php endif; ?>
-              <form method="POST" action="admin.php?tab=users" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their auctions, members, and vehicles.')">
+              <form method="POST" action="admin.php?tab=users" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their auctions, members, and vehicles.')" data-parsley-validate>
                 <input type="hidden" name="action" value="delete_user">
                 <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                 <input type="hidden" name="_tok" value="<?= h($tok) ?>">

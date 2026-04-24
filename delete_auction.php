@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes'
       </div>
 
       <!-- Confirm Form -->
-      <form method="POST" action="delete_auction.php?auction_id=<?= $auctionId ?>">
+      <form method="POST" action="delete_auction.php?auction_id=<?= $auctionId ?>" data-parsley-validate>
         <input type="hidden" name="confirm" value="yes">
         <div class="flex gap-3">
           <a href="index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
@@ -126,5 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes'
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 </body>
 </html>
