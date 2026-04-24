@@ -252,9 +252,10 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <form onsubmit="return submitSaveAuction(event)" style="display:contents">
       <div class="flex items-center gap-2 flex-wrap">
         <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
-        <input class="inp w-36" type="date" name="date" value="<?= h($auction['date']) ?>">
+        <input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled>
         <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>"><span class="text-ak-muted text-[11px]">¥/member</span></div>
         <button class="btn btn-dark btn-sm" type="submit">Save</button>
+        <a class="btn btn-sm" href="delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
       </div>
     </form>
   </div>
