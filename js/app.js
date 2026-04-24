@@ -430,8 +430,16 @@ function openMemberDetail(memberId) {
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
+  if (!activeAuctionId) {
+    document.getElementById('mdContent').innerHTML = '<div class="text-ak-muted text-center py-8">No active auction selected.</div>';
+    return;
+  }
+
   fetch(`api/get_member_detail.php?member_id=${memberId}&auction_id=${activeAuctionId}`)
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) throw new Error('Server returned ' + r.status);
+      return r.json();
+    })
     .then(data => {
       if (data.error) { document.getElementById('mdContent').innerHTML = `<div class="text-ak-red text-center py-8">${data.error}</div>`; return; }
 
@@ -467,7 +475,8 @@ function openMemberDetail(memberId) {
 
       document.getElementById('mdContent').innerHTML = html;
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error('Member detail error:', err);
       document.getElementById('mdContent').innerHTML = '<div class="text-ak-red text-center py-8">Failed to load member details.</div>';
     });
 }
