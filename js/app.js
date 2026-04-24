@@ -84,7 +84,7 @@ function openEditModal(vehicleId) {
   toggleModalSoldFields(true);
 
   // Fetch vehicle data
-  fetch(`get_vehicle.php?id=${vehicleId}`)
+  fetch(`api/get_vehicle.php?id=${vehicleId}`)
     .then(r => r.json())
     .then(data => {
       if (data.error) {
@@ -155,7 +155,7 @@ function submitEditForm(e) {
   if (!payload.memberId) { showModalMsg('Please select a member.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
   if (!payload.make) { showModalMsg('Make is required.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
 
-  fetch('update_vehicle.php', {
+  fetch('api/update_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -211,7 +211,7 @@ function submitAddVehicle(e) {
   btn.disabled = true;
   btn.innerHTML = '<span class="add-preloader"></span> Adding…';
 
-  fetch('add_vehicle.php', {
+  fetch('api/add_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -344,7 +344,7 @@ function openEditMemberModal(memberId) {
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  fetch(`update_member.php?id=${memberId}`)
+  fetch(`api/update_member.php?id=${memberId}`)
     .then(r => r.json())
     .then(data => {
       if (data.error) { showEditMemberMsg(data.error, 'error'); return; }
@@ -390,7 +390,7 @@ function submitEditMember(e) {
 
   if (!payload.name) { showEditMemberMsg('Name is required.', 'error'); btn.disabled = false; btn.textContent = 'Save'; return false; }
 
-  fetch('update_member.php', {
+  fetch('api/update_member.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
@@ -418,7 +418,7 @@ function openMemberDetail(memberId) {
   modal.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  fetch(`get_member_detail.php?member_id=${memberId}&auction_id=${activeAuctionId}`)
+  fetch(`api/get_member_detail.php?member_id=${memberId}&auction_id=${activeAuctionId}`)
     .then(r => r.json())
     .then(data => {
       if (data.error) { document.getElementById('mdContent').innerHTML = `<div class="text-ak-red text-center py-8">${data.error}</div>`; return; }
@@ -475,7 +475,7 @@ function deleteVehicle(vehicleId, btn) {
   if (!confirm('Remove this vehicle?')) return;
   btn.disabled = true;
   btn.textContent = '…';
-  fetch('delete_vehicle.php', {
+  fetch('api/delete_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id: vehicleId })
