@@ -1,9 +1,10 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/helpers.php';
 session_start();
 
 if (empty($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /auctionkai/auth/login.php');
     exit;
 }
 
@@ -11,9 +12,6 @@ $db = db();
 $userId = (int)$_SESSION['user_id'];
 $error = '';
 
-function h(string $s): string {
-    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-}
 function fmt(float $n): string {
     return '¥' . number_format(round($n));
 }
@@ -25,7 +23,7 @@ $stmt->execute([$auctionId, $userId]);
 $auction = $stmt->fetch();
 
 if (!$auction) {
-    header('Location: index.php');
+    header('Location: /auctionkai/index.php');
     exit;
 }
 
@@ -52,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes'
     if (($_SESSION['auction_id'] ?? 0) == $auctionId) {
         unset($_SESSION['auction_id']);
     }
-    header('Location: index.php?tab=dashboard');
+    header('Location: /auctionkai/index.php?tab=dashboard');
     exit;
 }
 ?>
@@ -117,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes'
       <form method="POST" action="delete_auction.php?auction_id=<?= $auctionId ?>" data-parsley-validate>
         <input type="hidden" name="confirm" value="yes">
         <div class="flex gap-3">
-          <a href="index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
+          <a href="/auctionkai/index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
           <button class="btn flex-1 text-center" type="submit" style="background:var(--red);color:#fff" onclick="return confirm('Are you absolutely sure? This will permanently delete this auction and all its vehicles.')">🗑 Confirm Delete</button>
         </div>
       </form>

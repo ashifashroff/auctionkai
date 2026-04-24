@@ -1,10 +1,11 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/helpers.php';
 session_start();
 
 // ─── AUTH CHECK ────────────────────────────────────────────────────────────────
 if (empty($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /auctionkai/auth/login.php');
     exit;
 }
 
@@ -15,12 +16,6 @@ $userName = $_SESSION['user_name'] ?? 'User';
 $userRole = $_SESSION['user_role'] ?? 'user';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
-function fmt(float $n): string {
-    return '¥' . number_format(round($n));
-}
-function h(string $s): string {
-    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-}
 function postForm(string $action, string $tabTarget, string $tok): string {
     return "<form method='POST' action='index.php' style='display:contents' data-parsley-validate>"
          . "<input type='hidden' name='action' value='" . h($action) . "'>"
@@ -196,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     $tab = $_POST['tab'] ?? 'dashboard';
-    header("Location: index.php?tab=$tab");
+    header("Location: /auctionkai/index.php?tab=$tab");
     exit;
 }
 
@@ -211,29 +206,6 @@ $vehicles = $activeAuctionId
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
-function calcStatement(int $memberId, array $vehicles, float $commissionFee): array {
-    $all = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
-    $mv = array_values(array_filter($all, fn($v) => $v['sold']));
-    $uv = array_values(array_filter($all, fn($v) => !$v['sold']));
-    $count       = count($mv);
-    $unsoldCount = count($uv);
-    $grossSales  = array_sum(array_column($mv, 'sold_price'));
-    $taxTotal    = array_sum(array_map(fn($v) => round((float)$v['sold_price'] * 0.10), $mv));
-    $recycleTotal= array_sum(array_map(fn($v) => (float)($v['recycle_fee'] ?? 0), $mv));
-    $listingFeeTotal = array_sum(array_map(fn($v) => (float)($v['listing_fee'] ?? 0), $mv));
-    $soldFeeTotal    = array_sum(array_map(fn($v) => (float)($v['sold_fee'] ?? 0), $mv));
-    $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $uv)); // nagare for unsold only
-    $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $all));
-
-    $commissionTotal = $commissionFee;
-    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
-    $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
-    $totalDed = $totalVehicleDed + $commissionTotal;
-    $netPayout = $count > 0 ? $totalReceived - $totalDed : 0;
-
-    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
-}
-
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
 $tab      = $_GET['tab'] ?? 'dashboard';
 $tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'statements'=>['icon'=>'📄','label'=>'Statements']];
@@ -266,27 +238,27 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled>
         <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"><span class="text-ak-muted text-[11px]">¥/member</span></div>
         <button class="btn btn-dark btn-sm" type="submit">Save</button>
-        <a class="btn btn-sm" href="delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
+        <a class="btn btn-sm" href="/auctionkai/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
       </div>
     </form>
   </div>
   <?php endif; ?>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
-    <a href="profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
+    <a href="/auctionkai/profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
       <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
       <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
     </a>
     <?php if (!empty($_SESSION['original_admin_id'])): ?>
-      <form method="POST" action="admin.php" style="display:inline" data-parsley-validate>
+      <form method="POST" action="/auctionkai/admin.php" style="display:inline" data-parsley-validate>
         <input type="hidden" name="action" value="return_to_admin">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
         <button type="submit" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-ak-gold/20 text-ak-gold border border-ak-gold/30 hover:bg-ak-gold/30 transition-colors">← Return to Admin Panel</button>
       </form>
     <?php endif; ?>
     <?php if ($userRole === 'admin'): ?>
-      <a href="admin.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">⚙️ Admin</a>
+      <a href="/auctionkai/admin.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">⚙️ Admin</a>
     <?php endif; ?>
-    <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
+    <a href="/auctionkai/auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
   </div>
 </div>
 
@@ -553,7 +525,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php elseif ($tab === 'statements'): ?>
 <div class="flex justify-between items-center mb-6">
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
-  <a class="btn btn-dark" href="pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
+  <a class="btn btn-dark" href="/auctionkai/pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
 </div>
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sales history available for this auction.</div>
@@ -571,7 +543,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
         <a class="btn-email" href="mailto:<?= h($m['email']) ?>?subject=<?= $emailSubject ?>&body=<?= $emailBody ?>">✉ Send Email</a>
-        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
+        <a class="btn btn-gold btn-sm" href="/auctionkai/pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
     <div class="sb2">

@@ -1,5 +1,6 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/helpers.php';
 session_start();
 
 $db = db();
@@ -50,15 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
             // Delete used token
             $db->prepare("DELETE FROM password_resets WHERE token = ?")->execute([$token]);
 
-            header('Location: login.php?reset=1');
+            header('Location: /auctionkai/auth/login.php?reset=1');
             exit;
         }
     }
 }
 
-function h(string $s): string {
-    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -68,8 +66,8 @@ function h(string $s): string {
 <title>AuctionKai — Reset Password</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<?php include 'css/tailwind-config.php'; ?>
+<link rel="stylesheet" href="/auctionkai/css/style.css">
+<?php include __DIR__ . '/../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
@@ -87,13 +85,13 @@ function h(string $s): string {
         <div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-5"><?= h($error) ?></div>
         <?php if (!$validToken): ?>
           <div class="text-center mt-3">
-            <a href="forgot_password.php" class="text-ak-gold hover:underline text-sm">Request a new reset link</a>
+            <a href="/auctionkai/auth/forgot_password.php" class="text-ak-gold hover:underline text-sm">Request a new reset link</a>
           </div>
         <?php endif; ?>
       <?php endif; ?>
 
       <?php if ($validToken): ?>
-      <form method="POST" action="reset_password.php?token=<?= h($token) ?>" data-parsley-validate>
+      <form method="POST" action="/auctionkai/auth/reset_password.php?token=<?= h($token) ?>" data-parsley-validate>
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
         <div class="mb-4">
@@ -111,7 +109,7 @@ function h(string $s): string {
       <?php endif; ?>
 
       <div class="text-center mt-5 text-sm text-ak-muted">
-        <a href="login.php" class="text-ak-gold hover:underline">← Back to Login</a>
+        <a href="/auctionkai/auth/login.php" class="text-ak-gold hover:underline">← Back to Login</a>
       </div>
 
     </div>

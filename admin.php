@@ -1,11 +1,12 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/helpers.php';
 session_start();
 
 // ─── ADMIN PROTECTION ────────────────────────────────────────────────────────
 if (empty($_SESSION['user_id']) || ($_SESSION['user_role'] ?? '') !== 'admin') {
     $_SESSION['admin_error'] = 'Access denied. Admins only.';
-    header('Location: index.php');
+    header('Location: /auctionkai/index.php');
     exit;
 }
 
@@ -14,10 +15,6 @@ $tok = $_SESSION['tok'];
 $userId   = (int)$_SESSION['user_id'];
 $userName = $_SESSION['user_name'] ?? 'Admin';
 $userRole = $_SESSION['user_role'] ?? 'admin';
-
-function h(string $s): string {
-    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-}
 
 $db = db();
 $msg = '';
@@ -45,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name']           = $target['name'];
             $_SESSION['user_role']           = $target['role'];
             $_SESSION['user_username']       = $target['username'];
-            header('Location: index.php');
+            header('Location: /auctionkai/index.php');
             exit;
         }
         $msg = 'Invalid user.'; $msgType = 'error';
@@ -67,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         unset($_SESSION['original_admin_id'], $_SESSION['original_admin_name']);
-        header('Location: admin.php');
+        header('Location: /auctionkai/admin.php');
         exit;
     }
 
@@ -243,8 +240,8 @@ $tabs = [
   <div class="flex items-center gap-3 shrink-0 ml-auto">
     <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
     <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
-    <a href="index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">← Back to App</a>
-    <a href="logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
+    <a href="/auctionkai/index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">← Back to App</a>
+    <a href="/auctionkai/auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
   </div>
 </div>
 
@@ -310,7 +307,7 @@ $tabs = [
         <td class="px-4 py-3 text-center">
           <div class="flex gap-1.5 justify-center flex-wrap">
             <?php if ((int)$u['id'] !== $userId): ?>
-              <form method="POST" action="admin.php?tab=users" style="display:inline" data-parsley-validate>
+              <form method="POST" action="/auctionkai/admin.php?tab=users" style="display:inline" data-parsley-validate>
                 <input type="hidden" name="action" value="login_as">
                 <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                 <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -320,7 +317,7 @@ $tabs = [
             <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>, '<?= h(addslashes($u['username'])) ?>', '<?= h(addslashes($u['name'])) ?>', '<?= h(addslashes($u['email'])) ?>', '<?= h($u['role']) ?>')">Edit</button>
             <?php if ((int)$u['id'] !== $userId): ?>
               <?php if ($st === 'suspended'): ?>
-                <form method="POST" action="admin.php?tab=users" style="display:inline" data-parsley-validate>
+                <form method="POST" action="/auctionkai/admin.php?tab=users" style="display:inline" data-parsley-validate>
                   <input type="hidden" name="action" value="unsuspend_user">
                   <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                   <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -329,7 +326,7 @@ $tabs = [
               <?php else: ?>
                 <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>, '<?= h(addslashes($u['name'])) ?>')">Suspend</button>
               <?php endif; ?>
-              <form method="POST" action="admin.php?tab=users" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their auctions, members, and vehicles.')" data-parsley-validate>
+              <form method="POST" action="/auctionkai/admin.php?tab=users" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their auctions, members, and vehicles.')" data-parsley-validate>
                 <input type="hidden" name="action" value="delete_user">
                 <input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>">
                 <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -347,7 +344,7 @@ $tabs = [
 <?php elseif ($tab === 'create'): ?>
 <h2 class="text-lg font-bold mb-5">Create New User</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
-  <form method="POST" action="admin.php?tab=create" data-parsley-validate>
+  <form method="POST" action="/auctionkai/admin.php?tab=create" data-parsley-validate>
     <input type="hidden" name="action" value="create_user">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
@@ -382,7 +379,7 @@ $tabs = [
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
-  <form method="POST" action="admin.php?tab=settings" data-parsley-validate>
+  <form method="POST" action="/auctionkai/admin.php?tab=settings" data-parsley-validate>
     <input type="hidden" name="action" value="admin_settings">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
@@ -425,7 +422,7 @@ $tabs = [
       <h3 class="text-ak-gold text-lg font-bold">Edit User</h3>
       <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeEditUserModal()">×</button>
     </div>
-    <form method="POST" action="admin.php?tab=users" data-parsley-validate>
+    <form method="POST" action="/auctionkai/admin.php?tab=users" data-parsley-validate>
       <input type="hidden" name="action" value="edit_user">
       <input type="hidden" name="user_id" id="eu_id">
       <input type="hidden" name="_tok" value="<?= h($tok) ?>">
@@ -463,7 +460,7 @@ $tabs = [
       <h3 class="text-yellow-400 text-lg font-bold">⏸ Suspend User</h3>
       <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeSuspendModal()">×</button>
     </div>
-    <form method="POST" action="admin.php?tab=users" data-parsley-validate>
+    <form method="POST" action="/auctionkai/admin.php?tab=users" data-parsley-validate>
       <input type="hidden" name="action" value="suspend_user">
       <input type="hidden" name="user_id" id="sus_id">
       <input type="hidden" name="_tok" value="<?= h($tok) ?>">

@@ -1,9 +1,9 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/includes/db.php';
 session_start();
 
 if (empty($_SESSION['user_id'])) {
-    header('Location: login.php');
+    header('Location: /auctionkai/auth/login.php');
     exit;
 }
 
@@ -18,7 +18,7 @@ $user = $user->fetch();
 
 if (!$user) {
     session_destroy();
-    header('Location: login.php');
+    header('Location: /auctionkai/auth/login.php');
     exit;
 }
 
@@ -63,9 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-function h(string $s): string {
-    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
-}
+require_once __DIR__ . '/includes/helpers.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -155,7 +153,7 @@ function h(string $s): string {
 
     <!-- Back Link -->
     <div class="text-center mt-5 animate-fade-in">
-      <a href="index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
+      <a href="/auctionkai/index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
     </div>
 
   </div>

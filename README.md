@@ -84,18 +84,26 @@ auctionkai/
 │   ├── update_vehicle.php
 │   ├── get_member_detail.php
 │   └── update_member.php
+├── auth/
+│   ├── login.php              ← Login & registration
+│   ├── logout.php             ← Session destroy
+│   ├── forgot_password.php    ← Password reset request
+│   └── reset_password.php     ← Set new password
 ├── css/
 │   ├── style.css              ← Custom styles (forms, tables, statements)
 │   ├── pdf.css                ← PDF print layout
 │   └── tailwind-config.php    ← Tailwind CDN + theme colors
+├── includes/
+│   ├── .htaccess              ← Block direct browser access
+│   ├── auth_check.php         ← Session guard for protected pages
+│   ├── db.php                 ← PDO connection (requires config.php)
+│   └── helpers.php            ← Shared functions: fmt(), h(), calcStatement()
 ├── js/
 │   └── app.js                 ← All client-side JS
 ├── .htaccess                  ← Protect config.php and schema.sql from browser access
 ├── .gitignore                 ← Exclude config.php, logs, OS files
-├── config.php                 ← Database connection
+├── config.php                 ← DB constants only (host, name, user, pass)
 ├── schema.sql                 ← Full schema + seed data
-├── login.php                  ← Login & registration
-├── logout.php                 ← Session destroy
 ├── index.php                  ← Main app (dashboard, members, vehicles, statements)
 ├── admin.php                  ← Admin panel (user management)
 ├── delete_auction.php         ← AJAX: delete auction

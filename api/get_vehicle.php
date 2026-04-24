@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once __DIR__ . '/../includes/db.php';
 session_start();
 
 header('Content-Type: application/json; charset=utf-8');
