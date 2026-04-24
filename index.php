@@ -69,13 +69,20 @@ foreach ($expiredAuctions as $ea) {
 }
 // Refresh if current auction was deleted
 if ($activeAuctionId) { $chkAuc = $db->prepare("SELECT id FROM auction WHERE id=? AND user_id=?"); $chkAuc->execute([$activeAuctionId, $userId]); if (!$chkAuc->fetch()) $activeAuctionId = 0; }
-    unset($_SESSION['auction_id']);
+if (!$activeAuctionId) {
     $allAuctions_q = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC");
     $allAuctions_q->execute([$userId]);
     $allAuctions = $allAuctions_q->fetchAll();
     $auction = !empty($allAuctions) ? $allAuctions[0] : null;
     $activeAuctionId = $auction ? (int)$auction['id'] : 0;
     $_SESSION['auction_id'] = $activeAuctionId;
+} else {
+    $allAuctions_q = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC");
+    $allAuctions_q->execute([$userId]);
+    $allAuctions = $allAuctions_q->fetchAll();
+    $auction = null;
+    foreach ($allAuctions as $a) { if ((int)$a['id'] === $activeAuctionId) { $auction = $a; break; } }
+}
 
 // ─── HANDLE POSTS ────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
