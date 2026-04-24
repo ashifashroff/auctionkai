@@ -133,6 +133,10 @@ function h(string $s): string {
     <!-- Card -->
     <div class="bg-ak-card border border-ak-border rounded-xl p-8 animate-fade-in-up">
 
+      <?php if (isset($_GET['reset'])): ?>
+        <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-5">Password reset successfully! You can now log in.</div>
+      <?php endif; ?>
+
       <?php if ($error): ?>
         <div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-5"><?= h($error) ?></div>
       <?php endif; ?>
@@ -142,7 +146,7 @@ function h(string $s): string {
 
       <?php if ($showRegister): ?>
       <!-- Register -->
-      <form method="POST" action="login.php?register=1">
+      <form method="POST" action="login.php?register=1" data-parsley-validate>
         <input type="hidden" name="form" value="register">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
@@ -153,17 +157,17 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Username *</label>
-          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" required>
+          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" required>
         </div>
 
         <div class="mb-4">
           <label class="lbl">Email</label>
-          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>">
+          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>" data-parsley-type="email">
         </div>
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-          <input class="inp" type="password" name="password" placeholder="••••••" required>
+          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" required>
         </div>
 
         <div class="mb-5">
@@ -180,22 +184,40 @@ function h(string $s): string {
 
       <?php else: ?>
       <!-- Login -->
-      <form method="POST" action="login.php">
+      <form method="POST" action="login.php" id="loginForm" data-parsley-validate>
         <input type="hidden" name="form" value="login">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
         <div class="mb-4">
           <label class="lbl">Username</label>
-          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" required autofocus>
+          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" required autofocus>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Password</label>
-          <input class="inp" type="password" name="password" placeholder="••••••" required>
+          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" required>
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Log In</button>
       </form>
+
+      <!-- Forgot Password -->
+      <div id="forgotToggle" class="text-center mt-4">
+        <a href="#" onclick="document.getElementById('forgotForm').style.display='block';document.getElementById('forgotToggle').style.display='none';return false;" class="text-ak-gold hover:underline text-sm">Forgot password?</a>
+      </div>
+      <div id="forgotForm" style="display:none">
+        <form method="POST" action="forgot_password.php" data-parsley-validate class="mt-4 pt-4 border-t border-ak-border">
+          <input type="hidden" name="_tok" value="<?= h($tok) ?>">
+          <div class="mb-4">
+            <label class="lbl">Email Address</label>
+            <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email" required>
+          </div>
+          <button class="btn btn-gold w-full" type="submit">Send Reset Link</button>
+          <div class="text-center mt-3">
+            <a href="#" onclick="document.getElementById('forgotForm').style.display='none';document.getElementById('forgotToggle').style.display='block';return false;" class="text-ak-muted text-sm hover:underline">← Back to login</a>
+          </div>
+        </form>
+      </div>
 
       <div class="text-center mt-5 text-sm text-ak-muted">
         Don't have an account? <a href="login.php?register=1" class="text-ak-gold hover:underline">Register</a>
@@ -207,5 +229,6 @@ function h(string $s): string {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 </body>
 </html>

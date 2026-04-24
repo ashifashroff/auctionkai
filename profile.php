@@ -101,8 +101,7 @@ function h(string $s): string {
     <!-- Profile Info Card -->
     <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
       <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Profile Information</div>
-      <form method="POST" action="profile.php">
-        <input type="hidden" name="form" value="update_profile">
+      <form method="POST" action="profile.php" data-parsley-validate>
 
         <div class="mb-4">
           <label class="lbl">Username</label>
@@ -132,7 +131,7 @@ function h(string $s): string {
     <!-- Password Card -->
     <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
       <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Change Password</div>
-      <form method="POST" action="profile.php">
+      <form method="POST" action="profile.php" data-parsley-validate>
         <input type="hidden" name="form" value="change_password">
 
         <div class="mb-4">
@@ -162,5 +161,6 @@ function h(string $s): string {
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 </body>
 </html>

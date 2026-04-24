@@ -77,6 +77,15 @@ CREATE INDEX idx_vehicles_member_id ON vehicles(member_id);
 CREATE INDEX idx_auction_user_id ON auction(user_id);
 CREATE INDEX idx_members_user_id ON members(user_id);
 
+-- ── Password Resets ────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `password_resets` (
+  `id`         INT AUTO_INCREMENT PRIMARY KEY,
+  `email`      VARCHAR(200) NOT NULL,
+  `token`      VARCHAR(64) NOT NULL,
+  `expires_at` DATETIME NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ─────────────────────────────────────────────────────────────────
 -- Seed Data
 -- ─────────────────────────────────────────────────────────────────

@@ -467,7 +467,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 </div>
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
-  <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)">
+  <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)" data-parsley-validate>
     <div class="grid grid-cols-6 gap-2" id="addVehicleFields">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
@@ -475,10 +475,10 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
         <input type="hidden" id="memberId" name="memberId" required>
         <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
-      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" required></div>
+      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required required></div>
       <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
-      <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001"></div>
-      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0"></div>
+      <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001" data-parsley-minlength="1"></div>
+      <div><label class="lbl">Sold Price (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" min="0" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" min="0"></div>
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" min="0"></div>
@@ -706,5 +706,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 </body>
 </html>

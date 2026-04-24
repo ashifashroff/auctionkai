@@ -139,6 +139,14 @@ input[type=number]{-moz-appearance:textfield}
   #addVehicleFields { grid-template-columns: 1fr !important; }
 }
 
+/* ── PARSLEY VALIDATION ────────────────────────────── */
+.parsley-errors-list { margin: 2px 0 0; padding: 0; list-style: none; font-size: 11px; color: #CC7777; animation: fadeIn .2s ease-out; }
+.parsley-errors-list.filled { opacity: 1; }
+.parsley-error { border-color: #CC7777 !important; }
+.parsley-success { border-color: #4CAF82 !important; }
+input.parsley-error, select.parsley-error, textarea.parsley-error { border-color: #CC7777 !important; }
+input.parsley-success, select.parsley-success, textarea.parsley-success { border-color: #4CAF82 !important; }
+
 /* ── FIXES ─────────────────────────────────────────── */
 a{color:inherit}
 table{border-collapse:collapse}
