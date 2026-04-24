@@ -56,6 +56,16 @@ if (!$sold) {
     $soldFee = 0;
 }
 
+// Check for duplicate lot number in same auction
+if ($lot !== '') {
+    $dupLot = $db->prepare("SELECT COUNT(*) FROM vehicles WHERE auction_id = ? AND lot = ? AND lot != ''");
+    $dupLot->execute([$auctionId, $lot]);
+    if ((int)$dupLot->fetchColumn() > 0) {
+        echo json_encode(['success' => false, 'error' => 'Lot number already exists in this auction']);
+        exit;
+    }
+}
+
 if (!empty($errors)) {
     echo json_encode(['error' => implode(' ', $errors)]);
     exit;

@@ -220,6 +220,18 @@ function submitAddVehicle(e) {
   .then(data => {
     if (data.error) {
       showAddMsg(data.error, 'error');
+      // Show inline lot error if duplicate lot
+      if (data.error.includes('Lot number already exists')) {
+        const lotInput = document.getElementById('add_lot');
+        let lotErr = document.getElementById('add_lot_error');
+        if (!lotErr) {
+          lotErr = document.createElement('div');
+          lotErr.id = 'add_lot_error';
+          lotErr.style.cssText = 'color:#ef4444;font-size:11px;margin-top:2px;';
+          lotInput.parentNode.appendChild(lotErr);
+        }
+        lotErr.textContent = data.error;
+      }
       return;
     }
     showAddMsg('Vehicle added successfully!', 'success');
@@ -508,6 +520,15 @@ document.addEventListener('click', function(e) {
     if (!dd.contains(e.target) && e.target.id !== 'memberSearch' && e.target.id !== 'edit_memberSearch') dd.style.display = 'none';
   });
 });
+
+// Clear lot error when user types
+const addLotInput = document.getElementById('add_lot');
+if (addLotInput) {
+  addLotInput.addEventListener('input', function() {
+    const lotErr = document.getElementById('add_lot_error');
+    if (lotErr) lotErr.textContent = '';
+  });
+}
 
 // Body scroll lock when modal is open
 const editModal = document.getElementById('editModal');
