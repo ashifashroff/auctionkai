@@ -283,7 +283,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
         <span class="text-[10px] px-1.5 py-0.5 rounded <?= $badgeClass ?>"><?= $badgeText ?></span>
       </a>
     <?php endforeach; ?>
-    <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').style.display=document.getElementById('addAuctionForm').style.display==='none'?'flex':'none'">+ New Auction</button>
+    <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
   </div>
   <?php if ($auction): ?>
   <div class="text-ak-muted text-xs mt-2">

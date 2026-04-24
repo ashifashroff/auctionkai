@@ -259,7 +259,7 @@ function submitAddAuction(e) {
     body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value})
   }).then(r=>r.json()).then(d=>{
     if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Create';return;}
-    location.reload();
+    window.location.href = 'index.php?auction_id=' + d.auction_id + '&tab=dashboard';
   }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='+ Create';});
   return false;
 }

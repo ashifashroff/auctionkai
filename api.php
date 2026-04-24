@@ -31,7 +31,8 @@ if ($action === 'add_auction') {
     }
     $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, commission_fee, expires_at) VALUES (?,?,?,3300,DATE_ADD(?, INTERVAL 14 DAY))");
     $stmt->execute([$userId, $name, $date, $date]);
-    echo json_encode(['success' => true, 'message' => 'Auction created.']);
+    $newId = (int)$db->lastInsertId();
+    echo json_encode(['success' => true, 'message' => 'Auction created.', 'auction_id' => $newId]);
     exit;
 }
 
