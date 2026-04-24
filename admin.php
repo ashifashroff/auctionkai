@@ -347,25 +347,25 @@ $tabs = [
 <?php elseif ($tab === 'create'): ?>
 <h2 class="text-lg font-bold mb-5">Create New User</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
-  <form method="POST" action="admin.php?tab=create">
+  <form method="POST" action="admin.php?tab=create" data-parsley-validate>
     <input type="hidden" name="action" value="create_user">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
     <div class="mb-4">
       <label class="lbl">Username *</label>
-      <input class="inp" name="username" placeholder="Choose a username" required>
+      <input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true" required>
     </div>
     <div class="mb-4">
       <label class="lbl">Full Name *</label>
-      <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" required>
+      <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true" required>
     </div>
     <div class="mb-4">
       <label class="lbl">Email</label>
-      <input class="inp" type="email" name="email" placeholder="email@example.com">
+      <input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email">
     </div>
     <div class="mb-4">
       <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-      <input class="inp" type="password" name="password" placeholder="••••••" required>
+      <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true" required>
     </div>
     <div class="mb-5">
       <label class="lbl">Role</label>
@@ -382,21 +382,21 @@ $tabs = [
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
-  <form method="POST" action="admin.php?tab=settings">
+  <form method="POST" action="admin.php?tab=settings" data-parsley-validate>
     <input type="hidden" name="action" value="admin_settings">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
     <div class="mb-4">
       <label class="lbl">Username *</label>
-      <input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" required>
+      <input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true" required>
     </div>
     <div class="mb-4">
       <label class="lbl">Full Name *</label>
-      <input class="inp" name="name" value="<?= h($admin['name'] ?? '') ?>" required>
+      <input class="inp" name="name" value="<?= h($admin['name'] ?? '') ?>" data-parsley-required="true" required>
     </div>
     <div class="mb-4">
       <label class="lbl">Email</label>
-      <input class="inp" type="email" name="email" value="<?= h($admin['email'] ?? '') ?>">
+      <input class="inp" type="email" name="email" value="<?= h($admin['email'] ?? '') ?>" data-parsley-type="email">
     </div>
 
     <div class="border-t border-ak-border my-5 pt-5">
@@ -425,21 +425,21 @@ $tabs = [
       <h3 class="text-ak-gold text-lg font-bold">Edit User</h3>
       <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeEditUserModal()">×</button>
     </div>
-    <form method="POST" action="admin.php?tab=users">
+    <form method="POST" action="admin.php?tab=users" data-parsley-validate>
       <input type="hidden" name="action" value="edit_user">
       <input type="hidden" name="user_id" id="eu_id">
       <input type="hidden" name="_tok" value="<?= h($tok) ?>">
       <div class="mb-4">
         <label class="lbl">Username *</label>
-        <input class="inp" name="username" id="eu_username" required>
+        <input class="inp" name="username" id="eu_username" data-parsley-required="true" required>
       </div>
       <div class="mb-4">
         <label class="lbl">Full Name *</label>
-        <input class="inp" name="name" id="eu_name" required>
+        <input class="inp" name="name" id="eu_name" data-parsley-required="true" required>
       </div>
       <div class="mb-4">
         <label class="lbl">Email</label>
-        <input class="inp" type="email" name="email" id="eu_email">
+        <input class="inp" type="email" name="email" id="eu_email" data-parsley-type="email">
       </div>
       <div class="mb-5">
         <label class="lbl">Role</label>
@@ -463,18 +463,18 @@ $tabs = [
       <h3 class="text-yellow-400 text-lg font-bold">⏸ Suspend User</h3>
       <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeSuspendModal()">×</button>
     </div>
-    <form method="POST" action="admin.php?tab=users">
+    <form method="POST" action="admin.php?tab=users" data-parsley-validate>
       <input type="hidden" name="action" value="suspend_user">
       <input type="hidden" name="user_id" id="sus_id">
       <input type="hidden" name="_tok" value="<?= h($tok) ?>">
       <div class="mb-2 text-ak-muted text-sm">Suspending: <b class="text-ak-text" id="sus_name"></b></div>
       <div class="mb-4">
         <label class="lbl">Reason</label>
-        <input class="inp" name="reason" placeholder="e.g. Policy violation" required>
+        <input class="inp" name="reason" placeholder="e.g. Policy violation" data-parsley-required="true" required>
       </div>
       <div class="mb-5">
         <label class="lbl">Duration (days)</label>
-        <input class="inp font-mono" type="number" name="days" value="7" min="1" required>
+        <input class="inp font-mono" type="number" name="days" value="7" data-parsley-type="number" data-parsley-min="1" required>
       </div>
       <div class="flex justify-end gap-2 pt-4 border-t border-ak-border">
         <button type="button" class="btn btn-dark btn-sm" onclick="closeSuspendModal()">Cancel</button>
@@ -512,5 +512,6 @@ document.querySelectorAll('#editUserModal, #suspendModal').forEach(m => {
 });
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 </body>
 </html>

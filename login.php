@@ -152,7 +152,7 @@ function h(string $s): string {
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" required>
+          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" data-parsley-required="true" required>
         </div>
 
         <div class="mb-4">
@@ -172,7 +172,7 @@ function h(string $s): string {
 
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
-          <input class="inp" type="password" name="confirm" placeholder="••••••" required>
+          <input class="inp" type="password" name="confirm" placeholder="••••••" data-parsley-required="true" required>
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
