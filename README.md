@@ -25,7 +25,9 @@ After major updates, drop the entire `auctionkai` database and re-import `schema
 
 **Default logins:**
 
-- `admin` / `password` (admin role)
+| Username  | Password   | Role  |
+|-----------|------------|-------|
+| admin     | password   | admin |
 
 Or register a new account.
 
@@ -44,6 +46,8 @@ Or register a new account.
 **Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Download individual or all-statement PDFs. Email drafts via mailto link.
 
 **PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions. Net payout in bold.
+
+**🛡 Admin Panel** — view all registered users with status badges (active/suspended/restricted). Create new users and admins. Edit any user's name, email, username, role. Suspend users for a specific number of days with reason. Delete users and all their data. Login As any user to view their dashboard. Return to Admin Panel button shown in topbar when impersonating.
 
 ---
 
@@ -93,10 +97,11 @@ auctionkai/
 ├── login.php                  ← Login & registration
 ├── logout.php                 ← Session destroy
 ├── index.php                  ← Main app (dashboard, members, vehicles, statements)
+├── admin.php                  ← Admin panel (user management)
+├── delete_auction.php         ← AJAX: delete auction
+├── api.php                    ← AJAX: general API handler
 ├── profile.php                ← Edit name, email, password
 ├── pdf.php                    ← A4 PDF statements
-├── delete_auction.php         ← Delete auction with confirmation page
-├── api.php                    ← AJAX endpoint (add/save/delete auctions, members, toggle sold)
 └── README.md
 ```
 
@@ -120,6 +125,9 @@ users ──< auction ──< vehicles >── members
 
 Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
 - schema.sql seed data uses placeholder credentials only — never commit real usernames or passwords to public repos
+- Admin role required to access admin.php
+- User impersonation tracked via session original_admin_id
+- Suspended users blocked at login with expiry date shown
 
 ---
 
@@ -130,6 +138,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection.
 
 **v2.3** — AJAX for everything (no page reloads on any form), delete auction page with stats and confirmation, duplicate member name check, auction toggle fix, date field disabled after creation
 
