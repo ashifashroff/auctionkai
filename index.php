@@ -111,8 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'add_member') {
         $name = trim($_POST['name'] ?? '');
         if ($name !== '') {
-            $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
-            $stmt->execute([$userId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
+            $dup = $db->prepare("SELECT id FROM members WHERE user_id=? AND name=?");
+            $dup->execute([$userId, $name]);
+            if (!$dup->fetch()) {
+                $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
+                $stmt->execute([$userId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
+            }
         }
     }
 

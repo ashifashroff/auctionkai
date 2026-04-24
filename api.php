@@ -43,6 +43,13 @@ if ($action === 'add_member') {
         echo json_encode(['error' => 'Name is required.']);
         exit;
     }
+    // Check for duplicate member name
+    $dup = $db->prepare("SELECT id FROM members WHERE user_id=? AND name=?");
+    $dup->execute([$userId, $name]);
+    if ($dup->fetch()) {
+        echo json_encode(['error' => 'A member with this name already exists. Please use a different name.']);
+        exit;
+    }
     $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
     $stmt->execute([$userId, $name, trim($input['phone'] ?? ''), trim($input['email'] ?? '')]);
     echo json_encode(['success' => true, 'message' => 'Member added.']);
