@@ -1,3 +1,33 @@
+// ── Theme Manager ─────────────────────────────
+const ThemeManager = {
+  STORAGE_KEY: 'ak_theme',
+  init() {
+    const saved = localStorage.getItem(this.STORAGE_KEY);
+    if (saved === 'light') { document.body.classList.add('light-mode'); }
+    document.addEventListener('DOMContentLoaded', () => {
+      this.updateButton();
+      const btn = document.getElementById('theme-toggle-btn');
+      if (btn) { btn.addEventListener('click', () => this.toggle()); }
+    });
+  },
+  toggle() {
+    const isLight = document.body.classList.toggle('light-mode');
+    localStorage.setItem(this.STORAGE_KEY, isLight ? 'light' : 'dark');
+    this.updateButton();
+    showToast(isLight ? 'Light mode enabled' : 'Dark mode enabled', 'info', 1500);
+  },
+  updateButton() {
+    const btn = document.getElementById('theme-toggle-btn');
+    const icon = btn?.querySelector('.theme-toggle-icon');
+    const label = btn?.querySelector('.theme-toggle-label');
+    if (!btn) return;
+    const isLight = document.body.classList.contains('light-mode');
+    if (icon) icon.textContent = isLight ? '🌙' : '☀️';
+    if (label) label.textContent = isLight ? 'Dark' : 'Light';
+  }
+};
+ThemeManager.init();
+
 /* ── AuctionKai — Main JavaScript ─────────────────── */
 
 // ─── TOAST NOTIFICATIONS ────────────────────────────
