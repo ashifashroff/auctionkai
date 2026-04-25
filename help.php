@@ -43,7 +43,7 @@ $sections = [
     'items' => [
       '<b>Creating your first auction</b> — Click the "+ New Auction" button in the auction selector bar. Enter a name (e.g. "Nagoya Auto Auction") and the auction date. The system automatically sets a 14-day expiry.',
       '<b>Setting the auction date and commission fee</b> — The date field is set when you create the auction and cannot be changed after. The commission fee (default ¥3,300 per member) can be adjusted from the top bar at any time.',
-      '<b>What the 14-day expiry means</b> — After the expiry date, all sold vehicles and the auction itself are automatically deleted. Unsold vehicles and member records are preserved. A red badge warns you when expiry is near.',
+      '<b>What the 14-day expiry means</b> — After the expiry date, all vehicles (sold and unsold) and the auction itself are automatically deleted. Member records are preserved. A red badge warns you when expiry is near.',
     ],
   ],
   [
