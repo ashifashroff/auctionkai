@@ -56,8 +56,8 @@ $expiredQ = $db->prepare("SELECT id FROM auction WHERE user_id=? AND expires_at 
 $expiredQ->execute([$userId, $today]);
 $expiredAuctions = $expiredQ->fetchAll();
 foreach ($expiredAuctions as $ea) {
-    // Delete sold vehicles for this auction (keep unsold)
-    $db->prepare("DELETE FROM vehicles WHERE auction_id=? AND sold=1")->execute([(int)$ea['id']]);
+    // Delete all vehicles for this auction (sold + unsold)
+    $db->prepare("DELETE FROM vehicles WHERE auction_id=?")->execute([(int)$ea['id']]);
 
     // Delete the auction itself
     $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([(int)$ea['id'], $userId]);
