@@ -29,7 +29,7 @@ After major updates, drop the entire `auctionkai` database and re-import `schema
 |-----------|------------|-------|
 | admin     | password   | admin |
 
-Or register a new account.
+Or register a new account. Usernames and emails must be unique.
 
 ---
 
@@ -37,17 +37,23 @@ Or register a new account.
 
 **Dashboard** — see your auction at a glance. Total members, vehicles, sold count, gross sales, and net payout. Members ranked by net payout so you know who your top sellers are.
 
-**Auctions** — create multiple auctions, switch between them using the navbar chips. Each auction has its own commission fee (default ¥3,300 per member) and auto-expires after 2 weeks. Expired auctions clean up sold vehicles but keep your members. A red badge warns you when expiry is close.
+**Auctions** — create multiple auctions, switch between them using the navbar chips. Each auction has its own commission fee (default ¥3,300 per member) and auto-expires after 2 weeks. Expired auctions delete all vehicles (sold and unsold) and the auction itself. Member records are preserved. A red badge warns you when expiry is close.
 
-**Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Duplicate names are blocked with a clear error message.
+**Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Search members by name, phone, or email with instant filtering. Duplicate names are blocked with a clear error message.
 
-**Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Search the table in real-time by lot number, member name, or make/model. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead.
+**Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Search the table in real-time by lot number, member name, or make/model. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
 
 **Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Download individual or all-statement PDFs. Email drafts via mailto link.
 
-**PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions. Net payout in bold.
+**PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions. Net payout in bold. White background, print-friendly layout.
 
 **🛡 Admin Panel** — view all registered users with status badges (active/suspended/restricted). Create new users and admins. Edit any user's name, email, username, role. Suspend users for a specific number of days with reason. Delete users and all their data. Login As any user to view their dashboard. Return to Admin Panel button shown in topbar when impersonating.
+
+**📖 Help & Guide** — built-in accordion-style help page covering getting started, managing members, vehicles, statements, and fee settings.
+
+**🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
+
+**⌨ Keyboard Shortcuts** — press `?` to see all shortcuts. Navigate tabs with `G` then `M/V/S/D`. Add vehicle with `N`, add member with `Shift+N`. Focus lot field with `L`. Search with `/`. Close modals with `Esc`.
 
 ---
 
@@ -65,7 +71,7 @@ Nagare fee only applies to unsold vehicles. When you mark a vehicle as sold, the
 
 ```
 Total Received  = Sold Price + 10% Tax + Recycle Fee
-Total Deductions = Listing Fee + Sold Fee + Nagare Fee (unsold only) + Other Fee + Commission (flat/member)
+Total Deductions = Listing Fee + Sold Fee + Nagare Fee (unsold only) + Commission (flat/member)
 NET PAYOUT      = Total Received − Total Deductions
 ```
 
@@ -83,7 +89,8 @@ auctionkai/
 │   ├── get_vehicle.php
 │   ├── update_vehicle.php
 │   ├── get_member_detail.php
-│   └── update_member.php
+│   ├── update_member.php
+│   └── check_lot.php           ← Duplicate lot number check
 │
 ├── auth/                       ← Authentication pages
 │   ├── login.php
@@ -92,7 +99,7 @@ auctionkai/
 │   └── reset_password.php
 │
 ├── css/
-│   ├── style.css               ← Custom styles (forms, tables, statements)
+│   ├── style.css               ← Custom styles (forms, tables, statements, toasts, shortcuts)
 │   ├── pdf.css                 ← PDF print layout
 │   └── tailwind-config.php     ← Tailwind CDN + theme colors
 │
@@ -103,15 +110,17 @@ auctionkai/
 │   └── footer.php              ← Shared footer component
 │
 ├── js/
-│   └── app.js                  ← All client-side JS
+│   └── app.js                  ← All client-side JS (toasts, shortcuts, AJAX)
 │
 ├── .htaccess                   ← Protect config.php and schema.sql
 ├── .gitignore                  ← Exclude config.php, logs, OS files
 ├── config.php                  ← Database credentials
-├── schema.sql                  ← Full schema + seed data
+├── schema.sql                  ← Full schema + seed data + indexes
 ├── index.php                   ← Main app (dashboard, members, vehicles, statements)
+├── admin.php                   ← Admin panel (user management)
 ├── profile.php                 ← Edit name, email, password
 ├── pdf.php                     ← A4 PDF settlement statements
+├── delete_auction.php          ← Delete auction with confirmation
 ├── help.php                    ← Help & guide (accordion FAQ)
 ├── about.php                   ← About AuctionKai + tech stack + version history
 ├── privacy.php                 ← Privacy policy
@@ -124,41 +133,50 @@ auctionkai/
 
 ```
 users ──< auction ──< vehicles >── members
+password_resets (token-based password reset)
 ```
 
 - Members belong to users (shared across auctions)
 - Vehicles belong to auctions (connected to members via member_id)
 - Commission fee lives on the auction table
 - Nagare fee lives on the vehicles table (only used for unsold)
-- No fee_items, vehicle_fees, or custom_deductions tables — all removed
+- Users have status (active/suspended/restricted) with suspend tracking
+- Performance indexes on auction_id, user_id, member_id, and sold columns
 
 ---
 
 ## Security
 
-Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
+Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt with `password_hash()`. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
+
 - schema.sql seed data uses placeholder credentials only — never commit real usernames or passwords to public repos
 - Admin role required to access admin.php
-- User impersonation tracked via session original_admin_id
+- User impersonation tracked via session `original_admin_id`
 - Suspended users blocked at login with expiry date shown
+- Duplicate email and username checks on registration
+- Duplicate lot number check via real-time AJAX before vehicle save
+- All form validation via Parsley.js (no HTML5 native validation)
+- Password minimum 8 characters with strength indicator
 
 ---
 
 ## Design
 
-Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B). Noto Sans JP for text, Space Mono for prices. Buttons lift on hover. Cards fade in with staggered timing. The active auction chip pulses gold.
+Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B). Noto Sans JP for text, Space Mono for prices. Buttons lift on hover. Cards fade in with staggered timing. The active auction chip pulses gold. Toast notifications for all user actions (success/error/warning/info). Mobile responsive with card view for vehicles on small screens.
 
 ---
 
 ## Changelog
 
-**v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection.
+**v2.5** — Removed Other Fee from all UI/forms/tables/statements/PDF. Real-time duplicate lot number check. Password strength indicator (Weak/Fair/Good/Strong). Member search filter. New members appear at top without page reload. Keyboard shortcuts with help modal. Toast notifications across all pages. Parsley.js form validation. Mobile responsive vehicles table (card view). Help, About, Privacy pages. Shared footer component. Forgot password / reset password flow. Duplicate email check on registration. Cache-busting for CSS/JS. Fixed vehicle add/edit bugs (placeholder count, variable names).
+
+**v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection. Auth/ and includes/ folder restructure.
 
 **v2.3** — AJAX for everything (no page reloads on any form), delete auction page with stats and confirmation, duplicate member name check, auction toggle fix, date field disabled after creation
 
 **v2.2** — Brute force login protection, CSRF tokens on login/register, session regeneration, removed personal data from schema
 
-**v2.1** — Dashboard tab, vehicle search, PDO prepared statements everywhere, vehicle ownership verification
+**v2.1** — Dashboard tab, vehicle search, PDO prepared statements everywhere, vehicle ownership verification, DB indexes
 
 **v2.0** — Tailwind CSS migration, modal-based editing, AJAX add/edit/delete, profile page
 
@@ -168,9 +186,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Troubleshooting
 
-If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables.
-
----
+If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. CSS and JS files include `?v=2.5` cache-busting to help. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables. If toast notifications don't appear, clear browser cache and reload.
 
 ---
 
@@ -178,5 +194,3 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 
 Designed & Developed by Mirai Global Solutions
 © 2025–2026 AuctionKai. All rights reserved.
-
-
