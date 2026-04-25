@@ -12,10 +12,6 @@ $db = db();
 $userId = (int)$_SESSION['user_id'];
 $error = '';
 
-function fmt(float $n): string {
-    return '¥' . number_format(round($n));
-}
-
 // Get auction
 $auctionId = (int)($_GET['auction_id'] ?? 0);
 $stmt = $db->prepare("SELECT * FROM auction WHERE id=? AND user_id=?");
