@@ -24,7 +24,9 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
 
     $commissionTotal = $commissionFee;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
+    $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal;
     $totalDed = $totalVehicleDed + $commissionTotal;
     $netPayout = $count > 0 ? $totalReceived - $totalDed : 0;
 
+    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
