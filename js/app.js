@@ -30,6 +30,26 @@ function dismissToast(toast) {
   setTimeout(() => toast.remove(), 350);
 }
 
+// ── Duplicate Lot Number Check ────────────────
+async function checkDuplicateLot(lot, auctionId, excludeId = 0) {
+  if (!lot || !lot.trim()) return false;
+  try {
+    const res = await fetch('api/check_lot.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lot, auction_id: auctionId, exclude_id: excludeId })
+    });
+    const data = await res.json();
+    if (data.duplicate) {
+      showToast(data.message, 'warning');
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 // ─── ADD VEHICLE FORM: Toggle sold/unsold fields ────
 function toggleSoldFields(isSold) {
   document.querySelectorAll('.sold-fields').forEach(el => {
@@ -149,7 +169,7 @@ function closeEditModal() {
 }
 
 // ─── EDIT MODAL: Submit ─────────────────────────────
-function submitEditForm(e) {
+async function submitEditForm(e) {
   e.preventDefault();
   const btn = document.getElementById('editSubmitBtn');
   btn.disabled = true;
@@ -176,6 +196,17 @@ function submitEditForm(e) {
   if (!payload.memberId) { showToast('Please select a member.', 'warning'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
   if (!payload.make) { showToast('Make is required.', 'warning'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
 
+  // Duplicate lot check (exclude current vehicle)
+  if (payload.lot) {
+    const isDuplicate = await checkDuplicateLot(payload.lot, activeAuctionId, payload.id);
+    if (isDuplicate) {
+      const lotInput = document.getElementById('edit_lot');
+      if (lotInput) { lotInput.style.borderColor = '#CC7777'; lotInput.focus(); setTimeout(() => lotInput.style.borderColor = '', 2500); }
+      btn.disabled = false; btn.textContent = 'Save Changes';
+      return false;
+    }
+  }
+
   fetch('api/update_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -200,7 +231,7 @@ function submitEditForm(e) {
 }
 
 // ─── ADD VEHICLE (AJAX) ────────────────────────────
-function submitAddVehicle(e) {
+async function submitAddVehicle(e) {
   e.preventDefault();
 
   // Let Parsley validate first
@@ -232,6 +263,16 @@ function submitAddVehicle(e) {
   if (!payload.auctionId) { showToast('No active auction selected.', 'warning'); return false; }
   if (payload.sold && !payload.soldPrice) { showToast('Sold price is required for sold vehicles.', 'warning'); return false; }
 
+  // Duplicate lot check
+  if (payload.lot) {
+    const isDuplicate = await checkDuplicateLot(payload.lot, payload.auctionId, 0);
+    if (isDuplicate) {
+      const lotInput = document.getElementById('add_lot');
+      if (lotInput) { lotInput.style.borderColor = '#CC7777'; lotInput.focus(); setTimeout(() => lotInput.style.borderColor = '', 2500); }
+      return false;
+    }
+  }
+
   // Fade + disable + preloader
   fields.style.opacity = '0.4';
   fields.style.pointerEvents = 'none';
@@ -247,18 +288,6 @@ function submitAddVehicle(e) {
   .then(data => {
     if (data.error) {
       showToast(data.error, 'error');
-      // Show inline lot error if duplicate lot
-      if (data.error.includes('Lot number already exists')) {
-        const lotInput = document.getElementById('add_lot');
-        let lotErr = document.getElementById('add_lot_error');
-        if (!lotErr) {
-          lotErr = document.createElement('div');
-          lotErr.id = 'add_lot_error';
-          lotErr.style.cssText = 'color:#ef4444;font-size:11px;margin-top:2px;';
-          lotInput.parentNode.appendChild(lotErr);
-        }
-        lotErr.textContent = data.error;
-      }
       return;
     }
     showToast('Vehicle added successfully', 'success');
