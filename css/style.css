@@ -150,3 +150,22 @@ input.parsley-success, select.parsley-success, textarea.parsley-success { border
 /* ── FIXES ─────────────────────────────────────────── */
 a{color:inherit}
 table{border-collapse:collapse}
+
+/* ── TOAST NOTIFICATIONS ──────────────────────────── */
+.toast{display:flex;align-items:center;gap:10px;padding:12px 18px;border-radius:10px;font-family:'Noto Sans JP',sans-serif;font-size:13px;font-weight:500;min-width:260px;max-width:380px;box-shadow:0 8px 24px rgba(0,0,0,0.4);pointer-events:all;cursor:pointer;border-left:4px solid transparent;backdrop-filter:blur(8px);opacity:0;transform:translateX(40px);transition:opacity .3s ease,transform .3s ease}
+.toast.show{opacity:1;transform:translateX(0)}
+.toast.hide{opacity:0;transform:translateX(40px)}
+.toast-success{background:#0D2B1A;border-color:#4CAF82;color:#4CAF82}
+.toast-error{background:#2B0D0D;border-color:#CC7777;color:#CC7777}
+.toast-warning{background:#2B200D;border-color:#D4A84B;color:#D4A84B}
+.toast-info{background:#0D1E2B;border-color:#5A9FD4;color:#5A9FD4}
+.toast-icon{font-size:16px;flex-shrink:0}
+.toast-msg{flex:1;line-height:1.4}
+.toast-close{font-size:16px;opacity:.6;flex-shrink:0;line-height:1}
+.toast-close:hover{opacity:1}
+.toast-progress{position:absolute;bottom:0;left:0;height:3px;border-radius:0 0 10px 10px;width:100%;transform-origin:left;animation:toast-progress linear forwards}
+.toast-success .toast-progress{background:#4CAF82}
+.toast-error .toast-progress{background:#CC7777}
+.toast-warning .toast-progress{background:#D4A84B}
+.toast-info .toast-progress{background:#5A9FD4}
+@keyframes toast-progress{from{transform:scaleX(1)}to{transform:scaleX(0)}}

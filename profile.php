@@ -162,5 +162,19 @@ require_once __DIR__ . '/includes/helpers.php';
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 <?php require_once 'includes/footer.php'; ?>
+<!-- Toast Container -->
+<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+<script src="js/app.js"></script>
+<script>
+<?php if (isset($_GET['success'])): ?>
+showToast('Profile updated successfully', 'success');
+<?php elseif (isset($_GET['error'])): ?>
+showToast('Failed to update profile. Please try again.', 'error');
+<?php elseif (isset($_GET['password_changed'])): ?>
+showToast('Password changed successfully', 'success');
+<?php elseif (isset($_GET['wrong_password'])): ?>
+showToast('Current password is incorrect', 'error');
+<?php endif; ?>
+</script>
 </body>
 </html>

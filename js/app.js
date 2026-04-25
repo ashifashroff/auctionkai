@@ -1,5 +1,35 @@
 /* ── AuctionKai — Main JavaScript ─────────────────── */
 
+// ─── TOAST NOTIFICATIONS ────────────────────────────
+function showToast(message, type = 'success', duration = 3500) {
+  const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.style.position = 'relative';
+  toast.style.overflow = 'hidden';
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type]}</span>
+    <span class="toast-msg">${message}</span>
+    <span class="toast-close">×</span>
+    <div class="toast-progress" style="animation-duration: ${duration}ms"></div>
+  `;
+  toast.addEventListener('click', () => dismissToast(toast));
+  container.appendChild(toast);
+  requestAnimationFrame(() => requestAnimationFrame(() => toast.classList.add('show')));
+  const timer = setTimeout(() => dismissToast(toast), duration);
+  toast._timer = timer;
+  return toast;
+}
+
+function dismissToast(toast) {
+  clearTimeout(toast._timer);
+  toast.classList.remove('show');
+  toast.classList.add('hide');
+  setTimeout(() => toast.remove(), 350);
+}
+
 // ─── ADD VEHICLE FORM: Toggle sold/unsold fields ────
 function toggleSoldFields(isSold) {
   document.querySelectorAll('.sold-fields').forEach(el => {
@@ -88,7 +118,7 @@ function openEditModal(vehicleId) {
     .then(r => r.json())
     .then(data => {
       if (data.error) {
-        showModalMsg(data.error, 'error');
+        showToast(data.error, 'error');
         return;
       }
       document.getElementById('edit_id').value = data.id;
@@ -106,7 +136,7 @@ function openEditModal(vehicleId) {
       document.getElementById('edit_sold').checked = data.sold;
       toggleModalSoldFields(data.sold);
     })
-    .catch(() => showModalMsg('Failed to load vehicle data.', 'error'))
+    .catch(() => showToast('Failed to load vehicle data.', 'error'))
     .finally(() => {
       document.getElementById('editSubmitBtn').disabled = false;
       document.getElementById('editSubmitBtn').textContent = 'Save Changes';
@@ -116,15 +146,6 @@ function openEditModal(vehicleId) {
 // ─── EDIT MODAL: Close ──────────────────────────────
 function closeEditModal() {
   document.getElementById('editModal').style.display = 'none';
-}
-
-// ─── EDIT MODAL: Messages ───────────────────────────
-function showModalMsg(text, type) {
-  const msg = document.getElementById('modalMsg');
-  msg.textContent = text;
-  msg.style.display = 'block';
-  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
-  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
 // ─── EDIT MODAL: Submit ─────────────────────────────
@@ -152,8 +173,8 @@ function submitEditForm(e) {
   };
 
   // Frontend validation
-  if (!payload.memberId) { showModalMsg('Please select a member.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
-  if (!payload.make) { showModalMsg('Make is required.', 'error'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
+  if (!payload.memberId) { showToast('Please select a member.', 'warning'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
+  if (!payload.make) { showToast('Make is required.', 'warning'); btn.disabled = false; btn.textContent = 'Save Changes'; return false; }
 
   fetch('api/update_vehicle.php', {
     method: 'POST',
@@ -163,13 +184,13 @@ function submitEditForm(e) {
   .then(r => r.json())
   .then(data => {
     if (data.error) {
-      showModalMsg(data.error, 'error');
+      showToast(data.error, 'error');
       return;
     }
-    showModalMsg('Vehicle updated successfully!', 'success');
+    showToast('Vehicle updated successfully', 'success');
     setTimeout(() => { closeEditModal(); location.reload(); }, 800);
   })
-  .catch(() => showModalMsg('Network error. Please try again.', 'error'))
+  .catch(() => showToast('Connection error. Please try again.', 'error'))
   .finally(() => {
     btn.disabled = false;
     btn.textContent = 'Save Changes';
@@ -208,8 +229,8 @@ function submitAddVehicle(e) {
     auctionId:  activeAuctionId
   };
 
-  if (!payload.auctionId) { showAddMsg('No active auction selected.', 'error'); return false; }
-  if (payload.sold && !payload.soldPrice) { showAddMsg('Sold price is required for sold vehicles.', 'error'); return false; }
+  if (!payload.auctionId) { showToast('No active auction selected.', 'warning'); return false; }
+  if (payload.sold && !payload.soldPrice) { showToast('Sold price is required for sold vehicles.', 'warning'); return false; }
 
   // Fade + disable + preloader
   fields.style.opacity = '0.4';
@@ -225,7 +246,7 @@ function submitAddVehicle(e) {
   .then(r => r.json())
   .then(data => {
     if (data.error) {
-      showAddMsg(data.error, 'error');
+      showToast(data.error, 'error');
       // Show inline lot error if duplicate lot
       if (data.error.includes('Lot number already exists')) {
         const lotInput = document.getElementById('add_lot');
@@ -240,14 +261,14 @@ function submitAddVehicle(e) {
       }
       return;
     }
-    showAddMsg('Vehicle added successfully!', 'success');
+    showToast('Vehicle added successfully', 'success');
     document.getElementById('addVehicleForm').reset();
     document.getElementById('memberId').value = '';
     document.getElementById('memberSearch').value = '';
     toggleSoldFields(true);
     setTimeout(() => location.reload(), 600);
   })
-  .catch(() => showAddMsg('Network error. Please try again.', 'error'))
+  .catch(() => showToast('Connection error. Please try again.', 'error'))
   .finally(() => {
     fields.style.opacity = '1';
     fields.style.pointerEvents = 'auto';
@@ -256,14 +277,6 @@ function submitAddVehicle(e) {
   });
 
   return false;
-}
-
-function showAddMsg(text, type) {
-  const msg = document.getElementById('addVehicleMsg');
-  msg.textContent = text;
-  msg.classList.remove('hidden');
-  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
-  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
 }
 
 // ─── ADD AUCTION (AJAX) ───────────────────────────
@@ -365,13 +378,13 @@ function openEditMemberModal(memberId) {
   fetch(`api/update_member.php?id=${memberId}`)
     .then(r => r.json())
     .then(data => {
-      if (data.error) { showEditMemberMsg(data.error, 'error'); return; }
+      if (data.error) { showToast(data.error, 'error'); return; }
       document.getElementById('em_id').value = data.id;
       document.getElementById('em_name').value = data.name;
       document.getElementById('em_phone').value = data.phone;
       document.getElementById('em_email').value = data.email;
     })
-    .catch(() => showEditMemberMsg('Failed to load member data.', 'error'))
+    .catch(() => showToast('Failed to load member data.', 'error'))
     .finally(() => {
       document.getElementById('emSubmitBtn').disabled = false;
       document.getElementById('emSubmitBtn').textContent = 'Save';
@@ -406,7 +419,7 @@ function submitEditMember(e) {
     email: document.getElementById('em_email').value.trim(),
   };
 
-  if (!payload.name) { showEditMemberMsg('Name is required.', 'error'); btn.disabled = false; btn.textContent = 'Save'; return false; }
+  if (!payload.name) { showToast('Name is required.', 'warning'); btn.disabled = false; btn.textContent = 'Save'; return false; }
 
   fetch('api/update_member.php', {
     method: 'POST',
@@ -415,11 +428,11 @@ function submitEditMember(e) {
   })
   .then(r => r.json())
   .then(data => {
-    if (data.error) { showEditMemberMsg(data.error, 'error'); return; }
-    showEditMemberMsg('Member updated!', 'success');
+    if (data.error) { showToast(data.error, 'error'); return; }
+    showToast('Member updated successfully', 'success');
     setTimeout(() => { closeEditMemberModal(); location.reload(); }, 600);
   })
-  .catch(() => showEditMemberMsg('Network error.', 'error'))
+  .catch(() => showToast('Connection error. Please try again.', 'error'))
   .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
   return false;
 }
