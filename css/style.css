@@ -182,3 +182,34 @@ table{border-collapse:collapse}
 .strength-fair .strength-label{color:#D4A84B}
 .strength-good .strength-label{color:#5A9FD4}
 .strength-strong .strength-label{color:#4CAF82}
+
+/* ── MOBILE RESPONSIVE VEHICLES TABLE ─────── */
+.vehicle-card-mobile{display:none}
+@media(max-width:768px){
+.vehicles-table-desktop{display:none!important}
+.vehicle-card-mobile{display:block}
+.v-card{background:#111E2D;border:1px solid #1E3A5F;border-radius:12px;padding:14px 16px;margin-bottom:10px;animation:fadeIn .2s ease}
+.v-card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.v-card-lot{font-family:'Space Mono',monospace;font-size:11px;color:#D4A84B;background:#0A1724;border:1px solid #1E3A5F;padding:3px 10px;border-radius:20px}
+.v-card-name{font-size:15px;font-weight:600;color:#E8DCC8;margin-bottom:4px}
+.v-card-meta{font-size:12px;color:#6A88A0;margin-bottom:10px}
+.v-card-fees{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.v-card-fee{background:#0A1724;border-radius:8px;padding:7px 10px}
+.v-card-fee-label{font-size:10px;color:#5A7A90;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.v-card-fee-value{font-family:'Space Mono',monospace;font-size:13px;color:#4CAF82;font-weight:600}
+.v-card-fee-value.muted{color:#3A5570}
+.v-card-actions{display:flex;gap:8px;justify-content:flex-end;padding-top:10px;border-top:1px solid #1E3A5F}
+.v-card-actions button,.v-card-actions a{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;border:none}
+.auction-chips-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.add-vehicle-grid{grid-template-columns:1fr 1fr!important}
+.topbar-inner{flex-wrap:wrap;gap:10px}
+.hide-mobile{display:none!important}
+.auth-card{margin:20px 12px!important;padding:24px 18px!important}
+.form-container{padding:0 12px}
+.stmt-body-grid{grid-template-columns:1fr!important}
+.stmt-left{border-right:none!important;border-bottom:1px solid #1E3A5F}
+}
+@media(max-width:480px){
+.v-card-fees{grid-template-columns:1fr}
+.add-vehicle-grid{grid-template-columns:1fr!important}
+}

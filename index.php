@@ -225,7 +225,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
-<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down">
+<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down topbar-inner">
   <div class="shrink-0">
     <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai <span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded ml-1 font-mono">MySQL</span></div>
     <div class="text-ak-muted text-[11px]">Settlement Management System</div>
@@ -443,7 +443,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
   <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)" data-parsley-validate>
-    <div class="grid grid-cols-6 gap-2" id="addVehicleFields">
+    <div class="grid grid-cols-6 gap-2 add-vehicle-grid" id="addVehicleFields">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
         <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" data-parsley-required-message="Member is required" onfocus="showMemberResults()" oninput="filterMembers()">
@@ -469,7 +469,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto vehicles-table-desktop">
   <table class="vt">
     <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr></thead>
     <tbody>
@@ -523,6 +523,52 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <?php endif; ?>
     </tbody>
   </table>
+</div>
+
+<!-- Mobile Card View -->
+<div class="vehicle-card-mobile" id="vehicle-cards-mobile">
+<?php foreach ($vehicles as $v):
+  $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
+?>
+<div class="v-card" id="v-card-<?= (int)$v['id'] ?>">
+  <div class="v-card-top">
+    <span class="v-card-lot"><?= h($v['lot'] ?: '—') ?></span>
+    <button onclick="toggleSold(<?= (int)$v['id'] ?>)" class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" id="sold-btn-m-<?= (int)$v['id'] ?>"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
+  </div>
+  <div class="v-card-name"><?= h($v['make'] . ' ' . $v['model']) ?></div>
+  <div class="v-card-meta"><?= h($owner['name'] ?? '?') ?></div>
+  <div class="v-card-fees">
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Sold Price</div>
+      <div class="v-card-fee-value <?= $v['sold'] ? '' : 'muted' ?>"><?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?></div>
+    </div>
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Recycle Fee</div>
+      <div class="v-card-fee-value"><?= fmt((float)$v['recycle_fee']) ?></div>
+    </div>
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Listing Fee</div>
+      <div class="v-card-fee-value"><?= fmt((float)$v['listing_fee']) ?></div>
+    </div>
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Sold Fee</div>
+      <div class="v-card-fee-value"><?= fmt((float)$v['sold_fee']) ?></div>
+    </div>
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Nagare Fee</div>
+      <div class="v-card-fee-value <?= !$v['sold'] ? '' : 'muted' ?>"><?= !$v['sold'] ? fmt((float)$v['nagare_fee']) : '—' ?></div>
+    </div>
+    <div class="v-card-fee">
+      <div class="v-card-fee-label">Other Fee</div>
+      <div class="v-card-fee-value"><?= fmt((float)$v['other_fee']) ?></div>
+    </div>
+  </div>
+  <div class="v-card-actions">
+    <button onclick="openEditModal(<?= (int)$v['id'] ?>)" style="background:#1E3A5F;color:#D4A84B">✎ Edit</button>
+    <button onclick="deleteVehicle(<?= (int)$v['id'] ?>)" style="background:#3A1A1A;color:#CC7777">× Delete</button>
+  </div>
+</div>
+<?php endforeach; ?>
 </div>
 
 <?php elseif ($tab === 'statements'): ?>
