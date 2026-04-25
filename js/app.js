@@ -30,6 +30,100 @@ ThemeManager.init();
 
 /* ── AuctionKai — Main JavaScript ─────────────────── */
 
+// ── Keyboard Shortcuts Manager ────────────────
+const KeyboardShortcuts = {
+  gPressed: false, gTimer: null,
+  init() {
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement.tagName;
+      if (['INPUT','TEXTAREA','SELECT'].includes(tag)) return;
+      if (e.ctrlKey && e.key.toLowerCase() !== 'p') return;
+      if (e.altKey || e.metaKey) return;
+      this.handle(e);
+    });
+  },
+  handle(e) {
+    const key = e.key.toLowerCase();
+    if (this.gPressed) {
+      clearTimeout(this.gTimer); this.gPressed = false;
+      switch(key) {
+        case 'm': this.goToTab('members'); this.showHint('→ Members'); break;
+        case 'v': this.goToTab('vehicles'); this.showHint('→ Vehicles'); break;
+        case 's': this.goToTab('statements'); this.showHint('→ Statements'); break;
+        case 'd': this.goToTab('dashboard'); this.showHint('→ Dashboard'); break;
+      }
+      return;
+    }
+    switch(key) {
+      case 'g':
+        this.gPressed = true;
+        this.showHint('G → M Members  V Vehicles  S Statements  D Dashboard');
+        this.gTimer = setTimeout(() => { this.gPressed = false; this.hideHint(); }, 1500);
+        break;
+      case 'n':
+        if (e.shiftKey) {
+          this.goToTab('members');
+          setTimeout(() => { const el = document.querySelector('input[name="name"]'); if(el) el.focus(); this.showHint('Add new member'); }, 100);
+        } else {
+          this.goToTab('vehicles');
+          setTimeout(() => { const el = document.getElementById('add_make'); if(el) el.focus(); this.showHint('Add new vehicle'); }, 100);
+        }
+        break;
+      case 'l':
+        this.goToTab('vehicles');
+        setTimeout(() => { const el = document.getElementById('add_lot'); if(el) el.focus(); this.showHint('Lot # field'); }, 100);
+        break;
+      case '/':
+        e.preventDefault();
+        const search = document.getElementById('vehicleSearch');
+        if (search) { search.focus(); this.showHint('Search vehicles'); }
+        break;
+      case 't':
+        if (typeof ThemeManager !== 'undefined') ThemeManager.toggle();
+        break;
+      case '?':
+        this.openShortcutsModal();
+        break;
+      case 'escape':
+        this.closeAllModals();
+        break;
+    }
+  },
+  goToTab(tabName) {
+    const link = document.querySelector('a[href*="tab=' + tabName + '"]');
+    if (link) { link.click(); }
+    else { const url = new URL(window.location.href); url.searchParams.set('tab', tabName); window.location.href = url.toString(); }
+  },
+  openShortcutsModal() {
+    const overlay = document.getElementById('shortcuts-modal-overlay');
+    if (overlay) { overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  },
+  closeAllModals() {
+    const so = document.getElementById('shortcuts-modal-overlay');
+    if (so) { so.classList.remove('open'); document.body.style.overflow = ''; }
+    document.querySelectorAll('.modal-overlay.open, [id$="-modal"].open').forEach(m => { m.classList.remove('open'); document.body.style.overflow = ''; });
+  },
+  showHint(message) {
+    const hint = document.getElementById('shortcut-hint');
+    if (!hint) return;
+    hint.textContent = message; hint.classList.add('visible');
+    clearTimeout(this._hintTimer);
+    this._hintTimer = setTimeout(() => this.hideHint(), 1800);
+  },
+  hideHint() {
+    const hint = document.getElementById('shortcut-hint');
+    if (hint) hint.classList.remove('visible');
+  }
+};
+
+function closeShortcutsModal() { KeyboardShortcuts.closeAllModals(); }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const overlay = document.getElementById('shortcuts-modal-overlay');
+  if (overlay) { overlay.addEventListener('click', function(e) { if (e.target === overlay) KeyboardShortcuts.closeAllModals(); }); }
+});
+KeyboardShortcuts.init();
+
 // ─── TOAST NOTIFICATIONS ────────────────────────────
 function showToast(message, type = 'success', duration = 3500) {
   const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };

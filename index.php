@@ -259,6 +259,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <?php if ($userRole === 'admin'): ?>
       <a href="admin.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">⚙️ Admin</a>
     <?php endif; ?>
+    <button onclick="KeyboardShortcuts.openShortcutsModal()" class="theme-toggle" title="Keyboard shortcuts (?)"><span>⌨</span><span class="hide-mobile">Shortcuts</span></button>
     <button class="theme-toggle" id="theme-toggle-btn" title="Toggle light/dark mode"><span class="theme-toggle-icon">☀️</span><span class="theme-toggle-label">Light</span></button>
     <a href="auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
   </div>
@@ -734,5 +735,35 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php require_once 'includes/footer.php'; ?>
 <!-- Toast Container -->
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+
+<!-- Keyboard Shortcuts Modal -->
+<div class="shortcuts-modal-overlay" id="shortcuts-modal-overlay">
+  <div class="shortcuts-modal">
+    <h3><span>⌨ Keyboard Shortcuts</span><button onclick="closeShortcutsModal()" style="background:none;border:none;color:#6A88A0;font-size:20px;cursor:pointer;line-height:1">×</button></h3>
+    <div class="shortcuts-group">
+      <div class="shortcuts-group-title">Navigation</div>
+      <div class="shortcut-row"><span>Go to Members tab</span><div class="shortcut-keys"><span class="kbd">G</span><span class="shortcut-plus">then</span><span class="kbd">M</span></div></div>
+      <div class="shortcut-row"><span>Go to Vehicles tab</span><div class="shortcut-keys"><span class="kbd">G</span><span class="shortcut-plus">then</span><span class="kbd">V</span></div></div>
+      <div class="shortcut-row"><span>Go to Statements tab</span><div class="shortcut-keys"><span class="kbd">G</span><span class="shortcut-plus">then</span><span class="kbd">S</span></div></div>
+      <div class="shortcut-row"><span>Go to Dashboard tab</span><div class="shortcut-keys"><span class="kbd">G</span><span class="shortcut-plus">then</span><span class="kbd">D</span></div></div>
+    </div>
+    <div class="shortcuts-group">
+      <div class="shortcuts-group-title">Actions</div>
+      <div class="shortcut-row"><span>Add new vehicle</span><div class="shortcut-keys"><span class="kbd">N</span></div></div>
+      <div class="shortcut-row"><span>Add new member</span><div class="shortcut-keys"><span class="kbd">Shift</span><span class="shortcut-plus">+</span><span class="kbd">N</span></div></div>
+      <div class="shortcut-row"><span>Focus lot number field</span><div class="shortcut-keys"><span class="kbd">L</span></div></div>
+      <div class="shortcut-row"><span>Print all PDFs</span><div class="shortcut-keys"><span class="kbd">Ctrl</span><span class="shortcut-plus">+</span><span class="kbd">P</span></div></div>
+    </div>
+    <div class="shortcuts-group">
+      <div class="shortcuts-group-title">General</div>
+      <div class="shortcut-row"><span>Toggle light/dark mode</span><div class="shortcut-keys"><span class="kbd">T</span></div></div>
+      <div class="shortcut-row"><span>Show this help</span><div class="shortcut-keys"><span class="kbd">?</span></div></div>
+      <div class="shortcut-row"><span>Close modal / dialog</span><div class="shortcut-keys"><span class="kbd">Esc</span></div></div>
+      <div class="shortcut-row"><span>Search vehicles</span><div class="shortcut-keys"><span class="kbd">/</span></div></div>
+    </div>
+    <div style="text-align:center;margin-top:8px;font-size:11px;color:#3A5570">Shortcuts are disabled when typing in input fields</div>
+  </div>
+</div>
+<div class="shortcut-hint" id="shortcut-hint"></div>
 </body>
 </html>
