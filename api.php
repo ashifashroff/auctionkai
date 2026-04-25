@@ -39,8 +39,13 @@ if ($action === 'add_auction') {
 // ─── ADD MEMBER ─────────────────────────────────────
 if ($action === 'add_member') {
     $name = trim($input['name'] ?? '');
+    $email = trim($input['email'] ?? '');
     if ($name === '') {
         echo json_encode(['error' => 'Name is required.']);
+        exit;
+    }
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo json_encode(['error' => 'Invalid email address.']);
         exit;
     }
     // Check for duplicate member name
@@ -51,7 +56,7 @@ if ($action === 'add_member') {
         exit;
     }
     $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
-    $stmt->execute([$userId, $name, trim($input['phone'] ?? ''), trim($input['email'] ?? '')]);
+    $stmt->execute([$userId, $name, trim($input['phone'] ?? ''), $email]);
     echo json_encode(['success' => true, 'message' => 'Member added.', 'id' => (int)$db->lastInsertId()]);
     exit;
 }

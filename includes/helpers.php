@@ -30,3 +30,18 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
 
     return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
+
+function sanitizeInput(string $input, string $type = 'string'): mixed {
+    $input = trim($input);
+    switch ($type) {
+        case 'int':
+            return filter_var($input, FILTER_VALIDATE_INT) !== false ? (int)$input : 0;
+        case 'float':
+            return filter_var($input, FILTER_VALIDATE_FLOAT) !== false ? (float)$input : 0.0;
+        case 'email':
+            return filter_var($input, FILTER_VALIDATE_EMAIL) ?: '';
+        case 'string':
+        default:
+            return htmlspecialchars($input, ENT_QUOTES, 'UTF-8');
+    }
+}

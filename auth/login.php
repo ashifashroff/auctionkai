@@ -1,6 +1,11 @@
 <?php
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/helpers.php';
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Strict');
 session_start();
 
 if (!empty($_SESSION['user_id'])) {
@@ -17,6 +22,10 @@ if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login') {
+    // Rate limit check
+    if (!checkRateLimit($_SERVER['REMOTE_ADDR'])) {
+        $error = 'Too many login attempts. Please try again later.';
+    } else {
     if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
     else {
     $username = trim($_POST['username'] ?? '');
@@ -26,14 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     $attemptKey = 'login_attempts_' . $username;
     if (!isset($_SESSION[$attemptKey])) $_SESSION[$attemptKey] = ['count' => 0, 'last' => 0];
     $att = &$_SESSION[$attemptKey];
-    if ($att['count'] >= 5 && (time() - $att['last']) < 30) {
+    if ($att['count'] >= MAX_LOGIN_ATTEMPTS && (time() - $att['last']) < LOGIN_LOCKOUT_SECONDS) {
         $remaining = 30 - (time() - $att['last']);
         $error = "Too many failed attempts. Try again in {$remaining}s.";
     }
     elseif ($username === '' || $password === '') {
         $error = 'Please fill in all fields.';
     } else {
-        $stmt = $db->prepare("SELECT * FROM users WHERE username = ?");
+        $stmt = $db->prepare("SELECT id, username, password, name, email, role, status, suspended_until, suspend_reason FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
@@ -68,10 +77,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         } else {
             $att['count']++;
             $att['last'] = time();
-            $error = 'Invalid username or password.';
+            $error = 'Invalid credentials.';
         }
     }
-    }
+    } // end rate limit else
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'register') {
@@ -85,15 +94,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
     if ($username === '' || $name === '' || $password === '') {
         $error = 'Please fill in all required fields.';
-    } elseif (strlen($password) < 8) {
+    } elseif (strlen($password) < MIN_PASSWORD_LENGTH) {
         $error = 'Password must be at least 8 characters.';
+    } elseif (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+        $error = 'Password must contain uppercase, lowercase, and numbers.';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
         $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->execute([$username]);
         if ($stmt->fetch()) {
-            $error = 'Username already taken.';
+            $error = 'Username not available.';
         } elseif ($email !== '') {
             $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
             $stmt->execute([$email]);
@@ -172,14 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
           <div class="strength-bar-wrap" id="reg-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="reg-strength-label"></div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
-          <input class="inp" type="password" name="confirm" placeholder="••••••" data-parsley-required="true">
+          <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
@@ -202,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-5">
           <label class="lbl">Password</label>
-          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <input class="inp" type="password" name="password" autocomplete="new-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Log In</button>

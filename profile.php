@@ -1,5 +1,9 @@
 <?php
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+require_once __DIR__ . '/includes/constants.php';
 require_once __DIR__ . '/includes/db.php';
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Strict');
 session_start();
 
 if (empty($_SESSION['user_id'])) {
@@ -51,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Please fill in all password fields.';
         } elseif (!password_verify($current, $user['password'])) {
             $error = 'Current password is incorrect.';
-        } elseif (strlen($new) < 8) {
+        } elseif (strlen($new) < MIN_PASSWORD_LENGTH) {
             $error = 'New password must be at least 8 characters.';
         } elseif ($new !== $confirm) {
             $error = 'New passwords do not match.';

@@ -1,6 +1,10 @@
 <?php
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+require_once __DIR__ . '/includes/constants.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_samesite', 'Strict');
 session_start();
 
 // ─── ADMIN PROTECTION ────────────────────────────────────────────────────────
