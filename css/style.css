@@ -169,3 +169,16 @@ table{border-collapse:collapse}
 .toast-warning .toast-progress{background:#D4A84B}
 .toast-info .toast-progress{background:#5A9FD4}
 @keyframes toast-progress{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* ── PASSWORD STRENGTH INDICATOR ──────────── */
+.strength-bar-wrap{display:flex;gap:4px;margin-top:6px;height:4px}
+.strength-bar{flex:1;border-radius:4px;background:#1E3A5F;transition:background .3s ease}
+.strength-label{font-size:11px;margin-top:5px;font-weight:600;transition:color .3s ease;min-height:16px}
+.strength-weak .strength-bar:nth-child(1){background:#CC7777}
+.strength-fair .strength-bar:nth-child(1),.strength-fair .strength-bar:nth-child(2){background:#D4A84B}
+.strength-good .strength-bar:nth-child(1),.strength-good .strength-bar:nth-child(2),.strength-good .strength-bar:nth-child(3){background:#5A9FD4}
+.strength-strong .strength-bar{background:#4CAF82}
+.strength-weak .strength-label{color:#CC7777}
+.strength-fair .strength-label{color:#D4A84B}
+.strength-good .strength-label{color:#5A9FD4}
+.strength-strong .strength-label{color:#4CAF82}

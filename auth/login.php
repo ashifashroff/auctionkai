@@ -85,8 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
     if ($username === '' || $name === '' || $password === '') {
         $error = 'Please fill in all required fields.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
+    } elseif (strlen($password) < 8) {
+        $error = 'Password must be at least 8 characters.';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
@@ -164,8 +164,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         </div>
 
         <div class="mb-4">
-          <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-          <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
+          <input class="inp" type="password" name="password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <div class="strength-bar-wrap" id="reg-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
+          <div class="strength-label" id="reg-strength-label"></div>
         </div>
 
         <div class="mb-5">

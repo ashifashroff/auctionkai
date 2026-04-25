@@ -50,6 +50,49 @@ async function checkDuplicateLot(lot, auctionId, excludeId = 0) {
   }
 }
 
+// ── Password Strength Checker ─────────────────
+function getPasswordStrength(password) {
+  let score = 0;
+  if (!password) return { score: 0, label: '', level: '' };
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+  if (score <= 1) return { score: 1, label: 'Weak', level: 'strength-weak' };
+  if (score <= 2) return { score: 2, label: 'Fair', level: 'strength-fair' };
+  if (score <= 4) return { score: 3, label: 'Good', level: 'strength-good' };
+  return { score: 4, label: 'Strong', level: 'strength-strong' };
+}
+
+function initStrengthIndicator(inputId, barsId, labelId) {
+  const input = document.getElementById(inputId);
+  const bars = document.getElementById(barsId);
+  const label = document.getElementById(labelId);
+  if (!input || !bars || !label) return;
+  input.addEventListener('input', function() {
+    const val = input.value;
+    if (!val) { bars.className = 'strength-bar-wrap'; label.textContent = ''; return; }
+    const result = getPasswordStrength(val);
+    bars.className = 'strength-bar-wrap ' + result.level;
+    label.textContent = result.label;
+    const form = input.closest('form');
+    if (form) {
+      if (result.score < 2) {
+        input.setCustomValidity('Password is too weak. Add uppercase, numbers, or symbols.');
+      } else {
+        input.setCustomValidity('');
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initStrengthIndicator('register-password', 'reg-strength-bars', 'reg-strength-label');
+  initStrengthIndicator('profile-new-password', 'prof-strength-bars', 'prof-strength-label');
+});
+
 // ─── ADD VEHICLE FORM: Toggle sold/unsold fields ────
 function toggleSoldFields(isSold) {
   document.querySelectorAll('.sold-fields').forEach(el => {

@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Please fill in all password fields.';
         } elseif (!password_verify($current, $user['password'])) {
             $error = 'Current password is incorrect.';
-        } elseif (strlen($new) < 6) {
-            $error = 'New password must be at least 6 characters.';
+        } elseif (strlen($new) < 8) {
+            $error = 'New password must be at least 8 characters.';
         } elseif ($new !== $confirm) {
             $error = 'New passwords do not match.';
         } else {
@@ -138,8 +138,10 @@ require_once __DIR__ . '/includes/helpers.php';
         </div>
 
         <div class="mb-4">
-          <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label>
-          <input class="inp" type="password" name="new_password" placeholder="Enter new password" data-parsley-required="true">
+          <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
+          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-minlength="8">
+          <div class="strength-bar-wrap" id="prof-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
+          <div class="strength-label" id="prof-strength-label"></div>
         </div>
 
         <div class="mb-5">
