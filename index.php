@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([
                 $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
