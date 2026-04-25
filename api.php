@@ -52,7 +52,7 @@ if ($action === 'add_member') {
     }
     $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
     $stmt->execute([$userId, $name, trim($input['phone'] ?? ''), trim($input['email'] ?? '')]);
-    echo json_encode(['success' => true, 'message' => 'Member added.']);
+    echo json_encode(['success' => true, 'message' => 'Member added.', 'id' => (int)$db->lastInsertId()]);
     exit;
 }
 

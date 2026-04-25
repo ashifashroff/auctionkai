@@ -466,12 +466,12 @@ function submitAddMember(e) {
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Add';return;}
     showToast('Member added successfully', 'success');
-    // Prepend new member card to top of list
     const list = document.getElementById('memberList');
     const name = form.name.value.trim();
     const phone = form.phone.value.trim();
     const email = form.email.value.trim();
     const initial = name.charAt(0).toUpperCase();
+    const newId = d.id || 0;
     const card = document.createElement('div');
     card.className = 'bg-ak-card rounded-xl p-4 border border-ak-gold/30 flex items-center gap-4 animate-fade-in-up member-card';
     card.setAttribute('data-member-name', name.toLowerCase());
@@ -481,10 +481,14 @@ function submitAddMember(e) {
       <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
       <div class="flex-1 min-w-0">
         <div class="text-ak-text font-semibold">${name}</div>
-        <div class="text-ak-muted text-xs">${phone} · ${email}</div>
+        <div class="text-ak-muted text-xs">${phone}${phone && email ? ' · ' : ''}${email}</div>
       </div>
       <div class="text-center px-3"><div class="text-ak-text font-bold text-lg">0</div><div class="text-ak-muted text-[10px]">0 sold</div></div>
       <div class="text-right px-3"><div class="text-ak-gold font-mono font-bold">¥0</div><div class="text-ak-muted text-[10px]">net payout</div></div>
+      <div class="flex gap-2 shrink-0">
+        <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${newId}, '${name.replace(/'/g, "\\'")}', '${phone.replace(/'/g, "\\'")}', '${email.replace(/'/g, "\\'")}')">✎ Edit</button>
+        <form method="POST" action="index.php?tab=members" style="display:inline" data-parsley-validate onsubmit="return removeMember(${newId}, '${name.replace(/'/g, "\\'")}')"><button class="btn btn-sm" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)" type="submit">✕ Remove</button></form>
+      </div>
     `;
     list.prepend(card);
     form.reset();
