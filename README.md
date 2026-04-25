@@ -97,6 +97,7 @@ auctionkai/
 │   ├── .htaccess              ← Block direct browser access
 │   ├── auth_check.php         ← Session guard for protected pages
 │   ├── db.php                 ← PDO connection (requires config.php)
+│   ├── footer.php             ← Shared footer component
 │   └── helpers.php            ← Shared functions: fmt(), h(), calcStatement()
 ├── js/
 │   └── app.js                 ← All client-side JS
@@ -110,6 +111,9 @@ auctionkai/
 ├── api.php                    ← AJAX: general API handler
 ├── profile.php                ← Edit name, email, password
 ├── pdf.php                    ← A4 PDF statements
+├── help.php                   ← Help & Guide (accordion FAQ)
+├── about.php                  ← About AuctionKai
+├── privacy.php                ← Privacy Policy
 └── README.md
 ```
 
@@ -168,3 +172,10 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 ---
 
 Private project — all rights reserved.
+
+---
+
+## Credits
+
+Designed & Developed by Mirai Global Solutions
+© 2025–<?= date('Y') ?> All rights reserved.
