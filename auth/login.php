@@ -94,7 +94,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         $stmt->execute([$username]);
         if ($stmt->fetch()) {
             $error = 'Username already taken.';
-        } else {
+        } elseif ($email !== '') {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            if ($stmt->fetch()) {
+                $error = 'Email address already registered.';
+            }
+        }
+        if (empty($error)) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $db->prepare("INSERT INTO users (username, password, name, email, role) VALUES (?,?,?,?,?)");
             $stmt->execute([$username, $hash, $name, $email, 'user']);

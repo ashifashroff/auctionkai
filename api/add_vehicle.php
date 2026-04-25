@@ -71,5 +71,6 @@ if (!empty($errors)) {
 }
 
 $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?)");
+$stmt->execute([$auctionId, $memberId, $make, $model, $lot, $soldPrice, $recycleFee, $listingFee, $soldFee, $nagareFee, $sold]);
 
 echo json_encode(['success' => true, 'message' => 'Vehicle added successfully.']);
