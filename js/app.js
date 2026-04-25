@@ -396,14 +396,6 @@ function closeEditMemberModal() {
   document.body.style.overflow = '';
 }
 
-function showEditMemberMsg(text, type) {
-  const msg = document.getElementById('editMemberMsg');
-  msg.textContent = text;
-  msg.classList.remove('hidden');
-  msg.style.background = type === 'error' ? 'rgba(231,76,60,.15)' : 'rgba(46,204,113,.15)';
-  msg.style.color = type === 'error' ? '#e74c3c' : '#2ecc71';
-}
-
 function submitEditMember(e) {
   e.preventDefault();
   const btn = document.getElementById('emSubmitBtn');
