@@ -76,7 +76,7 @@ require_once __DIR__ . '/includes/helpers.php';
 <link rel="stylesheet" href="css/style.css">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
-<body class="bg-ak-bg text-ak-text font-sans min-h-screen">
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <div class="min-h-screen flex items-start justify-center pt-16 px-4">
   <div class="w-full max-w-lg">

@@ -4,11 +4,11 @@
 $base = '';
 if (isset($footerBase)) { $base = $footerBase; }
 elseif (!isset($footerBase)) {
-  // Detect if we're inside a subfolder by checking if index.php exists at current level
   $base = file_exists(__DIR__ . '/../index.php') ? '../' : '';
 }
 ?>
-<div class="bg-ak-bg2 border-t border-ak-border px-7 py-8 mt-8">
+</div><!-- end main content wrapper (flex-1) -->
+<footer class="bg-ak-bg2 border-t border-ak-border px-7 py-8 w-full mt-auto">
   <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
     <!-- Column 1 — Brand -->
     <div>
@@ -41,4 +41,4 @@ elseif (!isset($footerBase)) {
     <div class="text-ak-muted text-xs">© 2025–<?= date('Y') ?> AuctionKai. All rights reserved.</div>
     <div class="text-ak-muted text-xs mt-2 md:mt-0">Designed & Developed by Mirai Global Solutions</div>
   </div>
-</div>
+</footer>

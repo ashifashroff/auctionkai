@@ -14,7 +14,7 @@ require_once 'includes/helpers.php';
 <link rel="stylesheet" href="css/style.css">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
-<body class="bg-ak-bg text-ak-text font-sans min-h-screen">
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
 <div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50">
