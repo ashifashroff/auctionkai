@@ -179,9 +179,4 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 Designed & Developed by Mirai Global Solutions
 © 2025–2026 AuctionKai. All rights reserved.
 
----
 
-## Credits
-
-Designed & Developed by Mirai Global Solutions
-© 2025–<?= date('Y') ?> All rights reserved.
