@@ -565,7 +565,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php elseif ($tab === 'statements'): ?>
 <div class="flex justify-between items-center mb-6">
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
-  <a class="btn btn-dark" href="pdf.php?all=1&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
+  <a class="btn btn-dark" href="pdf.php?all=1&v=2.4&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
 </div>
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sales history available for this auction.</div>
@@ -583,7 +583,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
         <a class="btn-email" href="mailto:<?= h($m['email']) ?>?subject=<?= $emailSubject ?>&body=<?= $emailBody ?>">✉ Send Email</a>
-        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
+        <a class="btn btn-gold btn-sm" href=".php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
     <div class="sb2">
