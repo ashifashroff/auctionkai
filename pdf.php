@@ -28,7 +28,8 @@ if (empty($targets)) { echo 'No members found.'; exit; }
 function renderStatement(array $m, array $s, array $auction): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
-        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['sold_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) ) . "</td></tr>";
+        $net = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0);
+        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['sold_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt($net) . "</td></tr>";
     }
     $uRows = '';
     foreach ($s['uv'] ?? [] as $v) {
@@ -39,16 +40,17 @@ function renderStatement(array $m, array $s, array $auction): string {
     <div class='page'>
       <div class='hdr'>
         <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div></div>
-        <div class='meta'><strong>" . h($m['name']) . "</strong>" . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
+        <div class='meta'><strong>" . h($m['name']) . "</strong> " . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
       <table>
-        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Listing</th><th class='r'>Sold Fee</th><th class='r'>Other</th><th class='r'>Net</th></tr></thead>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Listing</th><th class='r'>Sold Fee</th><th class='r'>Net</th></tr></thead>
+        <tbody>{$rows}</tbody>
       </table>
       " . ($s['unsoldCount'] > 0 ? "
       <div class='sec'>Unsold Vehicles ({$s['unsoldCount']} units)</div>
       <table>
-        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Nagare</th><th class='r'>Other</th><th class='r'>Total</th></tr></thead>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Nagare</th><th class='r'>Total</th></tr></thead>
         <tbody>{$uRows}</tbody>
       </table>
       " : "") . "
@@ -74,14 +76,13 @@ function renderStatement(array $m, array $s, array $auction): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta charset="UTF-8">
 <title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pdf.css">
 </head>
 <body>
-<div class="ctrl">
+<div class="ctrl'>
   <span>⚡ AuctionKai</span>
   <span style="color:#3A5570">|</span>
   <a href="index.php?tab=statements<?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>">← Back</a>
