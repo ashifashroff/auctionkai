@@ -76,7 +76,6 @@ function renderStatement(array $m, array $s, array $auction): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script>document.documentElement.classList.remove('light-mode');document.body&&document.body.classList.remove('light-mode');</script>
 <meta charset="UTF-8">
 <title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">

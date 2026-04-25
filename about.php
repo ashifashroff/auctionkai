@@ -9,7 +9,6 @@ require_once 'includes/helpers.php';
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AuctionKai — About</title>
-<script>(function(){if(localStorage.getItem("ak_theme")==="light"){document.documentElement.classList.add("light-mode");document.body.classList.add("light-mode");}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=2.4">
@@ -24,7 +23,7 @@ require_once 'includes/helpers.php';
     <div class="text-ak-muted text-[11px]">About</div>
   </div>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
-    <button class="theme-toggle" id="theme-toggle-btn" title="Toggle light/dark mode"><span class="theme-toggle-icon">☀️</span><span class="theme-toggle-label">Light</span></button><a href="index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">← Back to App</a>
+    <a href="index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">← Back to App</a>
   </div>
 </div>
 

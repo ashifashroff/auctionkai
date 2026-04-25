@@ -1,6 +1,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans JP',sans-serif;background:#ffffff!important;color:#111;font-size:13px;line-height:1.5}
-.page{background:#ffffff!important;width:210mm;min-height:297mm;margin:0 auto 20px;padding:40px 44px;box-shadow:0 4px 24px rgba(0,0,0,.15)}
+body{font-family:'Noto Sans JP',sans-serif;background:#f4f4f4;color:#111;font-size:13px;line-height:1.5}
+.page{background:#fff;width:210mm;min-height:297mm;margin:0 auto 20px;padding:40px 44px;box-shadow:0 4px 24px rgba(0,0,0,.15)}
 .hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #111;padding-bottom:16px;margin-bottom:28px}
 .brand{font-size:26px;font-weight:700;letter-spacing:-.5px} .brand span{color:#B8912A}
 .sub{font-size:11px;color:#666;margin-top:3px}
