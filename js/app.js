@@ -305,9 +305,36 @@ function submitAddMember(e) {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'add_member', name:form.name.value, phone:form.phone.value, email:form.email.value})
   }).then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Add';return;}
-    location.reload();
-  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='+ Add';});
+    if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Add';return;}
+    showToast('Member added successfully', 'success');
+    // Prepend new member card to top of list
+    const list = document.getElementById('memberList');
+    const name = form.name.value.trim();
+    const phone = form.phone.value.trim();
+    const email = form.email.value.trim();
+    const initial = name.charAt(0).toUpperCase();
+    const card = document.createElement('div');
+    card.className = 'bg-ak-card rounded-xl p-4 border border-ak-gold/30 flex items-center gap-4 animate-fade-in-up member-card';
+    card.setAttribute('data-member-name', name.toLowerCase());
+    card.setAttribute('data-member-phone', phone.toLowerCase());
+    card.setAttribute('data-member-email', email.toLowerCase());
+    card.innerHTML = `
+      <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-ak-text font-semibold">${name}</div>
+        <div class="text-ak-muted text-xs">${phone} · ${email}</div>
+      </div>
+      <div class="text-center px-3"><div class="text-ak-text font-bold text-lg">0</div><div class="text-ak-muted text-[10px]">0 sold</div></div>
+      <div class="text-right px-3"><div class="text-ak-gold font-mono font-bold">¥0</div><div class="text-ak-muted text-[10px]">net payout</div></div>
+    `;
+    list.prepend(card);
+    form.reset();
+    btn.disabled = false; btn.textContent = '+ Add';
+    // Clear search to show new member
+    const search = document.getElementById('memberListSearch');
+    if (search) search.value = '';
+    filterMemberList();
+  }).catch(()=>{showToast('Connection error. Please try again.', 'error');btn.disabled=false;btn.textContent='+ Add';});
   return false;
 }
 
@@ -328,6 +355,18 @@ function submitSaveAuction(e) {
 }
 
 // ─── REMOVE MEMBER (AJAX) ──────────────────────────
+// ─── MEMBER LIST SEARCH ───────────────────────────
+function filterMemberList() {
+  const q = (document.getElementById('memberListSearch')?.value || '').toLowerCase().trim();
+  document.querySelectorAll('.member-card').forEach(card => {
+    const name = card.getAttribute('data-member-name') || '';
+    const phone = card.getAttribute('data-member-phone') || '';
+    const email = card.getAttribute('data-member-email') || '';
+    const match = !q || name.includes(q) || phone.includes(q) || email.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+}
+
 function removeMember(id, name) {
   if (!confirm('Remove ' + name + ' and all their vehicles?')) return;
   fetch('api.php', {

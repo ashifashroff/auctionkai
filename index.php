@@ -389,7 +389,10 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     </div>
   </form>
 </div>
-<div class="flex flex-col gap-2.5">
+<div class="mb-4">
+  <input class="inp max-w-md" id="memberListSearch" placeholder="🔍 Search members by name, phone, or email…" oninput="filterMemberList()">
+</div>
+<div class="flex flex-col gap-2.5" id="memberList">
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">No members yet for this auction.</div>
 <?php else: ?>
@@ -408,7 +411,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     </div>
   </div>
   <?php else: ?>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up member-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-member-phone="<?= h(mb_strtolower($m['phone'])) ?>" data-member-email="<?= h(mb_strtolower($m['email'])) ?>">
     <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
     <div class="flex-1 min-w-0">
       <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(<?= (int)$m['id'] ?>)"><?= h($m['name']) ?></div>
