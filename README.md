@@ -77,43 +77,44 @@ No sold vehicles means ¥0 net payout.
 
 ```
 auctionkai/
-├── api/
+├── api/                        ← AJAX handlers
 │   ├── add_vehicle.php
 │   ├── delete_vehicle.php
 │   ├── get_vehicle.php
 │   ├── update_vehicle.php
 │   ├── get_member_detail.php
 │   └── update_member.php
-├── auth/
-│   ├── login.php              ← Login & registration
-│   ├── logout.php             ← Session destroy
-│   ├── forgot_password.php    ← Password reset request
-│   └── reset_password.php     ← Set new password
+│
+├── auth/                       ← Authentication pages
+│   ├── login.php
+│   ├── logout.php
+│   ├── forgot_password.php
+│   └── reset_password.php
+│
 ├── css/
-│   ├── style.css              ← Custom styles (forms, tables, statements)
-│   ├── pdf.css                ← PDF print layout
-│   └── tailwind-config.php    ← Tailwind CDN + theme colors
-├── includes/
-│   ├── .htaccess              ← Block direct browser access
-│   ├── auth_check.php         ← Session guard for protected pages
-│   ├── db.php                 ← PDO connection (requires config.php)
-│   ├── footer.php             ← Shared footer component
-│   └── helpers.php            ← Shared functions: fmt(), h(), calcStatement()
+│   ├── style.css               ← Custom styles (forms, tables, statements)
+│   ├── pdf.css                 ← PDF print layout
+│   └── tailwind-config.php     ← Tailwind CDN + theme colors
+│
+├── includes/                   ← Shared PHP components
+│   ├── auth_check.php          ← Session guard for protected pages
+│   ├── db.php                  ← PDO connection
+│   ├── helpers.php             ← fmt(), h(), calcStatement()
+│   └── footer.php              ← Shared footer component
+│
 ├── js/
-│   └── app.js                 ← All client-side JS
-├── .htaccess                  ← Protect config.php and schema.sql from browser access
-├── .gitignore                 ← Exclude config.php, logs, OS files
-├── config.php                 ← DB constants only (host, name, user, pass)
-├── schema.sql                 ← Full schema + seed data
-├── index.php                  ← Main app (dashboard, members, vehicles, statements)
-├── admin.php                  ← Admin panel (user management)
-├── delete_auction.php         ← AJAX: delete auction
-├── api.php                    ← AJAX: general API handler
-├── profile.php                ← Edit name, email, password
-├── pdf.php                    ← A4 PDF statements
-├── help.php                   ← Help & Guide (accordion FAQ)
-├── about.php                  ← About AuctionKai
-├── privacy.php                ← Privacy Policy
+│   └── app.js                  ← All client-side JS
+│
+├── .htaccess                   ← Protect config.php and schema.sql
+├── .gitignore                  ← Exclude config.php, logs, OS files
+├── config.php                  ← Database credentials
+├── schema.sql                  ← Full schema + seed data
+├── index.php                   ← Main app (dashboard, members, vehicles, statements)
+├── profile.php                 ← Edit name, email, password
+├── pdf.php                     ← A4 PDF settlement statements
+├── help.php                    ← Help & guide (accordion FAQ)
+├── about.php                   ← About AuctionKai + tech stack + version history
+├── privacy.php                 ← Privacy policy
 └── README.md
 ```
 
@@ -171,7 +172,12 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 
 ---
 
-Private project — all rights reserved.
+---
+
+## Credits
+
+Designed & Developed by Mirai Global Solutions
+© 2025–2026 AuctionKai. All rights reserved.
 
 ---
 
