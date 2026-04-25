@@ -31,7 +31,6 @@ $recycleFee= (float)($input['recycleFee'] ?? 0);
 $listingFee= (float)($input['listingFee'] ?? 0);
 $soldFee   = (float)($input['soldFee'] ?? 0);
 $nagareFee = (float)($input['nagareFee'] ?? 0);
-$otherFee  = (float)($input['otherFee'] ?? 0);
 $sold      = !empty($input['sold']) ? 1 : 0;
 
 // Validation
@@ -50,7 +49,6 @@ if (!$sold) {
     if ($soldPrice < 0) $errors[] = 'Sold price cannot be negative.';
 }
 if ($nagareFee < 0) $errors[] = 'Nagare fee cannot be negative.';
-if ($otherFee < 0) $errors[] = 'Other fee cannot be negative.';
 
 if (!empty($errors)) {
     echo json_encode(['error' => implode(' ', $errors)]);
@@ -78,7 +76,6 @@ if (!$memCheck->fetch()) {
 }
 
 // Update
-$stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, other_fee=?, sold=? WHERE id=?");
-$stmt->execute([$memberId, $make, $model, $lot, $soldPrice, $recycleFee, $listingFee, $soldFee, $nagareFee, $otherFee, $sold, $id]);
+$stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, sold=? WHERE id=?");
 
 echo json_encode(['success' => true, 'message' => 'Vehicle updated successfully.']);

@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $memberId = (int)($_POST['memberId'] ?? 0);
         $make     = trim($_POST['make'] ?? '');
         if ($memberId && $make !== '') {
-            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, other_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+            $stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?)");
             $stmt->execute([
                 $activeAuctionId, $memberId, $make,
                 trim($_POST['model']    ?? ''),
@@ -150,7 +150,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (float)($_POST['listingFee'] ?? 0),
                 (float)($_POST['soldFee'] ?? 0),
                 (float)($_POST['nagareFee'] ?? 0),
-                (float)($_POST['otherFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
             ]);
         }
@@ -160,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id   = (int)$_POST['id'];
         $make = trim($_POST['make'] ?? '');
         if ($make !== '') {
-            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, other_fee=?, sold=? WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
+            $stmt = $db->prepare("UPDATE vehicles SET member_id=?, make=?, model=?, lot=?, sold_price=?, recycle_fee=?, listing_fee=?, sold_fee=?, nagare_fee=?, sold=? WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
             $stmt->execute([
                 (int)($_POST['memberId'] ?? 0),
                 $make,
@@ -171,7 +170,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (float)($_POST['listingFee'] ?? 0),
                 (float)($_POST['soldFee'] ?? 0),
                 (float)($_POST['nagareFee'] ?? 0),
-                (float)($_POST['otherFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
                 $id,
                 $userId,
@@ -459,7 +457,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" data-parsley-type="number" data-parsley-min="0"></div>
       <div class="nagare-field"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" data-parsley-type="number" data-parsley-min="0" disabled></div>
-      <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" data-parsley-type="number" data-parsley-min="0"></div>
       <div class="flex items-end pt-[22px] gap-2">
         <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
           <input type="checkbox" id="add_sold" name="sold" checked class="accent-ak-gold" onchange="toggleSoldFields(this.checked)"> Sold
@@ -472,7 +469,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 </div>
 <div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto vehicles-table-desktop">
   <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Other</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr></thead>
+    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr></thead>
     <tbody>
     <?php if (empty($vehicles)): ?>
       <tr><td colspan="14" class="text-center text-ak-muted py-12">No vehicles yet for this auction.</td></tr>
@@ -502,11 +499,8 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
         <td class="text-right font-mono text-ak-red text-xs" data-field="nagare">
           <?= !$v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
         </td>
-        <td class="text-right font-mono text-ak-red text-xs" data-field="other">
-          <?= (float)($v['other_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['other_fee']) : '—' ?>
-        </td>
         <td class="text-right font-mono font-bold <?= $v['sold'] ? 'text-ak-gold' : 'text-ak-muted' ?>" data-field="total">
-          <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0) - (float)($v['other_fee'] ?? 0); ?>
+          <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0); ?>
           <?= fmt($vTotal) ?>
           <?php else: ?>—<?php endif; ?>
         </td>
@@ -558,10 +552,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="v-card-fee">
       <div class="v-card-fee-label">Nagare Fee</div>
       <div class="v-card-fee-value <?= !$v['sold'] ? '' : 'muted' ?>"><?= !$v['sold'] ? fmt((float)$v['nagare_fee']) : '—' ?></div>
-    </div>
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Other Fee</div>
-      <div class="v-card-fee-value"><?= fmt((float)$v['other_fee']) ?></div>
     </div>
   </div>
   <div class="v-card-actions">
@@ -630,9 +620,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
         <?php if ($s['nagareFeeTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Nagare Fee ×<?= $s['unsoldCount'] ?></span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
         <?php endif; ?>
-        <?php if ($s['otherFeeTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Other Fee ×<?= $s['count'] ?></span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
-        <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
         <?php endif; ?>
@@ -676,8 +663,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
         <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_listingFee" name="listingFee" data-parsley-type="number" data-parsley-min="0"></div>
         <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono modal-sold-field" type="number" id="edit_soldFee" name="soldFee" data-parsley-type="number" data-parsley-min="0"></div>
         <div class="modal-nagare-field"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="edit_nagareFee" name="nagareFee" data-parsley-type="number" data-parsley-min="0" disabled></div>
-        <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="edit_otherFee" name="otherFee" data-parsley-type="number" data-parsley-min="0"></div>
-      </div>
+        </div>
       <div class="flex items-center gap-3 mt-4 pt-4 border-t border-ak-border">
         <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer">
           <input type="checkbox" id="edit_sold" name="sold" class="accent-ak-gold" onchange="toggleModalSoldFields(this.checked)"> Sold

@@ -28,11 +28,11 @@ if (empty($targets)) { echo 'No members found.'; exit; }
 function renderStatement(array $m, array $s, array $auction): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
-        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['sold_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['other_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['other_fee'] ?? 0)) . "</td></tr>";
+        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['sold_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt((float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) ) . "</td></tr>";
     }
     $uRows = '';
     foreach ($s['uv'] ?? [] as $v) {
-        $uRows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>−" . fmt((float)($v['nagare_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['other_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700;color:#e74c3c'>−" . fmt((float)($v['nagare_fee'] ?? 0) + (float)($v['other_fee'] ?? 0)) . "</td></tr>";
+        $uRows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>−" . fmt((float)($v['nagare_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700;color:#e74c3c'>−" . fmt((float)($v['nagare_fee'] ?? 0)) . "</td></tr>";
     }
     $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
@@ -44,7 +44,6 @@ function renderStatement(array $m, array $s, array $auction): string {
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
       <table>
         <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Listing</th><th class='r'>Sold Fee</th><th class='r'>Other</th><th class='r'>Net</th></tr></thead>
-        <tbody>{$rows}<tr class='tr'><td colspan='2'>Totals</td><td class='r'>" . fmt($s['grossSales']) . "</td><td class='r'>" . fmt($s['taxTotal']) . "</td><td class='r'>" . fmt($s['recycleTotal']) . "</td><td class='r'>" . fmt($s['listingFeeTotal']) . "</td><td class='r'>" . fmt($s['soldFeeTotal']) . "</td><td class='r'>" . fmt($s['otherFeeTotal']) . "</td><td class='r' style='font-weight:700'>" . fmt($s['netPayout']) . "</td></tr></tbody>
       </table>
       " . ($s['unsoldCount'] > 0 ? "
       <div class='sec'>Unsold Vehicles ({$s['unsoldCount']} units)</div>
@@ -62,7 +61,6 @@ function renderStatement(array $m, array $s, array $auction): string {
         " . ($s['listingFeeTotal'] > 0 ? "<div class='row dim'><span>− Listing Fees</span><span>" . fmt($s['listingFeeTotal']) . "</span></div>" : "") . "
         " . ($s['soldFeeTotal'] > 0 ? "<div class='row dim'><span>− Sold Fees</span><span>" . fmt($s['soldFeeTotal']) . "</span></div>" : "") . "
         " . ($s['nagareFeeTotal'] > 0 ? "<div class='row dim'><span>− Nagare Fees</span><span>" . fmt($s['nagareFeeTotal']) . "</span></div>" : "") . "
-        " . ($s['otherFeeTotal'] > 0 ? "<div class='row dim'><span>− Other Fees</span><span>" . fmt($s['otherFeeTotal']) . "</span></div>" : "") . "
         " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission ¥" . number_format($s['commissionFee']) . "/member</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>

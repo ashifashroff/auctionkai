@@ -58,13 +58,13 @@
 /* ── FORM ROW FOR ADD/EDIT ─────────────────────────── */
 
 /* ── STATEMENT SECTIONS ────────────────────────────── */
-.sh{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border)}
-.sn2{font-size:16px;font-weight:700;color:var(--gold)}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border)}
+.sn2{font-size:18px;font-weight:700;color:var(--gold)}
 .sm{color:var(--muted);font-size:12px;margin-top:2px}
 .sa{display:flex;gap:8px;align-items:center}
-.sb2{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px}
-.sl{background:var(--bg);border-radius:10px;padding:16px}
-.sr{background:var(--bg);border-radius:10px;padding:16px}
+.sb2{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px}
+.sl{background:var(--bg);border-radius:10px;padding:20px}
+.sr{background:var(--bg);border-radius:10px;padding:20px}
 .ssl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
 .vr{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(30,58,95,.3)}
 .vr:last-of-type{border-bottom:none}

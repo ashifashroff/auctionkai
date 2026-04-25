@@ -285,7 +285,6 @@ function openEditModal(vehicleId) {
       document.getElementById('edit_listingFee').value = data.listing_fee || '';
       document.getElementById('edit_soldFee').value = data.sold_fee || '';
       document.getElementById('edit_nagareFee').value = data.nagare_fee || '';
-      document.getElementById('edit_otherFee').value = data.other_fee || '';
       document.getElementById('edit_sold').checked = data.sold;
       toggleModalSoldFields(data.sold);
     })
@@ -321,7 +320,6 @@ async function submitEditForm(e) {
     listingFee: parseFloat(document.getElementById('edit_listingFee').value) || 0,
     soldFee:    parseFloat(document.getElementById('edit_soldFee').value) || 0,
     nagareFee:  parseFloat(document.getElementById('edit_nagareFee').value) || 0,
-    otherFee:   parseFloat(document.getElementById('edit_otherFee').value) || 0,
     sold:       document.getElementById('edit_sold').checked,
   };
 
@@ -388,7 +386,6 @@ async function submitAddVehicle(e) {
     listingFee: parseFloat(document.getElementById('add_listingFee').value) || 0,
     soldFee:    parseFloat(document.getElementById('add_soldFee').value) || 0,
     nagareFee:  parseFloat(document.getElementById('add_nagareFee').value) || 0,
-    otherFee:   parseFloat(document.getElementById('add_otherFee').value) || 0,
     sold:       document.getElementById('add_sold').checked,
     auctionId:  activeAuctionId
   };

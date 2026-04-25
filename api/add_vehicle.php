@@ -29,7 +29,6 @@ $recycleFee = (float)($input['recycleFee'] ?? 0);
 $listingFee = (float)($input['listingFee'] ?? 0);
 $soldFee    = (float)($input['soldFee'] ?? 0);
 $nagareFee  = (float)($input['nagareFee'] ?? 0);
-$otherFee   = (float)($input['otherFee'] ?? 0);
 $sold       = !empty($input['sold']) ? 1 : 0;
 $auctionId  = (int)($input['auctionId'] ?? 0);
 
@@ -71,7 +70,6 @@ if (!empty($errors)) {
     exit;
 }
 
-$stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, other_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
-$stmt->execute([$auctionId, $memberId, $make, $model, $lot, $soldPrice, $recycleFee, $listingFee, $soldFee, $nagareFee, $otherFee, $sold]);
+$stmt = $db->prepare("INSERT INTO vehicles (auction_id, member_id, make, model, lot, sold_price, recycle_fee, listing_fee, sold_fee, nagare_fee, sold) VALUES (?,?,?,?,?,?,?,?,?,?)");
 
 echo json_encode(['success' => true, 'message' => 'Vehicle added successfully.']);

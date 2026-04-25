@@ -21,13 +21,10 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
     $listingFeeTotal = array_sum(array_map(fn($v) => (float)($v['listing_fee'] ?? 0), $mv));
     $soldFeeTotal    = array_sum(array_map(fn($v) => (float)($v['sold_fee'] ?? 0), $mv));
     $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $uv)); // nagare for unsold only
-    $otherFeeTotal   = array_sum(array_map(fn($v) => (float)($v['other_fee'] ?? 0), $all));
 
     $commissionTotal = $commissionFee;
     $totalReceived = $grossSales + $taxTotal + $recycleTotal;
-    $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal + $otherFeeTotal;
     $totalDed = $totalVehicleDed + $commissionTotal;
     $netPayout = $count > 0 ? $totalReceived - $totalDed : 0;
 
-    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','otherFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
