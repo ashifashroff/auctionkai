@@ -3,18 +3,31 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
 session_start();
 
-$db = db();
+if (empty($_SESSION['user_id'])) { header('Location: auth/login.php'); exit; }
 
-// Determine auction
+$db = db();
+$userId = (int)$_SESSION['user_id'];
+
 $activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;
 if (!$activeAuctionId) {
-    $first = $db->query("SELECT id FROM auction ORDER BY id LIMIT 1")->fetch();
+    $first = $db->prepare("SELECT id FROM auction WHERE user_id=? ORDER BY id LIMIT 1");
+    $first->execute([$userId]);
+    $first = $first->fetch();
     $activeAuctionId = $first ? (int)$first['id'] : 0;
 }
 
-$auction  = $activeAuctionId ? $db->query("SELECT * FROM auction WHERE id=" . (int)$activeAuctionId)->fetch() : null;
-$members  = $activeAuctionId ? $db->query("SELECT * FROM members m WHERE m.user_id=" . (int)($auction['user_id'] ?? 0) . " ORDER BY m.id")->fetchAll() : [];
-$vehicles = $activeAuctionId ? $db->query("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=" . (int)$activeAuctionId . " ORDER BY v.id")->fetchAll() : [];
+$auction = null;
+if ($activeAuctionId) {
+    $stmt = $db->prepare("SELECT * FROM auction WHERE id=? AND user_id=?");
+    $stmt->execute([$activeAuctionId, $userId]);
+    $auction = $stmt->fetch();
+}
+
+$members  = $auction ? $db->prepare("SELECT * FROM members WHERE user_id=? ORDER BY id") : null;
+if ($members) { $members->execute([$userId]); $members = $members->fetchAll(); } else { $members = []; }
+
+$vehicles = $activeAuctionId ? $db->prepare("SELECT v.* FROM vehicles v JOIN members m ON v.member_id=m.id WHERE v.auction_id=? AND m.user_id=? ORDER BY v.id") : null;
+if ($vehicles) { $vehicles->execute([$activeAuctionId, $userId]); $vehicles = $vehicles->fetchAll(); } else { $vehicles = []; }
 
 $printAll = isset($_GET['all']);
 $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
@@ -79,14 +92,14 @@ function renderStatement(array $m, array $s, array $auction): string {
 <title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/pdf.css">
+<link rel="stylesheet" href="css/pdf.css?v=2.4">
 </head>
 <body>
-<div class="ctrl'>
+
+<div class="ctrl">
   <span>⚡ AuctionKai</span>
-  <span style="color:#3A5570">|</span>
   <a href="index.php?tab=statements<?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>">← Back</a>
-  <span style="margin-left:auto;color:#3A5570"><?= count($targets) ?> statement<?= count($targets)>1?'s':'' ?> · <?= h($auction['name'] ?? '') ?></span>
+  <span style="margin-left:auto;color:#7A94A8;font-size:12px"><?= count($targets) ?> statement<?= count($targets)>1?'s':'' ?> · <?= h($auction['name'] ?? '') ?></span>
   <button class="bp" onclick="window.print()">🖨 Print / Save PDF</button>
 </div>
 
@@ -96,10 +109,5 @@ function renderStatement(array $m, array $s, array $auction): string {
     echo renderStatement($m, $s, $auction);
 endforeach; ?>
 
-<script>
-<?php if (!$printAll && $memberId): ?>
-window.addEventListener('load', () => setTimeout(() => window.print(), 800));
-<?php endif; ?>
-</script>
 </body>
 </html>
