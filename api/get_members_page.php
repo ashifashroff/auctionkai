@@ -1,9 +1,8 @@
 <?php
+require_once __DIR__ . "/../includes/api_bootstrap.php";
 require_once '../includes/auth_check.php';
-require_once '../includes/db.php';
 require_once '../includes/helpers.php';
 
-header('Content-Type: application/json');
 
 $userId = (int)($_SESSION['user_id'] ?? 0);
 if (!$userId) {

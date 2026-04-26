@@ -40,8 +40,16 @@ $soldCount = count(array_filter($vehicleList, fn($v) => $v['sold']));
 $unsoldCount = $totalVehicles - $soldCount;
 $grossSales = array_sum(array_map(fn($v) => $v['sold'] ? (float)$v['sold_price'] : 0, $vehicleList));
 
+$tok = $_SESSION['tok'] ?? bin2hex(random_bytes(16));
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = $tok;
+
 // Handle delete
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (($_POST['_tok'] ?? '') !== $tok) {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+    if (($_POST['confirm'] ?? '') === 'yes') {
     // Delete vehicles for this auction
     $db->prepare("DELETE FROM vehicles WHERE auction_id=?")->execute([$auctionId]);
     // Delete the auction
@@ -114,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes'
       <!-- Confirm Form -->
       <form method="POST" action="delete_auction.php?auction_id=<?= $auctionId ?>" data-parsley-validate>
         <input type="hidden" name="confirm" value="yes">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
         <div class="flex gap-3">
           <a href="index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
           <button class="btn flex-1 text-center" type="submit" style="background:var(--red);color:#fff" onclick="return confirm('Are you absolutely sure? This will permanently delete this auction and all its vehicles.')">🗑 Confirm Delete</button>

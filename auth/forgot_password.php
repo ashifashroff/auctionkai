@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/constants.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 session_start();
 
 $db = db();
@@ -11,6 +13,9 @@ if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!checkRateLimit($_SERVER['REMOTE_ADDR'], 5, 300)) {
+        $error = 'Too many attempts. Please try again in 5 minutes.';
+    } else {
     if (($_POST['_tok'] ?? '') !== $tok) {
         $error = 'Invalid request.';
     } else {
@@ -40,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'If that email exists in our system, a reset link has been generated.';
             }
         }
+    }
     }
 }
 

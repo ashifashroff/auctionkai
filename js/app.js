@@ -127,7 +127,7 @@ async function checkDuplicateLot(lot, auctionId, excludeId = 0) {
     const res = await fetch('api/check_lot.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lot, auction_id: auctionId, exclude_id: excludeId })
+      body: JSON.stringify({ _tok: CSRF_TOKEN, lot, auction_id: auctionId, exclude_id: excludeId })
     });
     const data = await res.json();
     if (data.duplicate) {
@@ -687,7 +687,7 @@ function deleteVehicle(vehicleId, btn) {
   fetch('api/delete_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: vehicleId })
+    body: JSON.stringify({ _tok: CSRF_TOKEN, id: vehicleId })
   })
   .then(r => r.json())
   .then(data => {
@@ -716,7 +716,7 @@ async function sendStatementEmail(
       headers: { 
         'Content-Type': 'application/json' 
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({ _tok: CSRF_TOKEN, 
         member_id: memberId, 
         auction_id: auctionId 
       })

@@ -596,7 +596,7 @@ document.getElementById('statement-search')?.addEventListener('input', function(
 </script>
 
 <?php endif; ?>
-<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
+<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;const CSRF_TOKEN = '<?= h($tok) ?>';</script>
 <script src="js/app.js?v=2.8"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
