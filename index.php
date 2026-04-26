@@ -501,35 +501,38 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 </div>
 
 <?php elseif ($tab === 'statements'): ?>
+<div class="flex justify-between items-center mb-5 flex-wrap gap-3">
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
-  <a class="btn btn-dark" href="pdf.php?all=1&v=2.4&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
-  <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark">📊 Auction Summary</a>
+  <div class="flex gap-2">
+    <a class="btn btn-dark" href="pdf.php?all=1&v=2.4&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
+    <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark">📊 Auction Summary</a>
+  </div>
 </div>
+
+<!-- Search -->
+<div class="vehicles-search-wrap mb-4">
+  <div class="search-icon-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search by member name..." autocomplete="off">
+  </div>
+</div>
+
+<!-- Statements Grid (2 columns) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="statements-container">
 <?php if (empty($members)): ?>
-  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sales history available for this auction.</div>
+  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sales history available for this auction.</div>
 <?php else: ?>
   <?php $hasSales = false; ?>
   <?php foreach ($members as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
     if ($s['count'] === 0) continue;
     $hasSales = true;
-    $emailSubject = urlencode("Settlement Statement – {$auction['name']} {$auction['date']}");
-    $emailBody    = urlencode("Dear {$m['name']},\n\nPlease find your settlement for {$auction['name']} on {$auction['date']}.\n\nVehicles Sold: {$s['count']}\nGross Sales: " . fmt($s['grossSales']) . "\nTotal Deductions: " . fmt($s['totalDed']) . "\n\nNET PAYOUT: " . fmt($s['netPayout']) . "\n\nThank you.");
   ?>
-  <div class="bg-ak-card rounded-xl border border-ak-border mb-5 overflow-hidden animate-fade-in-up">
+  <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>">
     <div class="sh">
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
-        <button 
-          onclick="sendStatementEmail(
-            <?= (int)$m['id'] ?>, 
-            <?= (int)$activeAuctionId ?>,
-            this
-          )"
-          class="btn-email"
-          id="email-btn-<?= (int)$m['id'] ?>">
-          ✉ Send Email
-        </button>
+        <button onclick="sendStatementEmail(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="btn-email" id="email-btn-<?= (int)$m['id'] ?>">✉ Send Email</button>
         <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
@@ -576,10 +579,21 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     </div>
   </div>
   <?php endforeach; ?>
-<?php if (!$hasSales): ?>
-  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sold vehicles recorded for this auction yet.</div>
+  <?php if (!$hasSales): ?>
+  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sold vehicles recorded for this auction yet.</div>
+  <?php endif; ?>
 <?php endif; ?>
-<?php endif; ?>
+</div>
+
+<script>
+document.getElementById('statement-search')?.addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  document.querySelectorAll('.statement-card').forEach(card => {
+    const name = card.getAttribute('data-member-name') || '';
+    card.style.display = !q || name.includes(q) ? '' : 'none';
+  });
+});
+</script>
 
 <?php endif; ?>
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
