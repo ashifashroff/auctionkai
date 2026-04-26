@@ -86,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     }
     } // end rate limit else
 }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'register') {
     if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
