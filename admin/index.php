@@ -174,40 +174,6 @@ $users = $db->query("
   </table>
 </div>
 
-<!-- Email / SMTP Configuration -->
-<h2 class="text-lg font-bold text-ak-gold mb-4 mt-8">📧 Email / SMTP Configuration</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-6">
-<?php if (defined('MAIL_ENABLED') && MAIL_ENABLED): ?>
-  <div class="flex items-center gap-3 mb-4">
-    <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-ak-green/15 text-ak-green border border-ak-green/30">✓ Email Enabled</span>
-  </div>
-  <div class="text-ak-text2 text-sm">
-    <div class="mb-1"><strong>Host:</strong> <?= h(MAIL_HOST) ?>:<?= (int)MAIL_PORT ?></div>
-    <div class="mb-1"><strong>Username:</strong> <?= h(MAIL_USERNAME) ?></div>
-    <div><strong>Password:</strong> ••••••••</div>
-  </div>
-<?php else: ?>
-  <div class="flex items-center gap-3 mb-4">
-    <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-ak-red/15 text-ak-red border border-ak-red/30">✗ Email Disabled</span>
-  </div>
-  <div class="text-ak-text2 text-sm leading-relaxed">
-    <p class="mb-3">To enable email sending:</p>
-    <ol class="list-decimal list-inside space-y-1 text-ak-muted">
-      <li>Get a <strong>Gmail App Password</strong> from Google Account → Security → 2-Step Verification → App Passwords</li>
-      <li>Edit <code class="text-ak-gold bg-ak-bg px-1.5 py-0.5 rounded text-xs">config.php</code> and set:
-        <ul class="list-disc list-inside ml-4 mt-1 space-y-0.5 text-xs">
-          <li><code>MAIL_USERNAME</code> to your Gmail address</li>
-          <li><code>MAIL_PASSWORD</code> to the App Password</li>
-          <li><code>MAIL_FROM_EMAIL</code> to your Gmail address</li>
-          <li><code>MAIL_ENABLED</code> to <code>true</code></li>
-        </ul>
-      </li>
-      <li>Test by sending a statement from the Statements tab</li>
-    </ol>
-  </div>
-<?php endif; ?>
-</div>
-
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
