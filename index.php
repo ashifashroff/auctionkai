@@ -440,8 +440,47 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <?php elseif ($tab === 'vehicles'): ?>
 <h2 class="text-lg font-bold mb-5">Vehicle Listings — <?= h($auction['name']) ?></h2>
-<div class="mb-4">
-  <input class="inp max-w-md" id="vehicleSearch" placeholder="🔍 Search by lot, member, make, model…" oninput="filterVehicles()">
+
+<!-- Search + Controls Row -->
+<div class="vehicles-search-wrap">
+  <div class="search-icon-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="vehicle-search" class="vehicles-search-input" placeholder="Search lot, make, model, member..." autocomplete="off">
+  </div>
+  <div class="per-page-wrap">
+    <span>Show</span>
+    <select class="per-page-select" id="per-page-select">
+      <option value="10">10</option>
+      <option value="25" selected>25</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <span>per page</span>
+  </div>
+  <div class="vehicles-count-badge" id="vehicles-count-badge">— vehicles</div>
+</div>
+
+<!-- Vehicles Table -->
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden" id="vehicles-table-wrap">
+  <table class="vt vehicles-table-desktop" id="vehicles-table">
+    <thead>
+      <tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr>
+    </thead>
+    <tbody id="vehicles-tbody">
+      <!-- populated by JS -->
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <div class="pagination-wrap" id="pagination-wrap">
+    <div class="pagination-info" id="pagination-info"></div>
+    <div class="pagination-controls" id="pagination-controls"></div>
+  </div>
+</div>
+
+<!-- Mobile cards container -->
+<div class="vehicle-card-mobile" id="vehicle-cards-mobile">
+  <!-- populated by JS -->
 </div>
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
@@ -471,99 +510,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto vehicles-table-desktop">
-  <table class="vt">
-    <thead><tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Tax 10%</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr></thead>
-    <tbody>
-    <?php if (empty($vehicles)): ?>
-      <tr><td colspan="14" class="text-center text-ak-muted py-12">No vehicles yet for this auction.</td></tr>
-    <?php else: ?>
-      <?php foreach ($vehicles as $v):
-        $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
-      ?>
-      <tr data-vid="<?= (int)$v['id'] ?>" class="animate-fade-in">
-        <td><span class="lot"><?= h($v['lot'] ?: '—') ?></span></td>
-        <td data-field="member"><?= h($owner['name'] ?? '?') ?></td>
-        <td class="text-ak-text2" data-field="vehicle"><?= h($v['make'] . ' ' . $v['model']) ?></td>
-        <td class="text-right font-mono <?= $v['sold'] ? 'text-ak-green' : 'text-ak-muted' ?>" data-field="sold_price">
-          <?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?>
-        </td>
-        <td class="text-right font-mono text-ak-text2 text-xs" data-field="tax">
-          <?= $v['sold'] ? fmt(round((float)$v['sold_price'] * 0.10)) : '—' ?>
-        </td>
-        <td class="text-right font-mono text-ak-text2 text-xs" data-field="recycle">
-          <?= $v['sold'] && (float)($v['recycle_fee'] ?? 0) > 0 ? fmt((float)$v['recycle_fee']) : '—' ?>
-        </td>
-        <td class="text-right font-mono text-ak-red text-xs" data-field="listing">
-          <?= $v['sold'] && (float)($v['listing_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['listing_fee']) : '—' ?>
-        </td>
-        <td class="text-right font-mono text-ak-red text-xs" data-field="sold_fee">
-          <?= $v['sold'] && (float)($v['sold_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['sold_fee']) : '—' ?>
-        </td>
-        <td class="text-right font-mono text-ak-red text-xs" data-field="nagare">
-          <?= !$v['sold'] && (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
-        </td>
-        <td class="text-right font-mono font-bold <?= $v['sold'] ? 'text-ak-gold' : 'text-ak-muted' ?>" data-field="total">
-          <?php if ($v['sold']): $vTotal = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0) - (float)($v['nagare_fee'] ?? 0); ?>
-          <?= fmt($vTotal) ?>
-          <?php else: ?>—<?php endif; ?>
-        </td>
-        <td data-field="status">
-          <button class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" onclick="toggleSold(<?= (int)$v['id'] ?>, this)"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
-        </td>
-        <td class="whitespace-nowrap">
-          <div class="flex gap-1 items-center">
-            <button class="btn btn-dark btn-sm" onclick="openEditModal(<?= (int)$v['id'] ?>)">Edit</button>
-            <button class="btn-icon" onclick="deleteVehicle(<?= (int)$v['id'] ?>, this)">×</button>
-          </div>
-        </td>
-      </tr>
-      <?php endforeach; ?>
-    <?php endif; ?>
-    </tbody>
-  </table>
-</div>
-
-<!-- Mobile Card View -->
-<div class="vehicle-card-mobile" id="vehicle-cards-mobile">
-<?php foreach ($vehicles as $v):
-  $owner = array_values(array_filter($members, fn($m) => (int)$m['id'] === (int)$v['member_id']))[0] ?? null;
-?>
-<div class="v-card" id="v-card-<?= (int)$v['id'] ?>">
-  <div class="v-card-top">
-    <span class="v-card-lot"><?= h($v['lot'] ?: '—') ?></span>
-    <button onclick="toggleSold(<?= (int)$v['id'] ?>)" class="sb <?= $v['sold'] ? 'sy' : 'sn' ?>" id="sold-btn-m-<?= (int)$v['id'] ?>"><?= $v['sold'] ? '✓ SOLD' : '✗ UNSOLD' ?></button>
-  </div>
-  <div class="v-card-name"><?= h($v['make'] . ' ' . $v['model']) ?></div>
-  <div class="v-card-meta"><?= h($owner['name'] ?? '?') ?></div>
-  <div class="v-card-fees">
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Sold Price</div>
-      <div class="v-card-fee-value <?= $v['sold'] ? '' : 'muted' ?>"><?= $v['sold'] ? fmt((float)$v['sold_price']) : '—' ?></div>
-    </div>
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Recycle Fee</div>
-      <div class="v-card-fee-value"><?= fmt((float)$v['recycle_fee']) ?></div>
-    </div>
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Listing Fee</div>
-      <div class="v-card-fee-value"><?= fmt((float)$v['listing_fee']) ?></div>
-    </div>
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Sold Fee</div>
-      <div class="v-card-fee-value"><?= fmt((float)$v['sold_fee']) ?></div>
-    </div>
-    <div class="v-card-fee">
-      <div class="v-card-fee-label">Nagare Fee</div>
-      <div class="v-card-fee-value <?= !$v['sold'] ? '' : 'muted' ?>"><?= !$v['sold'] ? fmt((float)$v['nagare_fee']) : '—' ?></div>
-    </div>
-  </div>
-  <div class="v-card-actions">
-    <button onclick="openEditModal(<?= (int)$v['id'] ?>)" style="background:#1E3A5F;color:#D4A84B">✎ Edit</button>
-    <button onclick="deleteVehicle(<?= (int)$v['id'] ?>)" style="background:#3A1A1A;color:#CC7777">× Delete</button>
-  </div>
-</div>
-<?php endforeach; ?>
 </div>
 
 <?php elseif ($tab === 'statements'): ?>
@@ -650,6 +596,13 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <?php endif; ?>
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof VehiclesPager !== 'undefined' && document.getElementById('vehicles-tbody')) {
+    VehiclesPager.init(<?= (int)$activeAuctionId ?>);
+  }
+});
+</script>
 <script src="js/app.js?v=2.4"></script>
 
 <!-- Edit Vehicle Modal -->

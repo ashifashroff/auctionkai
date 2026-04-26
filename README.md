@@ -41,7 +41,7 @@ Or register a new account. Usernames and emails must be unique.
 
 **Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Search members by name, phone, or email with instant filtering. Duplicate names are blocked with a clear error message.
 
-**Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Search the table in real-time by lot number, member name, or make/model. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
+**Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Paginated vehicles table (10/25/50/100 per page). Real-time search filter by lot, make, model, member name. AJAX pagination — no full page reload. Skeleton loading animation while fetching. Stays on same page after add/edit/delete. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
 
 **Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Download individual or all-statement PDFs. Email drafts via mailto link.
 
@@ -91,6 +91,7 @@ auctionkai/
 │   ├── get_member_detail.php
 │   ├── update_member.php
 │   └── check_lot.php           ← Duplicate lot number check
+│   └── get_vehicles_page.php    ← Paginated vehicle fetch
 │   └── send_email.php          ← AJAX email endpoint
 │
 ├── admin/                       ← Admin panel
@@ -181,7 +182,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 **v2.5** — Removed Other Fee from all UI/forms/tables/statements/PDF. Real-time duplicate lot number check. Password strength indicator (Weak/Fair/Good/Strong). Member search filter. New members appear at top without page reload. Keyboard shortcuts with help modal. Toast notifications across all pages. Parsley.js form validation. Mobile responsive vehicles table (card view). Help, About, Privacy pages. Shared footer component. Forgot password / reset password flow. Duplicate email check on registration. Cache-busting for CSS/JS. Fixed vehicle add/edit bugs (placeholder count, variable names).
 
-**v2.4** — Real email sending via PHPMailer + Gmail SMTP. HTML settlement email with full fee breakdown. Email config status in admin panel.
+**v2.4** — Real email sending via PHPMailer + Gmail SMTP. HTML settlement email with full fee breakdown. Email config status in admin panel. Paginated vehicles table with AJAX loading. Real-time search across all vehicle fields. 10/25/50/100 per page selector. Skeleton loading state.
 
 **v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection. Auth/ and includes/ folder restructure.
 
