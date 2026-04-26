@@ -291,8 +291,8 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 
 <!-- ─── ADD AUCTION FORM ─────────────────────────────── -->
 <div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-7 py-4 animate-slide-down">
-  <form onsubmit="return submitAddAuction(event)" data-parsley-validate>
-    <div class="add-row ar-auction mb-0">
+  <form onsubmit="return submitAddAuction(event)" data-parsley-validate class="max-w-md">
+    <div class="add-row ar-auction mb-0" style="grid-template-columns:1fr 1fr auto">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" data-parsley-required="true"></div>
       <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true"></div>
       <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Create</button></div>

@@ -183,7 +183,7 @@ $tabs = [
 
 <?php elseif ($tab === 'create'): ?>
 <h2 class="text-lg font-bold mb-5">Create New User</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
   <form method="POST" action="actions.php" data-parsley-validate>
     <input type="hidden" name="action" value="create_user"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true"></div>
@@ -274,7 +274,7 @@ $tabs = [
 
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
   <form method="POST" action="actions.php" data-parsley-validate>
     <input type="hidden" name="action" value="admin_settings"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true"></div>
