@@ -3,6 +3,9 @@ require_once __DIR__ . '/includes/auth_check.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
 
+$db = db();
+$userId = (int)($_SESSION['user_id'] ?? 0);
+
 // Fetch auction
 $auctionId = (int)($_GET['auction_id'] ?? 0);
 if (!$auctionId) {
