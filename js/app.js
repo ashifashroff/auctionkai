@@ -466,23 +466,9 @@ function submitAddMember(e) {
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Add';return;}
     showToast('Member added successfully', 'success');
-    const list = document.getElementById('memberList');
-    const name = form.name.value.trim();
-    const phone = form.phone.value.trim();
-    const email = form.email.value.trim();
-    const initial = name.charAt(0).toUpperCase();
-    const newId = d.id || 0;
-    const card = document.createElement('div');
-    card.className = 'bg-ak-card rounded-xl p-4 border border-ak-gold/30 flex items-center gap-4 animate-fade-in-up member-card';
-    card.setAttribute('data-member-name', name.toLowerCase());
-    card.setAttribute('data-member-phone', phone.toLowerCase());
-    card.setAttribute('data-member-email', email.toLowerCase());
-    card.innerHTML = `
-      <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
-      <div class="flex-1 min-w-0">
-        <div class="text-ak-text font-semibold">${name}</div>
-        <div class="text-ak-muted text-xs">${phone}${phone && email ? ' · ' : ''}${email}</div>
-      </div>
+    form.reset();
+    btn.disabled = false; btn.textContent = '+ Add';
+    if (typeof MembersPager !== 'undefined') { MembersPager.reload(); } else { location.reload(); }
       <div class="text-center px-3"><div class="text-ak-text font-bold text-lg">0</div><div class="text-ak-muted text-[10px]">0 sold</div></div>
       <div class="text-right px-3"><div class="text-ak-gold font-mono font-bold">¥0</div><div class="text-ak-muted text-[10px]">net payout</div></div>
       <div class="flex gap-2 shrink-0">
@@ -493,10 +479,6 @@ function submitAddMember(e) {
     list.prepend(card);
     form.reset();
     btn.disabled = false; btn.textContent = '+ Add';
-    // Clear search to show new member
-    const search = document.getElementById('memberListSearch');
-    if (search) search.value = '';
-    filterMemberList();
   }).catch(()=>{showToast('Connection error. Please try again.', 'error');btn.disabled=false;btn.textContent='+ Add';});
   return false;
 }
@@ -624,7 +606,7 @@ function submitEditMember(e) {
   .then(data => {
     if (data.error) { showToast(data.error, 'error'); return; }
     showToast('Member updated successfully', 'success');
-    setTimeout(() => { closeEditMemberModal(); location.reload(); }, 600);
+    setTimeout(() => { closeEditMemberModal(); if(typeof MembersPager!=="undefined"){MembersPager.reload();}else{location.reload();} }, 600);
   })
   .catch(() => showToast('Connection error. Please try again.', 'error'))
   .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
@@ -1031,6 +1013,203 @@ const VehiclesPager = {
     this.page = page;
     this.load();
     const wrap = document.getElementById('vehicles-table-wrap');
+    if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
+
+  reload() {
+    this.load();
+  },
+
+  esc(str) {
+    const d = document.createElement('div');
+    d.textContent = String(str ?? '');
+    return d.innerHTML;
+  }
+};
+
+// ── Members Pagination ────────────────────────
+const MembersPager = {
+  page: 1,
+  lastPage: 1,
+  total: 0,
+  perPage: 25,
+  search: '',
+  loading: false,
+  auctionId: 0,
+
+  init(auctionId) {
+    this.auctionId = auctionId;
+    this.page = 1;
+    this.search = '';
+
+    const searchInput = document.getElementById('member-search');
+    if (searchInput) {
+      let timer;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          this.search = searchInput.value.trim();
+          this.page = 1;
+          this.load();
+        }, 400);
+      });
+    }
+
+    const perPageSel = document.getElementById('member-per-page-select');
+    if (perPageSel) {
+      perPageSel.addEventListener('change', () => {
+        this.perPage = parseInt(perPageSel.value);
+        this.page = 1;
+        this.load();
+      });
+    }
+
+    this.load();
+  },
+
+  async load() {
+    if (this.loading) return;
+    this.loading = true;
+
+    const container = document.getElementById('members-list-container');
+    if (container) {
+      container.innerHTML = '<div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">Loading…</div>';
+    }
+
+    try {
+      const params = new URLSearchParams({
+        auction_id: this.auctionId,
+        page: this.page,
+        per_page: this.perPage,
+        search: this.search,
+      });
+
+      const res = await fetch('api/get_members_page.php?' + params);
+      const data = await res.json();
+
+      if (!data.success) {
+        this.showEmpty('Failed to load members');
+        return;
+      }
+
+      this.total = data.total;
+      this.lastPage = data.lastPage;
+      this.page = data.page;
+
+      this.renderMembers(data.members);
+      this.renderPagination();
+      this.updateBadge();
+
+    } catch (err) {
+      this.showEmpty('Connection error');
+      console.error(err);
+    } finally {
+      this.loading = false;
+    }
+  },
+
+  showEmpty(msg = 'No members found') {
+    const container = document.getElementById('members-list-container');
+    if (container) {
+      container.innerHTML = `<div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">${msg}</div>`;
+    }
+    const badge = document.getElementById('members-count-badge');
+    if (badge) badge.textContent = '0 members';
+    const pagWrap = document.getElementById('members-pagination-wrap');
+    if (pagWrap) pagWrap.style.display = 'none';
+  },
+
+  renderMembers(members) {
+    const container = document.getElementById('members-list-container');
+    if (!container) return;
+
+    if (members.length === 0) {
+      this.showEmpty(this.search ? 'No members match your search' : 'No members yet for this auction.');
+      return;
+    }
+
+    container.innerHTML = members.map(m => {
+      const initial = (m.name || '?').charAt(0).toUpperCase();
+      const phone = m.phone || '';
+      const email = m.email || '';
+      const vehicleCount = parseInt(m.vehicle_count || 0);
+      const soldCount = parseInt(m.sold_count || 0);
+      const netPayout = parseInt(m.net_payout || 0);
+      const id = parseInt(m.id);
+
+      return `<div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+        <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
+          <div class="text-ak-muted text-xs">${this.esc(phone)}${phone && email ? ' · ' : ''}${this.esc(email)}</div>
+        </div>
+        <div class="text-center px-3">
+          <div class="text-ak-text font-bold text-lg">${vehicleCount}</div>
+          <div class="text-ak-muted text-[10px]">${soldCount} sold</div>
+        </div>
+        <div class="text-right px-3">
+          <div class="text-ak-gold font-mono font-bold">¥${netPayout.toLocaleString()}</div>
+          <div class="text-ak-muted text-[10px]">net payout</div>
+        </div>
+        <div class="flex gap-1.5 items-center">
+          <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')">Remove</button>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  renderPagination() {
+    const info = document.getElementById('members-pagination-info');
+    const controls = document.getElementById('members-pagination-controls');
+    const pagWrap = document.getElementById('members-pagination-wrap');
+    if (!info || !controls) return;
+
+    if (this.lastPage <= 1) {
+      if (pagWrap) pagWrap.style.display = 'none';
+      return;
+    }
+
+    if (pagWrap) pagWrap.style.display = 'block';
+
+    const from = ((this.page - 1) * this.perPage) + 1;
+    const to = Math.min(this.page * this.perPage, this.total);
+    info.innerHTML = `Showing <b>${from}–${to}</b> of <b>${this.total}</b> members`;
+
+    let html = '';
+    html += `<button class="page-btn prev" ${this.page===1?'disabled':''} onclick="MembersPager.goTo(${this.page-1})">‹</button>`;
+
+    const pages = this.getPageRange(this.page, this.lastPage);
+    let lastRendered = 0;
+    for (const p of pages) {
+      if (p - lastRendered > 1) html += '<span class="page-ellipsis">…</span>';
+      html += `<button class="page-btn ${p===this.page?'active':''}" onclick="MembersPager.goTo(${p})">${p}</button>`;
+      lastRendered = p;
+    }
+
+    html += `<button class="page-btn next" ${this.page===this.lastPage?'disabled':''} onclick="MembersPager.goTo(${this.page+1})">›</button>`;
+    controls.innerHTML = html;
+  },
+
+  getPageRange(current, last) {
+    const pages = new Set([1, last, current, Math.max(1, current - 1), Math.min(last, current + 1)]);
+    return [...pages].sort((a, b) => a - b);
+  },
+
+  updateBadge() {
+    const badge = document.getElementById('members-count-badge');
+    if (badge) {
+      badge.textContent = this.search
+        ? `${this.total} result${this.total !== 1 ? 's' : ''}`
+        : `${this.total} member${this.total !== 1 ? 's' : ''}`;
+    }
+  },
+
+  goTo(page) {
+    if (page < 1 || page > this.lastPage) return;
+    this.page = page;
+    this.load();
+    const wrap = document.getElementById('members-list-container');
     if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 

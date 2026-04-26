@@ -388,54 +388,43 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
       <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
-      <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Add</button></div>
+      <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit" id="addMemberBtn">+ Add</button></div>
     </div>
   </form>
+  <div id="addMemberMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
 </div>
-<div class="mb-4">
-  <input class="inp max-w-md" id="memberListSearch" placeholder="🔍 Search members by name, phone, or email…" oninput="filterMemberList()">
+
+<!-- Search + Controls -->
+<div class="vehicles-search-wrap">
+  <div class="search-icon-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="member-search" class="vehicles-search-input" placeholder="Search members by name, phone, or email..." autocomplete="off">
+  </div>
+  <div class="per-page-wrap">
+    <span>Show</span>
+    <select class="per-page-select" id="member-per-page-select">
+      <option value="10">10</option>
+      <option value="25" selected>25</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <span>per page</span>
+  </div>
+  <div class="vehicles-count-badge" id="members-count-badge">— members</div>
 </div>
-<div class="flex flex-col gap-2.5" id="memberList">
-<?php if (empty($members)): ?>
-  <div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">No members yet for this auction.</div>
-<?php else: ?>
-  <?php foreach ($members as $m):
-    $mv        = array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id']);
-    $soldCount = count(array_filter($mv, fn($v) => $v['sold']));
-    $s         = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
-    $editing   = isset($_GET['edit_member']) && (int)$_GET['edit_member'] === (int)$m['id'];
-  ?>
-  <?php if ($editing): ?>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-gold/30 flex items-center gap-4 animate-fade-in">
-    <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
-    <div class="flex-1 min-w-0">
-      <div class="text-ak-text font-semibold"><?= h($m['name']) ?></div>
-      <div class="text-ak-muted text-xs"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
-    </div>
+
+<!-- Members List -->
+<div class="flex flex-col gap-2.5" id="members-list-container">
+  <!-- populated by JS -->
+</div>
+
+<!-- Pagination -->
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden mt-3" id="members-pagination-wrap" style="display:none">
+  <div class="pagination-wrap">
+    <div class="pagination-info" id="members-pagination-info"></div>
+    <div class="pagination-controls" id="members-pagination-controls"></div>
   </div>
-  <?php else: ?>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up member-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-member-phone="<?= h(mb_strtolower($m['phone'])) ?>" data-member-email="<?= h(mb_strtolower($m['email'])) ?>">
-    <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0"><?= mb_strtoupper(mb_substr($m['name'], 0, 1)) ?></div>
-    <div class="flex-1 min-w-0">
-      <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(<?= (int)$m['id'] ?>)"><?= h($m['name']) ?></div>
-      <div class="text-ak-muted text-xs"><?= h($m['phone']) ?> · <?= h($m['email']) ?></div>
-    </div>
-    <div class="text-center px-3">
-      <div class="text-ak-text font-bold text-lg"><?= count($mv) ?></div>
-      <div class="text-ak-muted text-[10px]"><?= $soldCount ?> sold</div>
-    </div>
-    <div class="text-right px-3">
-      <div class="text-ak-gold font-mono font-bold"><?= fmt($s['netPayout']) ?></div>
-      <div class="text-ak-muted text-[10px]">net payout</div>
-    </div>
-    <div class="flex gap-1.5 items-center">
-      <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(<?= (int)$m['id'] ?>)">Edit</button>
-      <button class="btn btn-ghost btn-sm" onclick="removeMember(<?= (int)$m['id'] ?>, '<?= h(addslashes($m['name'])) ?>')">Remove</button>
-    </div>
-  </div>
-  <?php endif; ?>
-  <?php endforeach; ?>
-<?php endif; ?>
+</div>
 </div>
 
 <?php elseif ($tab === 'vehicles'): ?>
@@ -600,6 +589,9 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof VehiclesPager !== 'undefined' && document.getElementById('vehicles-tbody')) {
     VehiclesPager.init(<?= (int)$activeAuctionId ?>);
+  }
+  if (typeof MembersPager !== 'undefined' && document.getElementById('members-list-container')) {
+    MembersPager.init(<?= (int)$activeAuctionId ?>);
   }
 });
 </script>
