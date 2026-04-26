@@ -632,7 +632,7 @@ function submitEditMember(e) {
 }
 
 // Close edit member modal on overlay click
-document.getElementById('editMemberModal').addEventListener('click', function(e) {
+document.getElementById('editMemberModal')?.addEventListener('click', function(e) {
   if (e.target === this) closeEditMemberModal();
 });
 
@@ -700,7 +700,7 @@ function closeMemberDetail() {
 }
 
 // Close member modal on overlay click
-document.getElementById('memberDetailModal').addEventListener('click', function(e) {
+document.getElementById('memberDetailModal')?.addEventListener('click', function(e) {
   if (e.target === this) closeMemberDetail();
 });
 
@@ -791,7 +791,7 @@ async function sendStatementEmail(
 // ─── GLOBAL EVENT LISTENERS ─────────────────────────
 
 // Close modal on overlay click
-document.getElementById('editModal').addEventListener('click', function(e) {
+document.getElementById('editModal')?.addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
 });
 
