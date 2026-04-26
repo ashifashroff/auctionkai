@@ -184,14 +184,14 @@ $tabs = [
 <?php elseif ($tab === 'create'): ?>
 <h2 class="text-lg font-bold mb-5">Create New User</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
-  <form method="POST" action="actions.php" data-parsley-validate>
-    <input type="hidden" name="action" value="create_user"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
+  <form id="createUserForm" data-parsley-validate>
+    <input type="hidden" name="action" value="create_user">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
     <div class="mb-4"><label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label><input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true"></div>
     <div class="mb-5"><label class="lbl">Role</label><select class="inp" name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
-    <button class="btn btn-gold w-full" type="submit">+ Create User</button>
+    <button class="btn btn-gold w-full" type="submit" id="createUserBtn">+ Create User</button>
   </form>
 </div>
 
@@ -205,8 +205,8 @@ $tabs = [
   <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-red/15 text-ak-red border border-ak-red/30">✗ Email Disabled</span>
 <?php endif; ?>
 </div>
-<form method="POST" action="actions.php" id="emailSettingsForm">
-<input type="hidden" name="action" value="save_email_settings"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><input type="hidden" name="mail_provider" id="mail_provider_input" value="<?= h($settings['mail_provider'] ?? 'smtp') ?>">
+<form id="emailSettingsForm">
+<input type="hidden" name="action" value="save_email_settings"><input type="hidden" name="mail_provider" id="mail_provider_input" value="<?= h($settings['mail_provider'] ?? 'smtp') ?>">
 <div class="mb-6">
   <label class="lbl mb-3">Mail Provider</label>
   <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -265,9 +265,9 @@ $tabs = [
 <div id="testEmailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
   <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[420px] p-7 shadow-2xl relative animate-fade-in-up">
     <div class="flex items-center justify-between mb-5"><h3 class="text-ak-gold text-lg font-bold">🧪 Test Email</h3><button class="text-ak-muted text-2xl hover:text-ak-text" onclick="closeTestEmailModal()">×</button></div>
-    <form method="POST" action="actions.php"><input type="hidden" name="action" value="test_email"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
+    <form id="testEmailForm"><input type="hidden" name="action" value="test_email">
       <div class="mb-4"><label class="lbl">Send test email to</label><input class="inp" type="email" name="test_email" value="<?= h($userEmail) ?>" placeholder="admin@example.com" required></div>
-      <button class="btn btn-gold w-full" type="submit">Send Test Email</button>
+      <button class="btn btn-gold w-full" type="submit" id="testEmailBtn">Send Test Email</button>
     </form>
   </div>
 </div>
@@ -275,8 +275,8 @@ $tabs = [
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
-  <form method="POST" action="actions.php" data-parsley-validate>
-    <input type="hidden" name="action" value="admin_settings"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
+  <form id="adminSettingsForm" data-parsley-validate>
+    <input type="hidden" name="action" value="admin_settings">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" name="name" value="<?= h($admin['name'] ?? '') ?>" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Email</label><input class="inp" type="email" name="email" value="<?= h($admin['email'] ?? '') ?>" data-parsley-type="email"></div>
@@ -285,7 +285,7 @@ $tabs = [
       <div class="mb-4"><label class="lbl">Current Password</label><input class="inp" type="password" name="current_password" placeholder="Enter current password to change"></div>
       <div class="mb-4"><label class="lbl">New Password <span class="font-normal text-ak-muted">(min 6 chars, leave blank to keep current)</span></label><input class="inp" type="password" name="new_password" placeholder="••••••"></div>
     </div>
-    <button class="btn btn-gold w-full" type="submit">Save Settings</button>
+    <button class="btn btn-gold w-full" type="submit" id="adminSettingsBtn">Save Settings</button>
   </form>
 </div>
 <?php endif; ?>
@@ -296,8 +296,8 @@ $tabs = [
 <div id="editUserModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
   <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[500px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
     <div class="flex items-center justify-between mb-5"><h3 class="text-ak-gold text-lg font-bold">Edit User</h3><button class="text-ak-muted text-2xl hover:text-ak-text" onclick="closeEditUserModal()">×</button></div>
-    <form method="POST" action="actions.php" data-parsley-validate>
-      <input type="hidden" name="action" value="edit_user"><input type="hidden" name="user_id" id="eu_id"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
+    <form id="editUserForm" data-parsley-validate>
+      <input type="hidden" name="action" value="edit_user"><input type="hidden" name="user_id" id="eu_id">
       <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" id="eu_username" data-parsley-required="true"></div>
       <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" name="name" id="eu_name" data-parsley-required="true"></div>
       <div class="mb-4"><label class="lbl">Email</label><input class="inp" type="email" name="email" id="eu_email" data-parsley-type="email"></div>
@@ -311,8 +311,8 @@ $tabs = [
 <div id="suspendModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
   <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[420px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
     <div class="flex items-center justify-between mb-5"><h3 class="text-yellow-400 text-lg font-bold">⏸ Suspend User</h3><button class="text-ak-muted text-2xl hover:text-ak-text" onclick="closeSuspendModal()">×</button></div>
-    <form method="POST" action="actions.php" data-parsley-validate>
-      <input type="hidden" name="action" value="suspend_user"><input type="hidden" name="user_id" id="sus_id"><input type="hidden" name="_tok" value="<?= h($tok) ?>">
+    <form id="suspendForm" data-parsley-validate>
+      <input type="hidden" name="action" value="suspend_user"><input type="hidden" name="user_id" id="sus_id">
       <div class="mb-2 text-ak-muted text-sm">Suspending: <b class="text-ak-text" id="sus_name"></b></div>
       <div class="mb-4"><label class="lbl">Reason</label><input class="inp" name="reason" placeholder="e.g. Policy violation" data-parsley-required="true"></div>
       <div class="mb-5"><label class="lbl">Duration (days)</label><input class="inp font-mono" type="number" name="days" value="7" data-parsley-type="number" data-parsley-min="1"></div>
@@ -326,7 +326,9 @@ $tabs = [
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 <script src="../js/app.js?v=2.7"></script>
 <script>
-// Provider selector
+const CSRF_TOKEN = '<?= h($tok) ?>';
+
+// ── Provider selector ──────────────────────────
 const currentProvider = '<?= h($settings["mail_provider"] ?? "smtp") ?>';
 function selectProvider(provider) {
   document.getElementById('mail_provider_input').value = provider;
@@ -347,8 +349,80 @@ function openEditUserModal(id, username, name, email, role) {
 function closeEditUserModal() { document.getElementById('editUserModal').style.display = 'none'; }
 function openSuspendModal(id, name) { document.getElementById('sus_id').value = id; document.getElementById('sus_name').textContent = name; document.getElementById('suspendModal').style.display = 'flex'; }
 function closeSuspendModal() { document.getElementById('suspendModal').style.display = 'none'; }
-// Close modals on backdrop click
 document.querySelectorAll('#editUserModal,#suspendModal,#testEmailModal').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; }); });
+
+// ── Admin AJAX helper ─────────────────────────
+async function adminAjax(formData, btnId) {
+  formData.append('_tok', CSRF_TOKEN);
+  const btn = btnId ? document.getElementById(btnId) : null;
+  if (btn) { btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'Saving…'; }
+  try {
+    const res = await fetch('../api/admin_actions.php', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) { showToast('✓ ' + data.message, 'success', 4000); }
+    else { showToast(data.message || 'Error', 'error'); }
+    return data;
+  } catch(e) { showToast('Connection error', 'error'); return { success: false }; }
+  finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.origText; } }
+}
+
+// ── Create User ───────────────────────────────
+document.getElementById('createUserForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = await adminAjax(fd, 'createUserBtn');
+  if (data.success) { this.reset(); setTimeout(() => location.reload(), 1000); }
+});
+
+// ── Email Settings ────────────────────────────
+document.getElementById('emailSettingsForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  // Checkbox hack — if unchecked, it's not in FormData
+  if (!this.querySelector('[name=mail_enabled]').checked) fd.set('mail_enabled', '0');
+  await adminAjax(fd, null);
+});
+
+// ── Test Email ────────────────────────────────
+document.getElementById('testEmailForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const btn = document.getElementById('testEmailBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  fd.append('_tok', CSRF_TOKEN);
+  try {
+    const res = await fetch('../api/admin_actions.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) { showToast('✓ ' + data.message, 'success', 4000); closeTestEmailModal(); }
+    else { showToast(data.message || 'Error', 'error'); }
+  } catch(e) { showToast('Connection error', 'error'); }
+  finally { btn.disabled = false; btn.textContent = 'Send Test Email'; }
+});
+
+// ── Admin Settings ────────────────────────────
+document.getElementById('adminSettingsForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = await adminAjax(fd, 'adminSettingsBtn');
+  if (data.success && data.message.includes('password')) { this.querySelector('[name=current_password]').value = ''; this.querySelector('[name=new_password]').value = ''; }
+});
+
+// ── Edit User ─────────────────────────────────
+document.getElementById('editUserForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = await adminAjax(fd, null);
+  if (data.success) { closeEditUserModal(); setTimeout(() => location.reload(), 800); }
+});
+
+// ── Suspend User ──────────────────────────────
+document.getElementById('suspendForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = await adminAjax(fd, null);
+  if (data.success) { closeSuspendModal(); setTimeout(() => location.reload(), 800); }
+});
+
 // Init provider
 selectProvider(currentProvider);
 </script>
