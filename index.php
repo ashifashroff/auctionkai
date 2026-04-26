@@ -570,6 +570,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <div class="flex justify-between items-center mb-6">
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
   <a class="btn btn-dark" href="pdf.php?all=1&v=2.4&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
+  <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark">📊 Auction Summary</a>
 </div>
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border">No sales history available for this auction.</div>
