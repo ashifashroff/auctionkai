@@ -27,6 +27,9 @@ nbproject/
 /vendor/
 composer.lock
 
+# Never commit real email credentials
+# config.php is already ignored
+
 # ─── Environment ─────────────────────────────
 .env
 .env.local

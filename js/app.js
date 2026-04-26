@@ -724,6 +724,70 @@ function deleteVehicle(vehicleId, btn) {
   .catch(() => { alert('Network error.'); btn.disabled = false; btn.textContent = '×'; });
 }
 
+// ── Send Statement Email ──────────────────────
+async function sendStatementEmail(
+  memberId, 
+  auctionId, 
+  btnEl
+) {
+  // Show loading state
+  const originalText = btnEl.innerHTML;
+  btnEl.innerHTML = '⏳ Sending...';
+  btnEl.disabled = true;
+
+  try {
+    const res = await fetch('api/send_email.php', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify({ 
+        member_id: memberId, 
+        auction_id: auctionId 
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showToast(
+        '✉ ' + data.message, 
+        'success', 
+        4000
+      );
+      btnEl.innerHTML = '✓ Sent';
+      btnEl.style.background = '#1A3A2A';
+      btnEl.style.color = '#4CAF82';
+      btnEl.style.border = '1px solid #2A5A3A';
+
+      // Reset button after 4 seconds
+      setTimeout(() => {
+        btnEl.innerHTML = originalText;
+        btnEl.style.background = '';
+        btnEl.style.color = '';
+        btnEl.style.border = '';
+        btnEl.disabled = false;
+      }, 4000);
+
+    } else {
+      showToast(
+        data.message || 'Failed to send email', 
+        'error'
+      );
+      btnEl.innerHTML = originalText;
+      btnEl.disabled = false;
+    }
+
+  } catch (err) {
+    showToast(
+      'Connection error. Please try again.',
+      'error'
+    );
+    btnEl.innerHTML = originalText;
+    btnEl.disabled = false;
+  }
+}
+
 // ─── GLOBAL EVENT LISTENERS ─────────────────────────
 
 // Close modal on overlay click
