@@ -469,16 +469,6 @@ function submitAddMember(e) {
     form.reset();
     btn.disabled = false; btn.textContent = '+ Add';
     if (typeof MembersPager !== 'undefined') { MembersPager.reload(); } else { location.reload(); }
-      <div class="text-center px-3"><div class="text-ak-text font-bold text-lg">0</div><div class="text-ak-muted text-[10px]">0 sold</div></div>
-      <div class="text-right px-3"><div class="text-ak-gold font-mono font-bold">¥0</div><div class="text-ak-muted text-[10px]">net payout</div></div>
-      <div class="flex gap-2 shrink-0">
-        <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${newId}, '${name.replace(/'/g, "\\'")}', '${phone.replace(/'/g, "\\'")}', '${email.replace(/'/g, "\\'")}')">✎ Edit</button>
-        <form method="POST" action="index.php?tab=members" style="display:inline" data-parsley-validate onsubmit="return removeMember(${newId}, '${name.replace(/'/g, "\\'")}')"><button class="btn btn-sm" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)" type="submit">✕ Remove</button></form>
-      </div>
-    `;
-    list.prepend(card);
-    form.reset();
-    btn.disabled = false; btn.textContent = '+ Add';
   }).catch(()=>{showToast('Connection error. Please try again.', 'error');btn.disabled=false;btn.textContent='+ Add';});
   return false;
 }

@@ -430,6 +430,34 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php elseif ($tab === 'vehicles'): ?>
 <h2 class="text-lg font-bold mb-5">Vehicle Listings — <?= h($auction['name']) ?></h2>
 
+<!-- Add Vehicle Form -->
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
+  <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)" data-parsley-validate>
+    <div class="grid grid-cols-6 gap-2 add-vehicle-grid" id="addVehicleFields">
+      <div class="col-span-2 relative">
+        <label class="lbl">Member *</label>
+        <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showMemberResults()" oninput="filterMembers()">
+        <input type="hidden" id="memberId" name="memberId">
+        <div id="memberDropdown" class="member-dropdown" style="display:none"></div>
+      </div>
+      <div><label class="lbl">Make *</label><input class="inp" id="add_make" name="make" placeholder="Toyota" data-parsley-required="true"></div>
+      <div><label class="lbl">Model</label><input class="inp" id="add_model" name="model" placeholder="Prius"></div>
+      <div><label class="lbl">Lot #</label><input class="inp" id="add_lot" name="lot" placeholder="A-001"></div>
+      <div><label class="lbl">Sold Price (¥) *</label><input class="inp font-mono sold-fields" type="number" id="add_soldPrice" name="soldPrice" placeholder="850000" data-parsley-type="number" data-parsley-min="0"></div>
+      <div><label class="lbl">Recycle Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_recycleFee" name="recycleFee" placeholder="15000" data-parsley-type="number" data-parsley-min="0"></div>
+      <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" data-parsley-type="number" data-parsley-min="0"></div>
+      <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" data-parsley-type="number" data-parsley-min="0"></div>
+      <div class="nagare-field"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" data-parsley-type="number" data-parsley-min="0" disabled></div>
+      <div class="flex items-end pt-[22px] gap-2">
+        <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer"><input type="checkbox" id="add_sold" name="sold" checked class="accent-ak-gold" onchange="toggleSoldFields(this.checked)"> Sold</label>
+        <button class="btn btn-gold" type="submit" id="addVehicleBtn">Add</button>
+      </div>
+    </div>
+    <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
+  </form>
+</div>
+
 <!-- Search + Controls Row -->
 <div class="vehicles-search-wrap">
   <div class="search-icon-wrap">
