@@ -3,6 +3,7 @@ require_once __DIR__ . '/../includes/admin_check.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/constants.php';
+require_once __DIR__ . '/../includes/settings.php';
 
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
@@ -10,7 +11,9 @@ if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_
 $tok = $_SESSION['tok'];
 
 $userName = $_SESSION['user_name'] ?? 'Admin';
+$userEmail = $_SESSION['user_email'] ?? '';
 $db = db();
+$settings = loadSettings($db);
 
 // Stats
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -171,38 +174,217 @@ $users = $db->query("
   </table>
 </div>
 
-<!-- Email / SMTP Configuration -->
-<h2 class="text-lg font-bold text-ak-gold mb-4 mt-8">📧 Email / SMTP Configuration</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-6">
-<?php if (defined('MAIL_ENABLED') && MAIL_ENABLED): ?>
-  <div class="flex items-center gap-3 mb-4">
-    <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-ak-green/15 text-ak-green border border-ak-green/30">✓ Email Enabled</span>
-  </div>
-  <div class="text-ak-text2 text-sm">
-    <div class="mb-1"><strong>Host:</strong> <?= h(MAIL_HOST) ?>:<?= (int)MAIL_PORT ?></div>
-    <div class="mb-1"><strong>Username:</strong> <?= h(MAIL_USERNAME) ?></div>
-    <div><strong>Password:</strong> ••••••••</div>
-  </div>
-<?php else: ?>
-  <div class="flex items-center gap-3 mb-4">
-    <span class="text-[11px] font-bold px-3 py-1 rounded-full bg-ak-red/15 text-ak-red border border-ak-red/30">✗ Email Disabled</span>
-  </div>
-  <div class="text-ak-text2 text-sm leading-relaxed">
-    <p class="mb-3">To enable email sending:</p>
-    <ol class="list-decimal list-inside space-y-1 text-ak-muted">
-      <li>Get a <strong>Gmail App Password</strong> from Google Account → Security → 2-Step Verification → App Passwords</li>
-      <li>Edit <code class="text-ak-gold bg-ak-bg px-1.5 py-0.5 rounded text-xs">config.php</code> and set:
-        <ul class="list-disc list-inside ml-4 mt-1 space-y-0.5 text-xs">
-          <li><code>MAIL_USERNAME</code> to your Gmail address</li>
-          <li><code>MAIL_PASSWORD</code> to the App Password</li>
-          <li><code>MAIL_FROM_EMAIL</code> to your Gmail address</li>
-          <li><code>MAIL_ENABLED</code> to <code>true</code></li>
-        </ul>
-      </li>
-      <li>Test by sending a statement from the Statements tab</li>
-    </ol>
-  </div>
+<!-- Email Settings -->
+<div id="email-settings">
+<h2 class="text-lg font-bold text-ak-gold mb-4 mt-8">📧 Email Settings</h2>
+
+<?php if (!empty($_SESSION['admin_success'])): ?>
+<div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-4"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div>
 <?php endif; ?>
+<?php if (!empty($_SESSION['admin_error'])): ?>
+<div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-4"><?= h($_SESSION['admin_error']); unset($_SESSION['admin_error']); ?></div>
+<?php endif; ?>
+
+<!-- Status -->
+<div class="mb-5">
+<?php if (($settings['mail_enabled'] ?? '0') === '1'): ?>
+  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-green/15 text-ak-green border border-ak-green/30">✓ Email Active</span>
+<?php else: ?>
+  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-red/15 text-ak-red border border-ak-red/30">✗ Email Disabled</span>
+<?php endif; ?>
+</div>
+
+<form method="POST" action="actions.php" id="emailSettingsForm">
+<input type="hidden" name="action" value="save_email_settings">
+<input type="hidden" name="_tok" value="<?= h($tok) ?>">
+<input type="hidden" name="mail_provider" id="mail_provider_input" value="<?= h($settings['mail_provider'] ?? 'smtp') ?>">
+
+<!-- Provider Selector -->
+<div class="mb-6">
+  <label class="lbl mb-3">Mail Provider</label>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="servermail" onclick="selectProvider('servermail')">
+      <div class="text-2xl mb-1">🖥</div>
+      <div class="text-sm font-semibold text-ak-text">Server Mail</div>
+      <div class="text-[10px] text-ak-muted">PHP mail()</div>
+    </div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="smtp" onclick="selectProvider('smtp')">
+      <div class="text-2xl mb-1">📧</div>
+      <div class="text-sm font-semibold text-ak-text">Custom SMTP</div>
+      <div class="text-[10px] text-ak-muted">Any host</div>
+    </div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="gmail" onclick="selectProvider('gmail')">
+      <div class="text-2xl mb-1">G</div>
+      <div class="text-sm font-semibold text-ak-text">Gmail SMTP</div>
+      <div class="text-[10px] text-ak-muted">App Password</div>
+    </div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="xserver" onclick="selectProvider('xserver')">
+      <div class="text-2xl mb-1">X</div>
+      <div class="text-sm font-semibold text-ak-text">Xserver</div>
+      <div class="text-[10px] text-ak-muted">Japan hosting</div>
+    </div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="sakura" onclick="selectProvider('sakura')">
+      <div class="text-2xl mb-1">🌸</div>
+      <div class="text-sm font-semibold text-ak-text">Sakura</div>
+      <div class="text-[10px] text-ak-muted">Internet</div>
+    </div>
+  </div>
+</div>
+
+<!-- Server Mail fields -->
+<div class="provider-fields" data-for="servermail" style="display:none">
+  <div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">
+    💡 Uses your hosting server's built-in mail. No SMTP credentials needed. Works on Xserver, Sakura, ConoHa automatically.
+  </div>
+</div>
+
+<!-- Gmail SMTP fields -->
+<div class="provider-fields" data-for="gmail" style="display:none">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="lbl">Gmail Address</label>
+      <input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="you@gmail.com">
+    </div>
+    <div>
+      <label class="lbl">App Password</label>
+      <div class="relative">
+        <input class="inp pr-10" type="password" name="mail_password" id="gmail_password" placeholder="xxxx xxxx xxxx xxxx">
+        <button type="button" onclick="togglePasswordVisibility('gmail_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button>
+      </div>
+    </div>
+  </div>
+  <div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">
+    💡 Use Gmail App Password — not your login password. Generate at: Google Account → Security → 2-Step Verification → App Passwords
+  </div>
+</div>
+
+<!-- Xserver SMTP fields -->
+<div class="provider-fields" data-for="xserver" style="display:none">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <div>
+      <label class="lbl">SMTP Host</label>
+      <input class="inp" name="mail_host" value="<?= h($settings['mail_host'] ?? '') ?>" placeholder="sv12345.xserver.jp">
+    </div>
+    <div>
+      <label class="lbl">Username (email)</label>
+      <input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="info@yourdomain.com">
+    </div>
+    <div>
+      <label class="lbl">Password</label>
+      <div class="relative">
+        <input class="inp pr-10" type="password" name="mail_password" id="xserver_password" placeholder="Email password">
+        <button type="button" onclick="togglePasswordVisibility('xserver_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button>
+      </div>
+    </div>
+  </div>
+  <div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">
+    💡 Find your SMTP host in Xserver panel → Mail Settings
+  </div>
+</div>
+
+<!-- Sakura Internet fields -->
+<div class="provider-fields" data-for="sakura" style="display:none">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <div>
+      <label class="lbl">SMTP Host</label>
+      <input class="inp" name="mail_host" value="<?= h($settings['mail_host'] ?? '') ?>" placeholder="mail.yourdomain.sakura.ne.jp">
+    </div>
+    <div>
+      <label class="lbl">Username</label>
+      <input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="info@yourdomain.sakura.ne.jp">
+    </div>
+    <div>
+      <label class="lbl">Password</label>
+      <div class="relative">
+        <input class="inp pr-10" type="password" name="mail_password" id="sakura_password" placeholder="Email password">
+        <button type="button" onclick="togglePasswordVisibility('sakura_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom SMTP fields -->
+<div class="provider-fields" data-for="smtp" style="display:none">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div>
+      <label class="lbl">SMTP Host</label>
+      <input class="inp" name="mail_host" value="<?= h($settings['mail_host'] ?? '') ?>" placeholder="smtp.example.com">
+    </div>
+    <div>
+      <label class="lbl">SMTP Port</label>
+      <input class="inp" name="mail_port" value="<?= h($settings['mail_port'] ?? '587') ?>" placeholder="587">
+    </div>
+    <div>
+      <label class="lbl">Encryption</label>
+      <div class="flex gap-4 items-center mt-1">
+        <label class="flex items-center gap-2 text-sm text-ak-text2 cursor-pointer">
+          <input type="radio" name="mail_encryption" value="tls" <?= ($settings['mail_encryption'] ?? 'tls') === 'tls' ? 'checked' : '' ?> class="accent-ak-gold"> TLS
+        </label>
+        <label class="flex items-center gap-2 text-sm text-ak-text2 cursor-pointer">
+          <input type="radio" name="mail_encryption" value="ssl" <?= ($settings['mail_encryption'] ?? '') === 'ssl' ? 'checked' : '' ?> class="accent-ak-gold"> SSL
+        </label>
+      </div>
+    </div>
+    <div>
+      <label class="lbl">Username</label>
+      <input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="user@example.com">
+    </div>
+    <div>
+      <label class="lbl">Password</label>
+      <div class="relative">
+        <input class="inp pr-10" type="password" name="mail_password" id="smtp_password" placeholder="SMTP password">
+        <button type="button" onclick="togglePasswordVisibility('smtp_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Common fields (all providers) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
+  <div>
+    <label class="lbl">From Name</label>
+    <input class="inp" name="mail_from_name" value="<?= h($settings['mail_from_name'] ?? 'AuctionKai Settlement System') ?>" placeholder="AuctionKai Settlement System">
+  </div>
+  <div>
+    <label class="lbl">From Email</label>
+    <input class="inp" name="mail_from_email" value="<?= h($settings['mail_from_email'] ?? '') ?>" placeholder="noreply@yourdomain.com">
+  </div>
+</div>
+
+<!-- Enable toggle -->
+<div class="flex items-center gap-3 mb-6 bg-ak-bg rounded-lg p-4">
+  <label class="flex items-center gap-3 cursor-pointer">
+    <input type="checkbox" name="mail_enabled" value="1" <?= ($settings['mail_enabled'] ?? '0') === '1' ? 'checked' : '' ?> class="w-5 h-5 accent-ak-gold rounded">
+    <span class="text-sm font-semibold text-ak-text">Enable Email Sending</span>
+  </label>
+</div>
+
+<!-- Buttons -->
+<div class="flex gap-3 flex-wrap">
+  <button class="btn btn-gold" type="submit">💾 Save Settings</button>
+  <button type="button" class="btn btn-dark" onclick="openTestEmailModal()">🧪 Test Email</button>
+</div>
+
+</form>
+</div>
+
+<!-- Test Email Modal -->
+<div id="testEmailModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center hidden" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[420px] p-7 shadow-2xl relative animate-fade-in-up">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-ak-gold text-lg font-bold">🧪 Test Email</h3>
+      <button class="text-ak-muted text-2xl hover:text-ak-text" onclick="closeTestEmailModal()">×</button>
+    </div>
+    <form method="POST" action="actions.php">
+      <input type="hidden" name="action" value="test_email">
+      <input type="hidden" name="_tok" value="<?= h($tok) ?>">
+      <div class="mb-4">
+        <label class="lbl">Send test email to</label>
+        <input class="inp" type="email" name="test_email" value="<?= h($userEmail) ?>" placeholder="admin@example.com" required>
+      </div>
+      <button class="btn btn-gold w-full" type="submit">Send Test Email</button>
+    </form>
+  </div>
 </div>
 
 </div>
@@ -211,5 +393,41 @@ $users = $db->query("
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 <script src="../js/app.js?v=2.6"></script>
+<script>
+// Provider selector
+const currentProvider = '<?= h($settings["mail_provider"] ?? "smtp") ?>';
+
+function selectProvider(provider) {
+  document.getElementById('mail_provider_input').value = provider;
+  document.querySelectorAll('.provider-card').forEach(c => {
+    c.classList.remove('border-ak-gold', 'bg-ak-gold/10');
+    c.classList.add('border-ak-border');
+  });
+  const selected = document.querySelector(`.provider-card[data-provider="${provider}"]`);
+  if (selected) {
+    selected.classList.remove('border-ak-border');
+    selected.classList.add('border-ak-gold', 'bg-ak-gold/10');
+  }
+  document.querySelectorAll('.provider-fields').forEach(f => f.style.display = 'none');
+  const fields = document.querySelector(`.provider-fields[data-for="${provider}"]`);
+  if (fields) fields.style.display = 'block';
+}
+
+function togglePasswordVisibility(id) {
+  const el = document.getElementById(id);
+  if (el) el.type = el.type === 'password' ? 'text' : 'password';
+}
+
+function openTestEmailModal() {
+  document.getElementById('testEmailModal').style.display = 'flex';
+}
+
+function closeTestEmailModal() {
+  document.getElementById('testEmailModal').style.display = 'none';
+}
+
+// Init
+selectProvider(currentProvider);
+</script>
 </body>
 </html>

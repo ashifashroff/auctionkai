@@ -1,89 +1,138 @@
 <?php
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/settings.php';
 
-/**
- * Send settlement statement email to a member
- * 
- * @param array $member Member data (name, email)
- * @param array $auction Auction data (name, date)
- * @param string $pdfUrl Full URL to PDF statement
- * @param string $summary Plain text summary of statement
- * @return array ['success' => bool, 'message' => string]
- */
 function sendSettlementEmail(
-    array $member, 
-    array $auction, 
-    string $htmlBody
+    array $member,
+    array $auction,
+    string $htmlBody,
+    PDO $db
 ): array {
 
-    if (!MAIL_ENABLED) {
+    $s = loadSettings($db);
+
+    if (empty($s['mail_enabled']) || $s['mail_enabled'] !== '1') {
         return [
-            'success' => false, 
-            'message' => 'Email sending is not configured. Set MAIL_ENABLED to true in config.php'
+            'success' => false,
+            'message' => 'Email sending is disabled. Configure in Admin → Email Settings.'
         ];
     }
 
     if (empty($member['email'])) {
         return [
-            'success' => false, 
-            'message' => 'Member has no email address'
+            'success' => false,
+            'message' => 'This member has no email address'
         ];
     }
 
+    $provider = $s['mail_provider'] ?? 'smtp';
+
     try {
         $mail = new PHPMailer(true);
-
-        // SMTP Settings
-        $mail->isSMTP();
-        $mail->Host = MAIL_HOST;
-        $mail->SMTPAuth = true;
-        $mail->Username = MAIL_USERNAME;
-        $mail->Password = MAIL_PASSWORD;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = MAIL_PORT;
         $mail->CharSet = 'UTF-8';
-
-        // From / To
-        $mail->setFrom(MAIL_FROM_EMAIL, MAIL_FROM_NAME);
-        $mail->addAddress($member['email'], $member['name']);
-        $mail->addReplyTo(MAIL_FROM_EMAIL, MAIL_FROM_NAME);
-
-        // Subject
-        $mail->Subject = '精算書 / Settlement Statement — ' 
-            . $auction['name'] 
-            . ' (' . $auction['date'] . ')';
-
-        // HTML Body
         $mail->isHTML(true);
+
+        if ($provider === 'servermail') {
+            // Use PHP mail() — no SMTP needed
+            $mail->isMail();
+
+        } else {
+            // All SMTP-based providers
+            $mail->isSMTP();
+            $mail->SMTPAuth = true;
+            $mail->Username = $s['mail_username'] ?? '';
+            $mail->Password = $s['mail_password'] ?? '';
+
+            // Set host and port based on provider
+            switch ($provider) {
+                case 'gmail':
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+
+                case 'xserver':
+                    // User must enter their server hostname
+                    $mail->Host = $s['mail_host'] ?? '';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+
+                case 'sakura':
+                    $mail->Host = $s['mail_host'] ?? '';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+
+                case 'conoha':
+                    $mail->Host = 'smtp.conoha.ne.jp';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+
+                case 'smtp':
+                default:
+                    // Custom SMTP — user enters everything
+                    $mail->Host = $s['mail_host'] ?? '';
+                    $mail->Port = (int)($s['mail_port'] ?? 587);
+                    $enc = $s['mail_encryption'] ?? 'tls';
+                    $mail->SMTPSecure = $enc === 'ssl'
+                        ? PHPMailer::ENCRYPTION_SMTPS
+                        : PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+            }
+
+            if (empty($mail->Host)) {
+                return [
+                    'success' => false,
+                    'message' => 'SMTP host is not configured'
+                ];
+            }
+        }
+
+        $fromEmail = $s['mail_from_email']
+            ?? $s['mail_username']
+            ?? '';
+        $fromName = $s['mail_from_name']
+            ?? 'AuctionKai';
+
+        if (empty($fromEmail)) {
+            return [
+                'success' => false,
+                'message' => 'From email address is not set'
+            ];
+        }
+
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($member['email'], $member['name']);
+
+        $mail->Subject = '精算書 / Settlement Statement — '
+            . $auction['name']
+            . ' (' . $auction['date'] . ')';
         $mail->Body = $htmlBody;
         $mail->AltBody = strip_tags($htmlBody);
 
         $mail->send();
 
         return [
-            'success' => true, 
+            'success' => true,
             'message' => 'Email sent to ' . $member['email']
         ];
 
     } catch (Exception $e) {
         return [
-            'success' => false, 
-            'message' => 'Email failed: ' . $mail->ErrorInfo
+            'success' => false,
+            'message' => 'Send failed: ' . $mail->ErrorInfo
         ];
     }
 }
 
-/**
- * Build HTML email body for settlement statement
- */
 function buildEmailBody(
-    array $member, 
-    array $auction, 
+    array $member,
+    array $auction,
     array $s,
     array $fees
 ): string {
@@ -92,10 +141,13 @@ function buildEmailBody(
         $rows .= "
         <tr>
           <td style='padding:8px 10px;border-bottom:
-            1px solid #f0f0f0'>{$v['lot']}</td>
+            1px solid #f0f0f0'>
+            " . htmlspecialchars($v['lot']) . "
+          </td>
           <td style='padding:8px 10px;border-bottom:
             1px solid #f0f0f0'>
-            {$v['make']} {$v['model']}</td>
+            " . htmlspecialchars($v['make'] . ' ' . $v['model']) . "
+          </td>
           <td style='padding:8px 10px;border-bottom:
             1px solid #f0f0f0;text-align:right;
             font-family:monospace'>
@@ -104,27 +156,11 @@ function buildEmailBody(
         </tr>";
     }
 
-    $customRows = '';
-    foreach ($fees['customDeductions'] ?? [] as $d) {
-        $customRows .= "
-        <tr>
-          <td style='padding:5px 10px;color:#777'>
-            {$d['name']} ×{$s['count']}</td>
-          <td style='padding:5px 10px;text-align:right;
-            font-family:monospace;color:#CC7777'>
-            −¥" . number_format($d['amount'] * $s['count']) . "
-          </td>
-        </tr>";
-    }
-
     return "
     <!DOCTYPE html>
     <html>
-    <head>
-      <meta charset='UTF-8'>
-      <meta name='viewport' content='width=device-width'>
-    </head>
-    <body style='font-family:\"Noto Sans JP\",sans-serif;
+    <head><meta charset='UTF-8'></head>
+    <body style='font-family:sans-serif;
       background:#f4f4f4;padding:20px;
       color:#111;font-size:13px'>
       <div style='max-width:600px;margin:0 auto;
@@ -132,7 +168,6 @@ function buildEmailBody(
         overflow:hidden;
         box-shadow:0 4px 20px rgba(0,0,0,.1)'>
 
-        <!-- Header -->
         <div style='background:#0A1420;padding:24px 32px'>
           <div style='font-size:22px;font-weight:700;
             color:#D4A84B'>
@@ -140,144 +175,76 @@ function buildEmailBody(
           </div>
           <div style='font-size:12px;color:#6A88A0;
             margin-top:4px'>
-            Settlement Statement · {$auction['name']}
+            Settlement Statement ·
+            " . htmlspecialchars($auction['name']) . "
           </div>
         </div>
 
-        <!-- Greeting -->
         <div style='padding:24px 32px 0'>
           <p style='font-size:15px;font-weight:600;
-            margin-bottom:6px'>
-            Dear {$member['name']},
+            margin-bottom:8px'>
+            Dear " . htmlspecialchars($member['name']) . ",
           </p>
           <p style='color:#555;line-height:1.6'>
-            Please find your settlement statement for 
-            <strong>{$auction['name']}</strong> 
-            held on {$auction['date']} below.
+            Please find your settlement statement for
+            <strong>
+              " . htmlspecialchars($auction['name']) . "
+            </strong>
+            held on " . htmlspecialchars($auction['date']) . ".
           </p>
         </div>
 
-        <!-- Vehicles table -->
         <div style='padding:20px 32px'>
-          <div style='font-size:10px;font-weight:700;
-            letter-spacing:2px;color:#999;
-            margin-bottom:8px;
-            text-transform:uppercase'>
-            Sold Vehicles
-          </div>
           <table style='width:100%;border-collapse:collapse'>
             <thead>
               <tr style='background:#f5f5f5'>
                 <th style='padding:8px 10px;text-align:left;
-                  font-size:10px;font-weight:700;
-                  letter-spacing:1px;
-                  text-transform:uppercase;
-                  color:#555'>Lot</th>
+                  font-size:10px;color:#555'>LOT</th>
                 <th style='padding:8px 10px;text-align:left;
-                  font-size:10px;font-weight:700;
-                  letter-spacing:1px;
-                  text-transform:uppercase;
-                  color:#555'>Vehicle</th>
+                  font-size:10px;color:#555'>VEHICLE</th>
                 <th style='padding:8px 10px;text-align:right;
-                  font-size:10px;font-weight:700;
-                  letter-spacing:1px;
-                  text-transform:uppercase;
-                  color:#555'>Sold Price</th>
+                  font-size:10px;color:#555'>PRICE</th>
               </tr>
             </thead>
             <tbody>{$rows}</tbody>
           </table>
         </div>
 
-        <!-- Fee breakdown -->
         <div style='margin:0 32px 20px;background:#f9f9f9;
           border:1px solid #e8e8e8;border-radius:8px;
           padding:16px'>
-          <table style='width:100%;border-collapse:collapse;
-            font-size:13px'>
+          <table style='width:100%;font-size:13px'>
             <tr>
               <td style='padding:5px 0'>Gross Sales</td>
-              <td style='text-align:right;
-                font-family:monospace'>
+              <td style='text-align:right;font-family:monospace'>
                 ¥" . number_format($s['grossSales']) . "
               </td>
             </tr>
             <tr style='border-top:1px dashed #ddd'>
               <td style='padding:8px 0 5px;color:#777'>
-                Listing Fee ×{$s['count']}</td>
-              <td style='text-align:right;
-                font-family:monospace;color:#CC7777;
-                padding-top:8px'>
-                −¥" . number_format($s['entryTotal']) . "
-              </td>
-            </tr>
-            <tr>
-              <td style='padding:5px 0;color:#777'>
-                Commission</td>
-              <td style='text-align:right;
-                font-family:monospace;
-                color:#CC7777'>
-                −¥" . number_format($s['commTotal']) . "
-              </td>
-            </tr>
-            <tr>
-              <td style='padding:5px 0;color:#777'>
-                Transport ×{$s['count']}</td>
-              <td style='text-align:right;
-                font-family:monospace;
-                color:#CC7777'>
-                −¥" . number_format($s['transTotal']) . "
-              </td>
-            </tr>
-            {$customRows}
-            <tr style='border-top:1px dashed #ddd'>
-              <td style='padding:8px 0 5px;color:#999;
-                font-size:12px'>
-                Tax {$fees['tax_rate']}% on fees</td>
-              <td style='text-align:right;
-                font-family:monospace;
-                color:#CC7777;padding-top:8px;
-                font-size:12px'>
-                −¥" . number_format($s['tax']) . "
-              </td>
-            </tr>
-            <tr style='border-top:2px solid #ccc;
-              font-weight:700'>
-              <td style='padding:8px 0'>
                 Total Deductions</td>
-              <td style='text-align:right;
-                font-family:monospace;
-                color:#CC7777'>
+              <td style='text-align:right;font-family:monospace;
+                color:#CC7777;padding-top:8px'>
                 −¥" . number_format($s['totalDed']) . "
+              </td>
+            </tr>
+            <tr style='border-top:2px solid #ccc;font-weight:700'>
+              <td style='padding:8px 0'>NET PAYOUT</td>
+              <td style='text-align:right;font-family:monospace;
+                color:#D4A84B'>
+                ¥" . number_format($s['netPayout']) . "
               </td>
             </tr>
           </table>
         </div>
 
-        <!-- Net payout -->
-        <div style='margin:0 32px 28px;background:#0A1420;
-          border-radius:10px;padding:16px 20px;
-          display:flex;justify-content:space-between;
-          align-items:center'>
-          <span style='color:#E8DCC8;font-weight:600'>
-            NET PAYOUT / お支払い額
-          </span>
-          <span style='color:#D4A84B;font-size:22px;
-            font-weight:700;font-family:monospace'>
-            ¥" . number_format($s['netPayout']) . "
-          </span>
-        </div>
-
-        <!-- Footer -->
-        <div style='background:#f5f5f5;padding:16px 32px;
+        <div style='background:#0A1420;padding:16px 32px;
           text-align:center;font-size:11px;
-          color:#999;border-top:1px solid #eee'>
-          {$auction['name']} · {$auction['date']} · 
-          Auto-generated by AuctionKai<br>
-          Designed &amp; Developed by 
-          Mirai Global Solutions
+          color:#6A88A0'>
+          " . htmlspecialchars($auction['name']) . " ·
+          " . htmlspecialchars($auction['date']) . "<br>
+          Designed &amp; Developed by Mirai Global Solutions
         </div>
-
       </div>
     </body>
     </html>";

@@ -136,3 +136,25 @@ SET FOREIGN_KEY_CHECKS=1;
 
 -- ── Migration: Add disabled column (for existing installs) ──────────
 ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled TINYINT(1) DEFAULT 0;
+
+-- ── Settings (email/SMTP config managed via admin panel) ──────────
+CREATE TABLE IF NOT EXISTS settings (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `key` VARCHAR(100) NOT NULL UNIQUE,
+  value TEXT DEFAULT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO settings (`key`, value) VALUES
+  ('mail_enabled', '0'),
+  ('mail_provider', 'smtp'),
+  ('mail_host', ''),
+  ('mail_port', '587'),
+  ('mail_username', ''),
+  ('mail_password', ''),
+  ('mail_from_email', ''),
+  ('mail_from_name', 'AuctionKai Settlement System'),
+  ('mail_encryption', 'tls');
+
+-- Migration for existing installs
+ALTER TABLE settings ADD COLUMN IF NOT EXISTS `key` VARCHAR(100) NOT NULL UNIQUE;

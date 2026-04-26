@@ -91,11 +91,11 @@ auctionkai/
 │   ├── get_member_detail.php
 │   ├── update_member.php
 │   └── check_lot.php           ← Duplicate lot number check
-│   └── send_email.php          ← AJAX email sender endpoint
+│   └── send_email.php          ← AJAX email endpoint
 │
 ├── admin/                       ← Admin panel
-│   ├── index.php               ← User management dashboard
-│   ├── actions.php             ← Handle admin POST actions
+│   ├── index.php               ← User management + Email Settings
+│   ├── actions.php             ← Handle admin POST actions (users + email)
 │   └── .htaccess               ← Protect admin directory
 │
 ├── auth/                       ← Authentication pages
@@ -113,7 +113,8 @@ auctionkai/
 │   ├── auth_check.php          ← Session guard for protected pages
 │   ├── db.php                  ← PDO connection
 │   ├── helpers.php             ← fmt(), h(), calcStatement()
-│   ├── mailer.php              ← PHPMailer wrapper + email builder
+│   ├── mailer.php              ← PHPMailer wrapper, multi-provider
+│   ├── settings.php             ← DB settings helper
 │   └── footer.php              ← Shared footer component
 │
 ├── js/
@@ -202,28 +203,27 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 
 ---
 
-## 📧 Email Setup (PHPMailer + Gmail SMTP)
+## 📧 Email Setup
 
-### Requirements
-- Gmail account
-- Gmail App Password (not your regular password)
-  - Go to: Google Account → Security → 2-Step Verification → App Passwords
-  - Create app password for "Mail"
+Email is configured through the Admin Panel.
+No credentials in code files — safe for GitHub.
 
-### Configuration
-Edit config.php:
-```
-define('MAIL_USERNAME', 'your@gmail.com');
-define('MAIL_PASSWORD', 'xxxx xxxx xxxx xxxx'); // App Password
-define('MAIL_FROM_EMAIL', 'your@gmail.com');
-define('MAIL_ENABLED', true);
-```
+### Supported Providers
+| Provider | Notes |
+|---|---|
+| Server Mail | PHP mail(), no credentials needed |
+| Custom SMTP | Any SMTP server |
+| Gmail SMTP | Requires Gmail App Password |
+| Xserver | Works with Xserver hosting SMTP |
+| Sakura Internet | Works with Sakura hosting SMTP |
 
-### How It Works
-- Click "✉ Send Email" on any member statement card
-- System generates a full HTML settlement statement
-- Sends via Gmail SMTP with Japanese subject line
-- Toast notification confirms success/failure
+### Setup Steps
+1. Log in as admin
+2. Go to Admin Panel → Email Settings
+3. Select your mail provider
+4. Enter credentials
+5. Click Test Email to verify
+6. Enable and Save
 
 ---
 
