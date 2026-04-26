@@ -91,6 +91,7 @@ auctionkai/
 │   ├── get_member_detail.php
 │   ├── update_member.php
 │   └── check_lot.php           ← Duplicate lot number check
+│   └── send_email.php          ← AJAX email sender endpoint
 │
 ├── admin/                       ← Admin panel
 │   ├── index.php               ← User management dashboard
@@ -112,6 +113,7 @@ auctionkai/
 │   ├── auth_check.php          ← Session guard for protected pages
 │   ├── db.php                  ← PDO connection
 │   ├── helpers.php             ← fmt(), h(), calcStatement()
+│   ├── mailer.php              ← PHPMailer wrapper + email builder
 │   └── footer.php              ← Shared footer component
 │
 ├── js/
@@ -125,6 +127,7 @@ auctionkai/
 ├── admin.php                   ← Admin panel (user management)
 ├── profile.php                 ← Edit name, email, password
 ├── pdf.php                     ← A4 PDF settlement statements
+├── vendor/                     ← PHPMailer (gitignored)
 ├── delete_auction.php          ← Delete auction with confirmation
 ├── help.php                    ← Help & guide (accordion FAQ)
 ├── about.php                   ← About AuctionKai + tech stack + version history
@@ -177,6 +180,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 **v2.5** — Removed Other Fee from all UI/forms/tables/statements/PDF. Real-time duplicate lot number check. Password strength indicator (Weak/Fair/Good/Strong). Member search filter. New members appear at top without page reload. Keyboard shortcuts with help modal. Toast notifications across all pages. Parsley.js form validation. Mobile responsive vehicles table (card view). Help, About, Privacy pages. Shared footer component. Forgot password / reset password flow. Duplicate email check on registration. Cache-busting for CSS/JS. Fixed vehicle add/edit bugs (placeholder count, variable names).
 
+**v2.4** — Real email sending via PHPMailer + Gmail SMTP. HTML settlement email with full fee breakdown. Email config status in admin panel.
+
 **v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection. Auth/ and includes/ folder restructure.
 
 **v2.3** — AJAX for everything (no page reloads on any form), delete auction page with stats and confirmation, duplicate member name check, auction toggle fix, date field disabled after creation
@@ -194,6 +199,31 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ## Troubleshooting
 
 If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. CSS and JS files include `?v=2.5` cache-busting to help. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables. If toast notifications don't appear, clear browser cache and reload.
+
+---
+
+## 📧 Email Setup (PHPMailer + Gmail SMTP)
+
+### Requirements
+- Gmail account
+- Gmail App Password (not your regular password)
+  - Go to: Google Account → Security → 2-Step Verification → App Passwords
+  - Create app password for "Mail"
+
+### Configuration
+Edit config.php:
+```
+define('MAIL_USERNAME', 'your@gmail.com');
+define('MAIL_PASSWORD', 'xxxx xxxx xxxx xxxx'); // App Password
+define('MAIL_FROM_EMAIL', 'your@gmail.com');
+define('MAIL_ENABLED', true);
+```
+
+### How It Works
+- Click "✉ Send Email" on any member statement card
+- System generates a full HTML settlement statement
+- Sends via Gmail SMTP with Japanese subject line
+- Toast notification confirms success/failure
 
 ---
 

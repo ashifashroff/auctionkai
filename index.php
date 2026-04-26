@@ -587,7 +587,16 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="sh">
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
       <div class="sa">
-        <a class="btn-email" href="mailto:<?= h($m['email']) ?>?subject=<?= $emailSubject ?>&body=<?= $emailBody ?>">✉ Send Email</a>
+        <button 
+          onclick="sendStatementEmail(
+            <?= (int)$m['id'] ?>, 
+            <?= (int)$activeAuctionId ?>,
+            this
+          )"
+          class="btn-email"
+          id="email-btn-<?= (int)$m['id'] ?>">
+          ✉ Send Email
+        </button>
         <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
