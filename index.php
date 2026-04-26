@@ -221,7 +221,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <title>AuctionKai — Settlement System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=2.4">
+<link rel="stylesheet" href="css/style.css?v=2.8">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -585,6 +585,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <?php endif; ?>
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
+<script src="js/app.js?v=2.8"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof VehiclesPager !== 'undefined' && document.getElementById('vehicles-tbody')) {
@@ -595,7 +596,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-<script src="js/app.js?v=2.4"></script>
 
 <!-- Edit Vehicle Modal -->
 <div id="editModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center hidden" style="display:none">

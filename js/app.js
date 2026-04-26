@@ -425,7 +425,7 @@ async function submitAddVehicle(e) {
     document.getElementById('memberId').value = '';
     document.getElementById('memberSearch').value = '';
     toggleSoldFields(true);
-    setTimeout(() => if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}, 600);
+    setTimeout(() => { if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();} }, 600);
   })
   .catch(() => showToast('Connection error. Please try again.', 'error'))
   .finally(() => {
