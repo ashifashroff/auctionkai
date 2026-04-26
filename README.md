@@ -92,6 +92,11 @@ auctionkai/
 │   ├── update_member.php
 │   └── check_lot.php           ← Duplicate lot number check
 │
+├── admin/                       ← Admin panel
+│   ├── index.php               ← User management dashboard
+│   ├── actions.php             ← Handle admin POST actions
+│   └── .htaccess               ← Protect admin directory
+│
 ├── auth/                       ← Authentication pages
 │   ├── login.php
 │   ├── logout.php
@@ -167,6 +172,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v2.6** — Admin panel with user management (separate admin/ folder). Disable/enable user accounts. Role management (admin/user). User stats dashboard. Disabled users blocked at login.
 
 **v2.5** — Removed Other Fee from all UI/forms/tables/statements/PDF. Real-time duplicate lot number check. Password strength indicator (Weak/Fair/Good/Strong). Member search filter. New members appear at top without page reload. Keyboard shortcuts with help modal. Toast notifications across all pages. Parsley.js form validation. Mobile responsive vehicles table (card view). Help, About, Privacy pages. Shared footer component. Forgot password / reset password flow. Duplicate email check on registration. Cache-busting for CSS/JS. Fixed vehicle add/edit bugs (placeholder count, variable names).
 

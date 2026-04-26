@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `status`          ENUM('active','suspended','restricted') NOT NULL DEFAULT 'active',
   `suspended_until` DATETIME DEFAULT NULL,
   `suspend_reason`  VARCHAR(255) DEFAULT NULL,
+  `disabled`        TINYINT(1) DEFAULT 0,
   `created_at`      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -132,3 +133,6 @@ INSERT INTO `vehicles` (`auction_id`, `member_id`, `make`, `model`, `lot`, `sold
   (2, 5, 'Lexus',   'IS 300',   'T-003', 1800000, 20000, 3500, 63000, 8000, 0, 1);
 
 SET FOREIGN_KEY_CHECKS=1;
+
+-- ── Migration: Add disabled column (for existing installs) ──────────
+ALTER TABLE users ADD COLUMN IF NOT EXISTS disabled TINYINT(1) DEFAULT 0;

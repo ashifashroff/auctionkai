@@ -49,7 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         if ($user && password_verify($password, $user['password'])) {
             // Check suspended status
             $userStatus = $user['status'] ?? 'active';
-            if ($userStatus === 'suspended') {
+
+            // Check if account is disabled
+            if (!empty($user['disabled'])) {
+                $error = 'Your account has been disabled. Please contact the administrator.';
+            } elseif ($userStatus === 'suspended') {
                 $suspendedUntil = $user['suspended_until'] ?? null;
                 if ($suspendedUntil && strtotime($suspendedUntil) > time()) {
                     $untilFormatted = date('M j, Y g:i A', strtotime($suspendedUntil));

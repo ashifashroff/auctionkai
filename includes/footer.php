@@ -6,7 +6,7 @@
     <div>
       <div class="text-ak-gold font-bold text-lg">⚡ AuctionKai</div>
       <div class="text-ak-muted text-xs mt-1">Settlement Management System</div>
-      <div class="mt-2"><span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded font-mono">v2.5</span></div>
+      <div class="mt-2"><span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded font-mono">v2.6</span></div>
     </div>
     <!-- Column 2 — System -->
     <div>
