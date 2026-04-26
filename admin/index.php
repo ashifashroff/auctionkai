@@ -6,9 +6,6 @@ require_once __DIR__ . '/../includes/constants.php';
 
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
-ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Strict');
-
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
 $tok = $_SESSION['tok'];
 
