@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/settings.php';
 
-header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
 $tok = $_SESSION['tok'];

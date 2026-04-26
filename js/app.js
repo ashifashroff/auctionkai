@@ -483,9 +483,12 @@ function submitSaveAuction(e) {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'save_auction', auction_id:activeAuctionId, name:form.name.value, date:form.date.value, commissionFee:form.commissionFee.value})
   }).then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='Save';return;}
-    if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
-  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='Save';});
+    if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='Save';return;}
+    showToast('Auction saved', 'success');
+    btn.disabled=false;btn.textContent='Save';
+    if(typeof VehiclesPager!=='undefined'){VehiclesPager.reload();}
+    if(typeof MembersPager!=='undefined'){MembersPager.reload();}
+  }).catch(()=>{showToast('Error saving auction', 'error');btn.disabled=false;btn.textContent='Save';});
   return false;
 }
 
