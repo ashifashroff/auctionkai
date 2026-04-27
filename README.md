@@ -257,6 +257,31 @@ If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Ta
 Email is configured through the Admin Panel.
 No credentials in code files — safe for GitHub.
 
+### First-Time Setup: Install PHPMailer
+
+The `vendor/` folder is gitignored and won't appear after `git pull`. Set it up once:
+
+**Option A — Composer (recommended):**
+```bash
+composer require phpmailer/phpmailer
+```
+
+**Option B — Manual:**
+1. Create folder: `vendor/phpmailer/phpmailer/src/`
+2. Download from [PHPMailer GitHub](https://github.com/PHPMailer/PHPMailer/tree/master/src):
+   - `PHPMailer.php`
+   - `SMTP.php`
+   - `Exception.php`
+3. Create `vendor/autoload.php`:
+```php
+<?php
+require_once __DIR__ . '/phpmailer/phpmailer/src/Exception.php';
+require_once __DIR__ . '/phpmailer/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/phpmailer/phpmailer/src/SMTP.php';
+```
+
+> **Note:** Future `git pull` will NOT delete your local `vendor/` folder — Git ignores it completely.
+
 ### Supported Providers
 | Provider | Notes |
 |---|---|
