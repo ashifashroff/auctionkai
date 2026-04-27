@@ -181,6 +181,7 @@ auctionkai/
 ├── help.php                    ← Help & guide (accordion FAQ)
 ├── about.php                   ← About AuctionKai + tech stack + version history
 ├── privacy.php                 ← Privacy policy
+├── terms.php                   ← Terms of Use page
 └── README.md
 ```
 
