@@ -126,7 +126,6 @@ auctionkai/
 ├── config.php                  ← Database credentials
 ├── schema.sql                  ← Full schema + seed data + indexes
 ├── index.php                   ← Main app (dashboard, members, vehicles, statements)
-├── admin.php                   ← Admin panel (user management)
 ├── profile.php                 ← Edit name, email, password
 ├── pdf.php                     ← A4 PDF settlement statements
 ├── vendor/                     ← PHPMailer (gitignored)
@@ -160,7 +159,7 @@ password_resets (token-based password reset)
 Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt with `password_hash()`. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
 
 - schema.sql seed data uses placeholder credentials only — never commit real usernames or passwords to public repos
-- Admin role required to access admin.php
+- Admin role required to access admin/ panel
 - User impersonation tracked via session `original_admin_id`
 - Suspended users blocked at login with expiry date shown
 - Duplicate email and username checks on registration
