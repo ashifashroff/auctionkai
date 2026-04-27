@@ -41,6 +41,7 @@ $tab = $_GET['tab'] ?? 'users';
 $tabs = [
     'users'    => ['icon' => '👥', 'label' => 'Users'],
     'create'   => ['icon' => '➕', 'label' => 'Create User'],
+    'backup'   => ['icon' => '🗄', 'label' => 'Backup'],
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
@@ -193,6 +194,30 @@ $tabs = [
     <div class="mb-5"><label class="lbl">Role</label><select class="inp" name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
     <button class="btn btn-gold w-full" type="submit" id="createUserBtn">+ Create User</button>
   </form>
+</div>
+
+<?php elseif ($tab === 'backup'): ?>
+<h2 class="text-lg font-bold text-ak-gold mb-4">🗄 Database Backup</h2>
+
+<div class="bg-ak-card border border-ak-border rounded-xl p-6">
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <div class="text-ak-text font-semibold text-sm mb-1">Full SQL Backup</div>
+      <div class="text-ak-muted text-xs leading-relaxed max-w-lg">Downloads a complete SQL dump of all tables including users, auctions, members, vehicles, settings and activity logs. Safe to import directly into phpMyAdmin.</div>
+    </div>
+    <a href="../api/db_backup.php" class="btn btn-gold" onclick="showBackupToast()">↓ Download Backup</a>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-ak-border">
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Format</div><div class="text-ak-text2 text-sm">SQL (phpMyAdmin compatible)</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Includes</div><div class="text-ak-text2 text-sm">Schema + All Data + Indexes</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Filename</div><div class="text-ak-gold text-sm font-mono">auctionkai_backup_YYYY-MM-DD_HH-MM-SS.sql</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Restore</div><div class="text-ak-text2 text-sm">phpMyAdmin → Import → Select file → Go</div></div>
+  </div>
+
+  <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-4 py-3 text-xs text-yellow-400">
+    ⚠ Store backups securely — they contain all user data and credentials. Never share backup files publicly.
+  </div>
 </div>
 
 <?php elseif ($tab === 'email'): ?>
@@ -349,6 +374,7 @@ function openEditUserModal(id, username, name, email, role) {
 function closeEditUserModal() { document.getElementById('editUserModal').style.display = 'none'; }
 function openSuspendModal(id, name) { document.getElementById('sus_id').value = id; document.getElementById('sus_name').textContent = name; document.getElementById('suspendModal').style.display = 'flex'; }
 function closeSuspendModal() { document.getElementById('suspendModal').style.display = 'none'; }
+function showBackupToast() { setTimeout(() => { showToast('↓ Backup download started', 'success', 3000); }, 500); }
 document.querySelectorAll('#editUserModal,#suspendModal,#testEmailModal').forEach(m => { m.addEventListener('click', e => { if (e.target === m) m.style.display = 'none'; }); });
 
 // ── Admin AJAX helper ─────────────────────────

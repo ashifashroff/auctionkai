@@ -147,6 +147,7 @@ auctionkai/
 │   ├── actions.php             ← Handle admin POST actions (users + email)
 │   └── .htaccess               ← Protect admin directory
 │
+│   └── db_backup.php             ← Admin-only SQL backup generator
 ├── auth/                       ← Authentication pages
 │   ├── login.php
 │   ├── logout.php
@@ -298,6 +299,15 @@ require_once __DIR__ . '/phpmailer/phpmailer/src/SMTP.php';
 4. Enter credentials
 5. Click Test Email to verify
 6. Enable and Save
+
+---
+
+### Database Backup
+- One-click full SQL backup from Admin Panel
+- Downloads timestamped .sql file
+- Compatible with phpMyAdmin import
+- Includes all tables: users, auctions, members, vehicles, settings, activity logs
+- Admin only — protected by session check
 
 ---
 
