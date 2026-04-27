@@ -83,7 +83,55 @@ No sold vehicles means ¥0 net payout.
 
 ```
 auctionkai/
-├── api/                        ← AJAX handlers
+├── admin/
+│   ├── index.php               ← User management + Email Settings
+│   ├── actions.php             ← Handle admin POST actions
+│   └── .htaccess
+├── api/
+│   ├── add_vehicle.php
+│   ├── delete_vehicle.php
+│   ├── get_vehicle.php
+│   ├── update_vehicle.php
+│   ├── get_member_detail.php
+│   ├── update_member.php
+│   ├── check_lot.php
+│   ├── get_vehicles_page.php
+│   ├── send_email.php
+│   └── delete_auction.php
+├── auth/
+│   ├── login.php
+│   ├── logout.php
+│   ├── forgot_password.php
+│   └── reset_password.php
+├── css/
+│   ├── style.css
+│   ├── pdf.css
+│   ├── summary.css
+│   └── tailwind-config.php
+├── includes/
+│   ├── auth_check.php
+│   ├── admin_check.php
+│   ├── db.php
+│   ├── helpers.php
+│   ├── mailer.php
+│   ├── settings.php
+│   └── footer.php
+├── js/
+│   └── app.js
+├── vendor/                     ← PHPMailer (gitignored)
+├── .htaccess
+├── .gitignore
+├── config.php
+├── schema.sql
+├── index.php
+├── profile.php
+├── pdf.php
+├── auction_summary.php
+├── help.php
+├── about.php
+├── privacy.php
+└── README.md
+```
 │   ├── add_vehicle.php
 │   ├── delete_vehicle.php
 │   ├── get_vehicle.php
@@ -129,7 +177,6 @@ auctionkai/
 ├── profile.php                 ← Edit name, email, password
 ├── pdf.php                     ← A4 PDF settlement statements
 ├── vendor/                     ← PHPMailer (gitignored)
-├── delete_auction.php          ← Delete auction with confirmation
 ├── help.php                    ← Help & guide (accordion FAQ)
 ├── about.php                   ← About AuctionKai + tech stack + version history
 ├── privacy.php                 ← Privacy policy
