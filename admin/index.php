@@ -377,10 +377,22 @@ document.getElementById('createUserForm')?.addEventListener('submit', async func
 // ── Email Settings ────────────────────────────
 document.getElementById('emailSettingsForm')?.addEventListener('submit', async function(e) {
   e.preventDefault();
-  const fd = new FormData(this);
-  // Checkbox hack — if unchecked, it's not in FormData
-  if (!this.querySelector('[name=mail_enabled]').checked) fd.set('mail_enabled', '0');
-  await adminAjax(fd, null);
+  const provider = document.getElementById('mail_provider_input').value;
+  const fd = new FormData();
+  fd.append('action', 'save_email_settings');
+  fd.append('mail_provider', provider);
+  fd.append('mail_from_name', this.querySelector('[name=mail_from_name]')?.value || '');
+  fd.append('mail_from_email', this.querySelector('[name=mail_from_email]')?.value || '');
+  fd.append('mail_enabled', this.querySelector('[name=mail_enabled]')?.checked ? '1' : '0');
+
+  // Only include fields from the active provider section
+  const activeFields = document.querySelector('.provider-fields[data-for="' + provider + '"]');
+  if (activeFields) {
+    activeFields.querySelectorAll('input, select').forEach(el => {
+      if (el.name) fd.append(el.name, el.value);
+    });
+  }
+  const result = await adminAjax(fd, null);
 });
 
 // ── Test Email ────────────────────────────────
@@ -392,10 +404,12 @@ document.getElementById('testEmailForm')?.addEventListener('submit', async funct
   fd.append('_tok', CSRF_TOKEN);
   try {
     const res = await fetch('../api/admin_actions.php', { method: 'POST', body: fd });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { data = { success: false, message: 'Server error: ' + text.substring(0, 200) }; }
     if (data.success) { showToast('✓ ' + data.message, 'success', 4000); closeTestEmailModal(); }
-    else { showToast(data.message || 'Error', 'error'); }
-  } catch(e) { showToast('Connection error', 'error'); }
+    else { showToast(data.message || 'Failed to send test email', 'error', 5000); }
+  } catch(e) { showToast('Connection error. Check if server is running.', 'error', 5000); }
   finally { btn.disabled = false; btn.textContent = 'Send Test Email'; }
 });
 
