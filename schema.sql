@@ -158,3 +158,53 @@ INSERT INTO settings (`key`, value) VALUES
 
 -- Migration for existing installs
 ALTER TABLE settings ADD COLUMN IF NOT EXISTS `key` VARCHAR(100) NOT NULL UNIQUE;
+
+-- ── Performance Indexes ──────────────────────
+
+-- vehicles table — most queried columns
+ALTER TABLE vehicles
+  ADD INDEX IF NOT EXISTS idx_vehicles_auction_id (`auction_id`),
+  ADD INDEX IF NOT EXISTS idx_vehicles_member_id (`member_id`),
+  ADD INDEX IF NOT EXISTS idx_vehicles_sold (`sold`),
+  ADD INDEX IF NOT EXISTS idx_vehicles_lot (`lot`),
+  ADD INDEX IF NOT EXISTS idx_vehicles_auction_sold (`auction_id`, `sold`);
+
+-- auction table
+ALTER TABLE auction
+  ADD INDEX IF NOT EXISTS idx_auction_user_id (`user_id`),
+  ADD INDEX IF NOT EXISTS idx_auction_expires_at (`expires_at`),
+  ADD INDEX IF NOT EXISTS idx_auction_user_date (`user_id`, `date`);
+
+-- members table
+ALTER TABLE members
+  ADD INDEX IF NOT EXISTS idx_members_user_id (`user_id`);
+
+-- users table
+ALTER TABLE users
+  ADD INDEX IF NOT EXISTS idx_users_username (`username`),
+  ADD INDEX IF NOT EXISTS idx_users_email (`email`),
+  ADD INDEX IF NOT EXISTS idx_users_role (`role`);
+
+-- password_resets table (if exists)
+ALTER TABLE password_resets
+  ADD INDEX IF NOT EXISTS idx_resets_email (`email`),
+  ADD INDEX IF NOT EXISTS idx_resets_token (`token`);
+
+-- settings table
+ALTER TABLE settings
+  ADD INDEX IF NOT EXISTS idx_settings_key (`key`);
+
+-- ── For existing installs — run these manually ──
+-- ── in phpMyAdmin SQL tab to add indexes ─────
+
+CREATE INDEX IF NOT EXISTS idx_vehicles_auction_id ON vehicles(auction_id);
+CREATE INDEX IF NOT EXISTS idx_vehicles_member_id ON vehicles(member_id);
+CREATE INDEX IF NOT EXISTS idx_vehicles_sold ON vehicles(sold);
+CREATE INDEX IF NOT EXISTS idx_vehicles_lot ON vehicles(lot);
+CREATE INDEX IF NOT EXISTS idx_vehicles_auction_sold ON vehicles(auction_id, sold);
+CREATE INDEX IF NOT EXISTS idx_auction_user_id ON auction(user_id);
+CREATE INDEX IF NOT EXISTS idx_auction_expires_at ON auction(expires_at);
+CREATE INDEX IF NOT EXISTS idx_auction_user_date ON auction(user_id, date);
+CREATE INDEX IF NOT EXISTS idx_members_user_id ON members(user_id);
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);

@@ -301,6 +301,19 @@ require_once __DIR__ . '/phpmailer/phpmailer/src/SMTP.php';
 
 ---
 
+## ⚡ Performance
+
+Database indexes are included in schema.sql for all frequently queried columns:
+
+- vehicles — indexed on auction_id, member_id, sold, lot, and composite (auction_id, sold)
+- auction — indexed on user_id, expires_at, composite (user_id, date)
+- members — indexed on user_id
+- users — indexed on username, email, role
+
+For existing installs, run the index creation queries at the bottom of schema.sql in phpMyAdmin → SQL tab.
+
+---
+
 ## Credits
 
 Designed & Developed by Mirai Global Solutions
