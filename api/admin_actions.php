@@ -85,6 +85,7 @@ switch ($action) {
         exit;
 
     case 'save_email_settings':
+        ensureSettingsTable($db);
         $newPass = trim($_POST['mail_password'] ?? '');
         saveSettings($db, [
             'mail_enabled'    => isset($_POST['mail_enabled']) ? '1' : '0',
