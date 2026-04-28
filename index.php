@@ -240,7 +240,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
 <div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down topbar-inner">
   <div class="shrink-0">
-    <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai <span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded ml-1 font-mono">MySQL</span></div>
+    <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai</div>
     <div class="text-ak-muted text-[11px]">Settlement Management System</div>
   </div>
   <?php if ($auction): ?>
