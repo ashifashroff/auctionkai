@@ -24,9 +24,13 @@ if (empty($_SESSION['user_id'])) {
 
 // CSRF check on POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rawInput = file_get_contents('php://input');
-    $input = json_decode($rawInput, true);
-    if (empty($input['_tok']) || $input['_tok'] !== ($_SESSION['tok'] ?? '')) {
+    $tok = $_POST['_tok'] ?? '';
+    if (empty($tok)) {
+        $rawInput = file_get_contents('php://input');
+        $input = json_decode($rawInput, true);
+        $tok = $input['_tok'] ?? '';
+    }
+    if (empty($tok) || $tok !== ($_SESSION['tok'] ?? '')) {
         http_response_code(403);
         echo json_encode(['error' => 'CSRF token mismatch']);
         exit;
