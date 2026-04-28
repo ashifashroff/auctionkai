@@ -326,7 +326,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <div class="provider-fields" data-for="gmail" style="display:none">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
     <div><label class="lbl">Gmail Address</label><input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="you@gmail.com"></div>
-    <div><label class="lbl">App Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="gmail_password" placeholder="xxxx xxxx xxxx xxxx"><button type="button" onclick="togglePasswordVisibility('gmail_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
+    <div><label class="lbl">App Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="gmail_password" placeholder="<?= !empty($settings['mail_password']) ? '•••••••• (saved — leave blank to keep)' : 'xxxx xxxx xxxx xxxx' ?>"><button type="button" onclick="togglePasswordVisibility('gmail_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
   </div>
   <div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">💡 Use Gmail App Password — not your login password. Generate at: Google Account → Security → 2-Step Verification → App Passwords</div>
 </div>
@@ -334,7 +334,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
     <div><label class="lbl">SMTP Host</label><input class="inp" name="mail_host" value="<?= h($settings['mail_host'] ?? '') ?>" placeholder="sv12345.xserver.jp"></div>
     <div><label class="lbl">Username (email)</label><input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="info@yourdomain.com"></div>
-    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="xserver_password" placeholder="Email password"><button type="button" onclick="togglePasswordVisibility('xserver_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
+    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="xserver_password" placeholder="<?= !empty($settings['mail_password']) ? '•••••••• (saved — leave blank to keep)' : 'Email password' ?>"><button type="button" onclick="togglePasswordVisibility('xserver_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
   </div>
   <div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">💡 Find your SMTP host in Xserver panel → Mail Settings</div>
 </div>
@@ -342,7 +342,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
     <div><label class="lbl">SMTP Host</label><input class="inp" name="mail_host" value="<?= h($settings['mail_host'] ?? '') ?>" placeholder="mail.yourdomain.sakura.ne.jp"></div>
     <div><label class="lbl">Username</label><input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="info@yourdomain.sakura.ne.jp"></div>
-    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="sakura_password" placeholder="Email password"><button type="button" onclick="togglePasswordVisibility('sakura_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
+    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="sakura_password" placeholder="<?= !empty($settings['mail_password']) ? '•••••••• (saved — leave blank to keep)' : 'Email password' ?>"><button type="button" onclick="togglePasswordVisibility('sakura_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
   </div>
 </div>
 <div class="provider-fields" data-for="smtp" style="display:none">
@@ -351,7 +351,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <div><label class="lbl">SMTP Port</label><input class="inp" name="mail_port" value="<?= h($settings['mail_port'] ?? '587') ?>" placeholder="587"></div>
     <div><label class="lbl">Encryption</label><div class="flex gap-4 items-center mt-1"><label class="flex items-center gap-2 text-sm text-ak-text2 cursor-pointer"><input type="radio" name="mail_encryption" value="tls" <?= ($settings['mail_encryption'] ?? 'tls')==='tls'?'checked':'' ?> class="accent-ak-gold"> TLS</label><label class="flex items-center gap-2 text-sm text-ak-text2 cursor-pointer"><input type="radio" name="mail_encryption" value="ssl" <?= ($settings['mail_encryption'] ?? '')==='ssl'?'checked':'' ?> class="accent-ak-gold"> SSL</label></div></div>
     <div><label class="lbl">Username</label><input class="inp" name="mail_username" value="<?= h($settings['mail_username'] ?? '') ?>" placeholder="user@example.com"></div>
-    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="smtp_password" placeholder="SMTP password"><button type="button" onclick="togglePasswordVisibility('smtp_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
+    <div><label class="lbl">Password</label><div class="relative"><input class="inp pr-10" type="password" name="mail_password" id="smtp_password" placeholder="<?= !empty($settings['mail_password']) ? '•••••••• (saved — leave blank to keep)' : 'SMTP password' ?>"><button type="button" onclick="togglePasswordVisibility('smtp_password')" class="absolute right-2 top-1/2 -translate-y-1/2 text-ak-muted hover:text-ak-text text-xs">👁</button></div></div>
   </div>
 </div>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
