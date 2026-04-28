@@ -104,7 +104,8 @@ while (($data = fgetcsv($handle)) !== false) {
 
     // Validate email if provided
     if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $email = ''; // Clear invalid email silently
+        $errors[] = "Row $rowNumber: Invalid email \"$email\" for \"$name\" — email cleared, member imported";
+        $email = ''; // Clear invalid email but still import
     }
 
     // Insert member
