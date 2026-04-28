@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/api_bootstrap.php';
+require_once __DIR__ . '/../includes/activity.php';
 
 // Only POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
