@@ -1255,7 +1255,10 @@ function handleCsvImport(input) {
     method: 'POST',
     body: fd
   })
-  .then(r => r.json())
+  .then(r => {
+    if (!r.ok) return r.text().then(t => { throw new Error('Server ' + r.status + ': ' + t.substring(0, 300)); });
+    return r.text().then(t => { try { return JSON.parse(t); } catch(e) { throw new Error('Invalid JSON: ' + t.substring(0, 300)); } });
+  })
   .then(data => {
     if (data.success) {
       resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-green/15 text-ak-green border-ak-green/30';
@@ -1276,7 +1279,7 @@ function handleCsvImport(input) {
   })
   .catch(() => {
     resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-red/15 text-ak-red border-ak-red/30';
-    resultDiv.textContent = '✗ Connection error';
+    resultDiv.textContent = '✗ ' + (err.message || 'Connection error');
     input.value = '';
     importBtn.disabled = true;
     importBtn.textContent = '↑ Import CSV';
