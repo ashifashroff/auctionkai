@@ -21,7 +21,9 @@ Japanese auto auction settlement system. Dark premium theme, vanilla PHP + Tailw
 
 **3. Open the app** — navigate to `http://localhost/auctionkai/` in your browser.
 
-After major updates, drop the entire `auctionkai` database and re-import `schema.sql`. Using the file import option in phpMyAdmin is more reliable than copy-pasting SQL.
+**Fresh install** — paste the entire contents of `schema.sql` into phpMyAdmin → SQL tab. This creates all tables and seed data.
+
+**Updating an existing database** — run only the new migrations from `migrations.sql`. Never run `schema.sql` on production — it drops and recreates tables, destroying all data. Each migration in `migrations.sql` is idempotent (safe to run multiple times) and only adds new tables/columns/indexes.
 
 **Default logins:**
 
