@@ -607,6 +607,7 @@ function submitEditMember(e) {
     name: document.getElementById('em_name').value.trim(),
     phone: document.getElementById('em_phone').value.trim(),
     email: document.getElementById('em_email').value.trim(),
+    _tok: CSRF_TOKEN
   };
 
   if (!payload.name) { showToast('Name is required.', 'warning'); btn.disabled = false; btn.textContent = 'Save'; return false; }
