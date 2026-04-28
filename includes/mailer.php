@@ -53,6 +53,13 @@ function sendSettlementEmail(
             $mail->SMTPAuth = true;
             $mail->Username = $s['mail_username'] ?? '';
             $mail->Password = $s['mail_password'] ?? '';
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
 
             switch ($provider) {
                 case 'gmail':
