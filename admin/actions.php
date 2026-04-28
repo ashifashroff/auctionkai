@@ -211,7 +211,7 @@ try {
                 saveSetting($db, 'mail_password', $newPass);
             }
 
-            $_SESSION['admin_success'] = 'Email settings saved successfully';
+            $_SESSION['admin_success'] = 'Email settings saved (' . ucfirst($provider) . ')';
             header('Location: index.php#email-settings');
             exit;
 

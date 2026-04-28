@@ -100,7 +100,7 @@ switch ($action) {
         if (!empty($newPass)) {
             saveSetting($db, 'mail_password', $newPass);
         }
-        echo json_encode(['success' => true, 'message' => 'Email settings saved successfully']);
+        echo json_encode(['success' => true, 'message' => 'Email settings saved (' . ucfirst($provider) . ')']);
         exit;
 
     case 'test_email':

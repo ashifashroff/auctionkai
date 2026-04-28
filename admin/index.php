@@ -298,12 +298,17 @@ loadActivityLog(1, 'all');
 <?php elseif ($tab === 'email'): ?>
 <div id="email-settings">
 <h2 class="text-lg font-bold text-ak-gold mb-4">📧 Email Settings</h2>
-<div class="mb-5">
+<div class="mb-5 flex items-center gap-3 flex-wrap">
 <?php if (($settings['mail_enabled'] ?? '0') === '1'): ?>
   <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-green/15 text-ak-green border border-ak-green/30">✓ Email Active</span>
 <?php else: ?>
   <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-red/15 text-ak-red border border-ak-red/30">✗ Email Disabled</span>
 <?php endif; ?>
+<?php
+$providerLabels = ['servermail'=>'Server Mail','smtp'=>'Custom SMTP','gmail'=>'Gmail SMTP','xserver'=>'Xserver','sakura'=>'Sakura'];
+$currentProvider = $settings['mail_provider'] ?? 'smtp';
+?>
+  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-gold/15 text-ak-gold border border-ak-gold/30">📡 <?= $providerLabels[$currentProvider] ?? ucfirst($currentProvider) ?></span>
 </div>
 <form id="emailSettingsForm">
 <input type="hidden" name="action" value="save_email_settings"><input type="hidden" name="mail_provider" id="mail_provider_input" value="<?= h($settings['mail_provider'] ?? 'smtp') ?>">
@@ -432,9 +437,23 @@ const CSRF_TOKEN = '<?= h($tok) ?>';
 const currentProvider = '<?= h($settings["mail_provider"] ?? "smtp") ?>';
 function selectProvider(provider) {
   document.getElementById('mail_provider_input').value = provider;
-  document.querySelectorAll('.provider-card').forEach(c => { c.classList.remove('border-ak-gold','bg-ak-gold/10'); c.classList.add('border-ak-border'); });
+  document.querySelectorAll('.provider-card').forEach(c => {
+    c.classList.remove('border-ak-gold','bg-ak-gold/10');
+    c.classList.add('border-ak-border');
+    const badge = c.querySelector('.active-badge');
+    if (badge) badge.remove();
+  });
   const selected = document.querySelector('.provider-card[data-provider="'+provider+'"]');
-  if (selected) { selected.classList.remove('border-ak-border'); selected.classList.add('border-ak-gold','bg-ak-gold/10'); }
+  if (selected) {
+    selected.classList.remove('border-ak-border');
+    selected.classList.add('border-ak-gold','bg-ak-gold/10');
+    if (!selected.querySelector('.active-badge')) {
+      const badge = document.createElement('div');
+      badge.className = 'active-badge text-[9px] font-bold bg-ak-gold text-ak-bg px-2 py-0.5 rounded-full mt-1 inline-block';
+      badge.textContent = 'ACTIVE';
+      selected.appendChild(badge);
+    }
+  }
   document.querySelectorAll('.provider-fields').forEach(f => f.style.display = 'none');
   const fields = document.querySelector('.provider-fields[data-for="'+provider+'"]');
   if (fields) fields.style.display = 'block';
