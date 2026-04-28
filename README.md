@@ -39,7 +39,7 @@ Or register a new account. Usernames and emails must be unique.
 
 **Auctions** — create multiple auctions, switch between them using the navbar chips. Each auction has its own commission fee (default ¥3,300 per member) and auto-expires after 2 weeks. Expired auctions delete all vehicles (sold and unsold) and the auction itself. Member records are preserved. A red badge warns you when expiry is close.
 
-**Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Search members by name, phone, or email with instant filtering. Duplicate names are blocked with a clear error message.
+**Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Search members by name, phone, or email with instant filtering. Duplicate names are blocked with a clear error message. Bulk CSV import — upload CSV file to add multiple members at once. Auto-detects header row. Supports name/phone/email columns in any order. Skips duplicates automatically. Shows per-row error details. Download CSV template with example data.
 
 **Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Paginated vehicles table (10/25/50/100 per page). Real-time search filter by lot, make, model, member name. AJAX pagination — no full page reload. Skeleton loading animation while fetching. Stays on same page after add/edit/delete. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
 
@@ -99,6 +99,8 @@ auctionkai/
 │   ├── check_lot.php
 │   ├── get_vehicles_page.php
 │   ├── send_email.php
+│   ├── import_members_csv.php  ← CSV bulk member import
+│   ├── csv_template.php         ← Download CSV template
 │   └── delete_auction.php
 ├── auth/
 │   ├── login.php
@@ -229,7 +231,9 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Member CSV import with duplicate detection and template download. Never crashes the app — errors caught silently.
+**v3.2** — Bulk member import via CSV file upload. CSV template download with example data. Auto duplicate detection on import. Per-row error reporting.
+
+**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
 
 **v3.0** — Security hardening: CSRF on all API endpoints, secure session cookies (httponly+samesite), rate limiting on password reset, input length limits, removed duplicate admin.php. Multi-provider email settings via admin panel (Server Mail/Gmail/Xserver/Sakura/Custom SMTP). Email credentials stored in DB (not config files). AJAX admin forms (no page refresh). Paginated vehicles + members tables with search and AJAX loading. Skeleton loading states. 2-column statement cards with member search. API bootstrap for consistent auth/CSRF.
 

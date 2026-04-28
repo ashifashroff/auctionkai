@@ -15,7 +15,8 @@ fputcsv($out, ['name', 'phone', 'email']);
 
 // Example rows
 fputcsv($out, ['Ahmad Hassan', '090-1234-5678', 'ahmad@example.com']);
-fputcsv($out, ['Tanaka Yuki', '080-9876-5432', 'tanaka@example.com']);
-fputcsv($out, ['Chen Wei', '070-5555-0001', '']);
+fputcsv($out, ['Mohammed Al-Rashid', '080-9876-5432', 'm.rashid@example.com']);
+fputcsv($out, ['Chen Wei', '070-5555-0001', 'cwei@example.com']);
+fputcsv($out, ['Tanaka Hiroshi', '090-0000-1111', '']);
 
 fclose($out);
