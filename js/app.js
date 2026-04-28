@@ -506,14 +506,35 @@ function filterMemberList() {
 }
 
 function removeMember(id, name) {
-  if (!confirm('Remove ' + name + ' and all their vehicles?')) return;
+  document.getElementById('removeMemberName').textContent = name;
+  document.getElementById('removeMemberModal').dataset.memberId = id;
+  document.getElementById('removeMemberModal').style.display = 'flex';
+}
+
+function closeRemoveMemberModal() {
+  document.getElementById('removeMemberModal').style.display = 'none';
+}
+
+function confirmRemoveMember() {
+  const modal = document.getElementById('removeMemberModal');
+  const id = modal.dataset.memberId;
+  const btn = document.getElementById('confirmRemoveMemberBtn');
+  btn.disabled = true;
+  btn.textContent = 'Removing...';
+
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'remove_member', id:id, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);return;}
-    if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
-  }).catch(()=>alert('Error'));
+    if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='Remove';return;}
+    showToast('Member removed successfully', 'success', 3000);
+    closeRemoveMemberModal();
+    if(typeof MembersPager!=="undefined"){MembersPager.reload();}else{location.reload();}
+    btn.disabled=false;btn.textContent='Remove';
+  }).catch(()=>{
+    showToast('Error removing member', 'error');
+    btn.disabled=false;btn.textContent='Remove';
+  });
 }
 
 // ─── TOGGLE SOLD (AJAX) ────────────────────────────

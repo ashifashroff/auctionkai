@@ -694,6 +694,24 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
+<!-- Remove Member Modal -->
+<div id="removeMemberModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[420px] p-7 shadow-2xl relative animate-fade-in-up">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-ak-red text-lg font-bold">🗑 Remove Member</h3>
+      <button class="text-ak-muted text-2xl hover:text-ak-text hover:bg-ak-infield px-2 py-1 rounded-lg transition-all" onclick="closeRemoveMemberModal()">×</button>
+    </div>
+    <div class="mb-5">
+      <div class="text-ak-text text-sm mb-2">Are you sure you want to remove <b id="removeMemberName" class="text-ak-gold"></b>?</div>
+      <div class="text-ak-muted text-xs">This will also remove all their vehicles from this auction. This cannot be undone.</div>
+    </div>
+    <div class="flex justify-end gap-2 pt-4 border-t border-ak-border">
+      <button class="btn btn-dark btn-sm" onclick="closeRemoveMemberModal()">Cancel</button>
+      <button class="btn btn-sm bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" id="confirmRemoveMemberBtn" onclick="confirmRemoveMember()">Remove</button>
+    </div>
+  </div>
+</div>
+
 <!-- Edit Member Modal -->
 <div id="editMemberModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
   <div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[500px] max-h-[90vh] overflow-y-auto p-7 shadow-2xl relative animate-fade-in-up">
