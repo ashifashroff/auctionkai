@@ -87,9 +87,10 @@ switch ($action) {
     case 'save_email_settings':
         ensureSettingsTable($db);
         $newPass = trim($_POST['mail_password'] ?? '');
+        $provider = trim($_POST['mail_provider'] ?? 'smtp');
         saveSettings($db, [
             'mail_enabled'    => isset($_POST['mail_enabled']) ? '1' : '0',
-            'mail_provider'   => trim($_POST['mail_provider'] ?? 'smtp'),
+            'mail_provider'   => $provider,
             'mail_host'       => trim($_POST['mail_host'] ?? ''),
             'mail_port'       => trim($_POST['mail_port'] ?? '587'),
             'mail_encryption' => trim($_POST['mail_encryption'] ?? 'tls'),

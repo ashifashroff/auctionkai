@@ -478,7 +478,9 @@ async function adminAjax(formData, btnId) {
   if (btn) { btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'Saving…'; }
   try {
     const res = await fetch('../api/admin_actions.php', { method: 'POST', body: formData });
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch(e) { data = { success: false, message: 'Server error: ' + text.substring(0, 200) }; }
     if (data.success) { showToast('✓ ' + data.message, 'success', 4000); }
     else { showToast(data.message || 'Error', 'error'); }
     return data;
