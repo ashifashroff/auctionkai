@@ -1,5 +1,21 @@
 <?php
-require_once __DIR__ . '/../includes/admin_check.php';
+// Start session first
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+// API-specific auth check — return JSON errors, not redirects
+if (empty($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Not logged in']);
+    exit;
+}
+if (($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Admin access required']);
+    exit;
+}
+
+$userId = (int)$_SESSION['user_id'];
+
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/settings.php';
