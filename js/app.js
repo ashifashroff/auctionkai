@@ -509,7 +509,7 @@ function removeMember(id, name) {
   if (!confirm('Remove ' + name + ' and all their vehicles?')) return;
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'remove_member', id:id})
+    body: JSON.stringify({action:'remove_member', id:id, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){alert(d.error);return;}
     if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
