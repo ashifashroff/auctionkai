@@ -64,10 +64,23 @@ while (($data = fgetcsv($handle)) !== false) {
     // Skip empty rows
     if (empty(array_filter($data))) continue;
 
-    // Auto-detect header row
-    $firstVal = strtolower(trim($data[0] ?? ''));
-    if ($rowNumber === 1 && in_array($firstVal, ['name', 'member', '名前'])) {
-        continue;
+    if ($rowNumber === 1) {
+        $firstVal = strtolower(trim($data[0] ?? ''));
+        // Strip BOM if present
+        $firstVal = str_replace("\xEF\xBB\xBF", '', $firstVal);
+        if (in_array($firstVal, ['name', 'full name', 'fullname', 'member', 'seller', '名前', 'first name', 'last name'])) {
+            continue;
+        }
+        // Also skip if ALL cells look like headers (not data)
+        $allHeaders = true;
+        foreach ($data as $cell) {
+            $c = strtolower(trim($cell));
+            if (!in_array($c, ['name', 'phone', 'email', 'mail', 'e-mail', 'tel', 'mobile', '電話', 'メール', ''])) {
+                $allHeaders = false;
+                break;
+            }
+        }
+        if ($allHeaders && count(array_filter($data)) > 0) continue;
     }
 
     $name  = trim($data[0] ?? '');
