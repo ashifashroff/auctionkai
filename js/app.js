@@ -1216,3 +1216,44 @@ const MembersPager = {
     return d.innerHTML;
   }
 };
+
+// ── CSV Import ────────────────────────────────
+function handleCsvImport(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const resultDiv = document.getElementById('csvImportResult');
+  resultDiv.classList.remove('hidden');
+  resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-bg text-ak-muted';
+  resultDiv.textContent = 'Uploading...';
+
+  const fd = new FormData();
+  fd.append('csv_file', file);
+  fd.append('_tok', CSRF_TOKEN);
+
+  fetch('api/import_members_csv.php', {
+    method: 'POST',
+    body: fd
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-green/15 text-ak-green border-ak-green/30';
+      let html = '✓ ' + data.message;
+      if (data.errors && data.errors.length > 0) {
+        html += '<div class="mt-2 text-xs text-ak-muted">' + data.errors.map(e => '• ' + e).join('<br>') + '</div>';
+      }
+      resultDiv.innerHTML = html;
+      if (typeof MembersPager !== 'undefined') MembersPager.reload();
+    } else {
+      resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-red/15 text-ak-red border-ak-red/30';
+      resultDiv.textContent = '✗ ' + (data.message || 'Import failed');
+    }
+    input.value = '';
+  })
+  .catch(() => {
+    resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-red/15 text-ak-red border-ak-red/30';
+    resultDiv.textContent = '✗ Connection error';
+    input.value = '';
+  });
+}

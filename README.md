@@ -229,7 +229,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
+**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Member CSV import with duplicate detection and template download. Never crashes the app — errors caught silently.
 
 **v3.0** — Security hardening: CSRF on all API endpoints, secure session cookies (httponly+samesite), rate limiting on password reset, input length limits, removed duplicate admin.php. Multi-provider email settings via admin panel (Server Mail/Gmail/Xserver/Sakura/Custom SMTP). Email credentials stored in DB (not config files). AJAX admin forms (no page refresh). Paginated vehicles + members tables with search and AJAX loading. Skeleton loading states. 2-column statement cards with member search. API bootstrap for consistent auth/CSRF.
 

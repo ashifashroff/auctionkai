@@ -405,6 +405,22 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <div id="addMemberMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
 </div>
 
+<!-- CSV Import Card -->
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Bulk Import via CSV</div>
+  <div class="flex items-start gap-4 flex-wrap">
+    <div class="flex-1 min-w-[200px]">
+      <div class="text-ak-text2 text-sm mb-2">Upload a CSV file to import multiple members at once.</div>
+      <div class="text-ak-muted text-xs leading-relaxed">Supported columns: <span class="font-mono text-ak-gold">name, phone, email</span><br>First row can be a header row — auto-detected.<br>Duplicates are automatically skipped.</div>
+    </div>
+    <div class="flex flex-col gap-2 shrink-0">
+      <a href="api/csv_template.php" class="btn btn-dark btn-sm text-center">↓ Download Template</a>
+      <label class="btn btn-gold btn-sm cursor-pointer text-center">↑ Import CSV<input type="file" id="csvImportInput" accept=".csv,.txt" class="hidden" onchange="handleCsvImport(this)"></label>
+    </div>
+  </div>
+  <div id="csvImportResult" class="hidden mt-3 p-3 rounded-lg text-sm border"></div>
+</div>
+
 <!-- Search + Controls -->
 <div class="vehicles-search-wrap">
   <div class="search-icon-wrap">
