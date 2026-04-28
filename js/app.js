@@ -341,7 +341,7 @@ async function submitEditForm(e) {
   fetch('api/update_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({...payload, _tok: CSRF_TOKEN})
   })
   .then(r => r.json())
   .then(data => {
@@ -412,7 +412,7 @@ async function submitAddVehicle(e) {
   fetch('api/add_vehicle.php', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({...payload, _tok: CSRF_TOKEN})
   })
   .then(r => r.json())
   .then(data => {
@@ -446,7 +446,7 @@ function submitAddAuction(e) {
   btn.disabled = true; btn.textContent = 'Creating…';
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value})
+    body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Create';return;}
     window.location.href = 'index.php?auction_id=' + d.auction_id + '&tab=dashboard';
@@ -462,7 +462,7 @@ function submitAddMember(e) {
   btn.disabled = true; btn.textContent = 'Adding…';
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'add_member', name:form.name.value, phone:form.phone.value, email:form.email.value})
+    body: JSON.stringify({action:'add_member', name:form.name.value, phone:form.phone.value, email:form.email.value, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Add';return;}
     showToast('Member added successfully', 'success');
@@ -481,7 +481,7 @@ function submitSaveAuction(e) {
   btn.disabled = true; btn.textContent = 'Saving…';
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'save_auction', auction_id:activeAuctionId, name:form.name.value, date:form.date.value, commissionFee:form.commissionFee.value})
+    body: JSON.stringify({action:'save_auction', auction_id:activeAuctionId, name:form.name.value, date:form.date.value, commissionFee:form.commissionFee.value, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='Save';return;}
     showToast('Auction saved', 'success');
@@ -542,7 +542,7 @@ function toggleSold(id, btn) {
   btn.disabled = true;
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'toggle_sold', id:id})
+    body: JSON.stringify({action:'toggle_sold', id:id, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){alert(d.error);btn.disabled=false;return;}
     if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
