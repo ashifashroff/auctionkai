@@ -478,13 +478,19 @@ async function adminAjax(formData, btnId) {
   if (btn) { btn.disabled = true; btn.dataset.origText = btn.textContent; btn.textContent = 'Saving…'; }
   try {
     const res = await fetch('../api/admin_actions.php', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const errText = await res.text();
+      showToast('Server error ' + res.status, 'error', 5000);
+      if (btn) { btn.disabled = false; btn.textContent = btn.dataset.origText; }
+      return { success: false };
+    }
     const text = await res.text();
     let data;
-    try { data = JSON.parse(text); } catch(e) { data = { success: false, message: 'Server error: ' + text.substring(0, 200) }; }
+    try { data = JSON.parse(text); } catch(e) { showToast('Parse error: ' + text.substring(0, 150), 'error', 5000); if (btn) { btn.disabled = false; btn.textContent = btn.dataset.origText; } return { success: false }; }
     if (data.success) { showToast('✓ ' + data.message, 'success', 4000); }
-    else { showToast(data.message || 'Error', 'error'); }
+    else { showToast(data.message || 'Error', 'error', 4000); }
     return data;
-  } catch(e) { showToast('Connection error', 'error'); return { success: false }; }
+  } catch(e) { showToast('Connection error: ' + e.message, 'error', 5000); return { success: false }; }
   finally { if (btn) { btn.disabled = false; btn.textContent = btn.dataset.origText; } }
 }
 
@@ -503,17 +509,18 @@ document.getElementById('emailSettingsForm')?.addEventListener('submit', async f
   const fd = new FormData();
   fd.append('action', 'save_email_settings');
   fd.append('mail_provider', provider);
+  fd.append('mail_enabled', this.querySelector('[name=mail_enabled]')?.checked ? '1' : '0');
   fd.append('mail_from_name', this.querySelector('[name=mail_from_name]')?.value || '');
   fd.append('mail_from_email', this.querySelector('[name=mail_from_email]')?.value || '');
-  fd.append('mail_enabled', this.querySelector('[name=mail_enabled]')?.checked ? '1' : '0');
 
-  // Only include fields from the active provider section
+  // Collect all visible provider fields (host, port, username, password, etc)
   const activeFields = document.querySelector('.provider-fields[data-for="' + provider + '"]');
   if (activeFields) {
     activeFields.querySelectorAll('input, select').forEach(el => {
       if (el.name) fd.append(el.name, el.value);
     });
   }
+
   const result = await adminAjax(fd, null);
 });
 
