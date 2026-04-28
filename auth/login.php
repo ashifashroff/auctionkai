@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
+            require_once __DIR__ . '/../includes/activity.php';
             // Check suspended status
             $userStatus = $user['status'] ?? 'active';
 
@@ -70,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             }
             if ($userStatus === 'active') {
                 unset($_SESSION[$attemptKey]);
+                logActivity($db, (int)$user['id'], 'login', 'user', (int)$user['id'], "Login from IP: " . ($_SERVER['REMOTE_ADDR'] ?? ''));
                 $_SESSION['user_id'] = (int)$user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_role'] = $user['role'];
@@ -82,6 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             $att['count']++;
             $att['last'] = time();
             $error = 'Invalid credentials.';
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, 0, 'login.failed', 'user', 0, "Failed login for username: " . $username);
         }
     }
     } // end rate limit else

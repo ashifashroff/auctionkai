@@ -208,3 +208,31 @@ CREATE INDEX IF NOT EXISTS idx_auction_user_date ON auction(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_members_user_id ON members(user_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+-- ── Activity Log Table ───────────────────────
+CREATE TABLE IF NOT EXISTS activity_log (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) DEFAULT NULL,
+  entity_id INT UNSIGNED DEFAULT NULL,
+  description TEXT DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_log_user_id (`user_id`),
+  INDEX idx_log_action (`action`),
+  INDEX idx_log_created (`created_at`),
+  INDEX idx_log_entity (`entity_type`, `entity_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS activity_log (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  action VARCHAR(100) NOT NULL,
+  entity_type VARCHAR(50) DEFAULT NULL,
+  entity_id INT UNSIGNED DEFAULT NULL,
+  description TEXT DEFAULT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

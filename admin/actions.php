@@ -261,6 +261,21 @@ try {
 
             header('Location: index.php#email-settings');
             exit;
+
+        case 'clear_old_logs':
+            $days = (int)($_POST['days'] ?? 90);
+            if ($days < 30) $days = 30;
+
+            $stmt = $db->prepare("DELETE FROM activity_log WHERE created_at < DATE_SUB(NOW(), INTERVAL ? DAY)");
+            $stmt->execute([$days]);
+            $deleted = $db->query("SELECT ROW_COUNT()")->fetchColumn();
+
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, $userId, 'admin.clear_logs', 'system', 0, "Cleared {$deleted} log entries older than {$days} days");
+
+            $_SESSION['admin_success'] = "Cleared {$deleted} log entries older than {$days} days";
+            header('Location: index.php?tab=activity#activity-log');
+            exit;
     }
 } catch (Exception $e) {
     error_log('Admin action error: ' . $e->getMessage());

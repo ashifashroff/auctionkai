@@ -62,12 +62,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $hash = password_hash($new, PASSWORD_DEFAULT);
             $db->prepare("UPDATE users SET password=? WHERE id=?")->execute([$hash, $userId]);
+            logActivity($db, $userId, 'password.change', 'user', $userId, "Password changed");
             $success = 'Password changed successfully.';
         }
     }
 }
 
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/activity.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -160,6 +162,41 @@ require_once __DIR__ . '/includes/helpers.php';
     <!-- Back Link -->
     <div class="text-center mt-5 animate-fade-in">
       <a href="index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
+    </div>
+
+    <!-- Recent Activity -->
+    <?php
+    function timeAgo(string $datetime): string {
+        $diff = time() - strtotime($datetime);
+        if ($diff < 60) return 'just now';
+        if ($diff < 3600) return floor($diff/60) . 'm ago';
+        if ($diff < 86400) return floor($diff/3600) . 'h ago';
+        if ($diff < 604800) return floor($diff/86400) . 'd ago';
+        return date('Y-m-d', strtotime($datetime));
+    }
+
+    $myActivity = $db->prepare("SELECT * FROM activity_log WHERE user_id=? ORDER BY created_at DESC LIMIT 20");
+    $myActivity->execute([$userId]);
+    $myActivity = $myActivity->fetchAll();
+    ?>
+    <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
+      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-4">📋 Recent Activity</div>
+      <div class="text-ak-muted text-xs mb-4">Your last 20 actions</div>
+      <?php if (empty($myActivity)): ?>
+        <div class="text-center text-ak-muted py-6">No activity recorded yet.</div>
+      <?php else: ?>
+      <div class="flex flex-col gap-2">
+        <?php foreach ($myActivity as $a): ?>
+        <div class="flex items-center gap-3 bg-ak-bg rounded-lg px-4 py-3 <?= getActivityBorder($a['action']) ?>">
+          <div class="text-lg"><?= getActivityIcon($a['action']) ?></div>
+          <div class="flex-1 min-w-0">
+            <div class="text-ak-text text-sm"><?= h($a['description'] ?: $a['action']) ?></div>
+            <div class="text-ak-muted text-[11px]"><?= timeAgo($a['created_at']) ?> · <?= h($a['action']) ?></div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
     </div>
 
   </div>

@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/admin_check.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/activity.php';
 
 // Only admin can access
 if (($_SESSION['user_role'] ?? '') !== 'admin') {
@@ -10,6 +11,8 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
 
 $db = db();
 $filename = 'auctionkai_backup_' . date('Y-m-d_H-i-s') . '.sql';
+
+logActivity($db, (int)($_SESSION['user_id'] ?? 0), 'backup.download', 'system', 0, "Database backup downloaded");
 
 // Set headers for file download
 header('Content-Type: application/octet-stream');

@@ -49,6 +49,8 @@ Or register a new account. Usernames and emails must be unique.
 
 **🛡 Admin Panel** — view all registered users with status badges (active/suspended/restricted). Create new users and admins. Edit any user's name, email, username, role. Suspend users for a specific number of days with reason. Delete users and all their data. Login As any user to view their dashboard. Return to Admin Panel button shown in topbar when impersonating.
 
+**📋 Activity Log** — tracks all important actions automatically. Actions logged: login/logout, auction create/update/delete, member add/update/remove, vehicle add/update/delete/toggle, PDF generate, email send, backup download, admin actions, password changes. Admin panel shows full log for all users with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
+
 **📖 Help & Guide** — built-in accordion-style help page covering getting started, managing members, vehicles, statements, and fee settings.
 
 **🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
@@ -165,6 +167,7 @@ auctionkai/
 │   ├── helpers.php             ← fmt(), h(), calcStatement()
 │   ├── mailer.php              ← PHPMailer wrapper, multi-provider
 │   ├── settings.php             ← DB settings helper
+│   ├── activity.php             ← Activity logging helper
 │   └── footer.php              ← Shared footer component
 │
 ├── js/
@@ -225,6 +228,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
 
 **v3.0** — Security hardening: CSRF on all API endpoints, secure session cookies (httponly+samesite), rate limiting on password reset, input length limits, removed duplicate admin.php. Multi-provider email settings via admin panel (Server Mail/Gmail/Xserver/Sakura/Custom SMTP). Email credentials stored in DB (not config files). AJAX admin forms (no page refresh). Paginated vehicles + members tables with search and AJAX loading. Skeleton loading states. 2-column statement cards with member search. API bootstrap for consistent auth/CSRF.
 

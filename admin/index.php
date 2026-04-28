@@ -7,6 +7,8 @@ require_once __DIR__ . '/../includes/settings.php';
 
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
+require_once __DIR__ . '/../includes/activity.php';
+
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
 $tok = $_SESSION['tok'];
 
@@ -42,6 +44,7 @@ $tabs = [
     'users'    => ['icon' => '👥', 'label' => 'Users'],
     'create'   => ['icon' => '➕', 'label' => 'Create User'],
     'backup'   => ['icon' => '🗄', 'label' => 'Backup'],
+    'activity' => ['icon' => '📋', 'label' => 'Activity Log'],
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
@@ -218,6 +221,118 @@ $tabs = [
   <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-4 py-3 text-xs text-yellow-400">
     ⚠ Store backups securely — they contain all user data and credentials. Never share backup files publicly.
   </div>
+</div>
+
+<?php elseif ($tab === 'activity'): ?>
+<?php
+// Fetch activity logs — admin sees all
+$logPage = max(1, (int)($_GET['log_page'] ?? 1));
+$logPerPage = 50;
+$logOffset = ($logPage - 1) * $logPerPage;
+
+// Filter
+$logFilter = $_GET['log_filter'] ?? 'all';
+$filterWhere = '';
+if ($logFilter === 'logins') $filterWhere = " WHERE al.action LIKE '%login%' OR al.action LIKE '%logout%'";
+elseif ($logFilter === 'vehicles') $filterWhere = " WHERE al.action LIKE '%vehicle%'";
+elseif ($logFilter === 'members') $filterWhere = " WHERE al.action LIKE '%member%'";
+elseif ($logFilter === 'auctions') $filterWhere = " WHERE al.action LIKE '%auction%'";
+elseif ($logFilter === 'admin') $filterWhere = " WHERE al.action LIKE '%admin%' OR al.action LIKE '%backup%'";
+
+$logTotal = (int)$db->query("SELECT COUNT(*) FROM activity_log al" . $filterWhere)->fetchColumn();
+$logLastPage = max(1, ceil($logTotal / $logPerPage));
+
+$stmt = $db->prepare("
+    SELECT al.*, u.name as user_name, u.username as username
+    FROM activity_log al
+    LEFT JOIN users u ON al.user_id = u.id
+    {$filterWhere}
+    ORDER BY al.created_at DESC
+    LIMIT ? OFFSET ?
+");
+$stmt->execute([$logPerPage, $logOffset]);
+$activityLogs = $stmt->fetchAll();
+?>
+
+<div id="activity-log">
+  <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <h2 class="text-lg font-bold text-ak-gold">📋 Activity Log</h2>
+    <div class="flex items-center gap-3">
+      <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2"><?= $logTotal ?> total events</span>
+      <form method="GET" class="flex items-center gap-2">
+        <select name="log_filter" class="inp text-sm" onchange="this.form.submit()">
+          <option value="all" <?= $logFilter==='all'?'selected':'' ?>>All actions</option>
+          <option value="logins" <?= $logFilter==='logins'?'selected':'' ?>>Logins / Logouts</option>
+          <option value="vehicles" <?= $logFilter==='vehicles'?'selected':'' ?>>Vehicles</option>
+          <option value="members" <?= $logFilter==='members'?'selected':'' ?>>Members</option>
+          <option value="auctions" <?= $logFilter==='auctions'?'selected':'' ?>>Auctions</option>
+          <option value="admin" <?= $logFilter==='admin'?'selected':'' ?>>Admin</option>
+        </select>
+      </form>
+      <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')">
+        <input type="hidden" name="action" value="clear_old_logs">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
+        <button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">🧹 Clear Old Logs</button>
+      </form>
+    </div>
+  </div>
+
+  <?php if (empty($activityLogs)): ?>
+    <div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No activity recorded yet.</div>
+  <?php else: ?>
+  <div class="bg-ak-card border border-ak-border rounded-xl overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">
+          <th class="px-4 py-3 text-left">Time</th>
+          <th class="px-4 py-3 text-left">User</th>
+          <th class="px-4 py-3 text-left">Action</th>
+          <th class="px-4 py-3 text-left">Entity</th>
+          <th class="px-4 py-3 text-left">Description</th>
+          <th class="px-4 py-3 text-left">IP</th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php foreach ($activityLogs as $l): ?>
+        <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors <?= getActivityBorder($l['action']) ?>">
+          <td class="px-4 py-3 text-ak-muted text-xs font-mono whitespace-nowrap"><?= date('Y-m-d H:i', strtotime($l['created_at'])) ?></td>
+          <td class="px-4 py-3">
+            <?php if ($l['user_id']): ?>
+              <div class="text-ak-text text-xs"><?= h($l['username'] ?? '') ?></div>
+              <div class="text-ak-muted text-[10px]"><?= h($l['user_name'] ?? '') ?></div>
+            <?php else: ?>
+              <span class="text-ak-muted text-xs">System</span>
+            <?php endif; ?>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-flex items-center gap-1.5 text-xs <?= getActivityColor($l['action']) ?>">
+              <?= getActivityIcon($l['action']) ?>
+              <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono"><?= h($l['action']) ?></span>
+            </span>
+          </td>
+          <td class="px-4 py-3 text-ak-muted text-xs"><?= h(($l['entity_type'] ?? '') . (($l['entity_id'] ?? '') ? ' #' . $l['entity_id'] : '')) ?></td>
+          <td class="px-4 py-3 text-ak-text2 text-xs"><?= h($l['description'] ?? '') ?></td>
+          <td class="px-4 py-3 text-ak-muted text-[11px] font-mono"><?= h($l['ip_address'] ?? '') ?></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+
+  <?php if ($logLastPage > 1): ?>
+  <div class="flex items-center justify-center gap-2 mt-4">
+    <?php if ($logPage > 1): ?>
+      <a href="?tab=activity&log_page=<?= $logPage-1 ?>&log_filter=<?= h($logFilter) ?>#activity-log" class="btn btn-dark btn-sm">← Prev</a>
+    <?php endif; ?>
+    <?php for ($p = max(1, $logPage-2); $p <= min($logLastPage, $logPage+2); $p++): ?>
+      <a href="?tab=activity&log_page=<?= $p ?>&log_filter=<?= h($logFilter) ?>#activity-log" class="px-3 py-1.5 rounded-lg text-sm font-semibold <?= $p===$logPage ? 'bg-ak-gold text-ak-bg' : 'bg-ak-card text-ak-muted hover:text-ak-text2 border border-ak-border' ?>"><?= $p ?></a>
+    <?php endfor; ?>
+    <?php if ($logPage < $logLastPage): ?>
+      <a href="?tab=activity&log_page=<?= $logPage+1 ?>&log_filter=<?= h($logFilter) ?>#activity-log" class="btn btn-dark btn-sm">Next →</a>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
+  <?php endif; ?>
 </div>
 
 <?php elseif ($tab === 'email'): ?>

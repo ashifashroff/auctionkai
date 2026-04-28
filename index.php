@@ -3,6 +3,7 @@ header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-
 require_once __DIR__ . '/includes/constants.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/activity.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -100,18 +101,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$userId, $name, $date, $expiresAt]);
             $newId = (int)$db->lastInsertId();
             $_SESSION['auction_id'] = $newId;
+            logActivity($db, $userId, 'auction.create', 'auction', $newId, "Created auction: " . $name);
         }
     }
 
     elseif ($action === 'delete_auction') {
         $id = (int)$_POST['id'];
         $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([$id, $userId]);
+        logActivity($db, $userId, 'auction.delete', 'auction', $id, "Deleted auction ID: " . $id);
         unset($_SESSION['auction_id']);
     }
 
     elseif ($action === 'save_auction') {
         $stmt = $db->prepare("UPDATE auction SET name=?, date=?, commission_fee=? WHERE id=? AND user_id=?");
         $stmt->execute([trim($_POST['name']), trim($_POST['date']), (float)($_POST['commissionFee'] ?? 3.00), $activeAuctionId, $userId]);
+        logActivity($db, $userId, 'auction.update', 'auction', $activeAuctionId, "Updated auction: " . trim($_POST['name']));
     }
 
     elseif ($action === 'add_member') {
@@ -122,6 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$dup->fetch()) {
                 $stmt = $db->prepare("INSERT INTO members (user_id, name, phone, email) VALUES (?,?,?,?)");
                 $stmt->execute([$userId, $name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? '')]);
+                logActivity($db, $userId, 'member.add', 'member', (int)$db->lastInsertId(), "Added member: " . $name);
             }
         }
     }
@@ -132,12 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name !== '') {
             $stmt = $db->prepare("UPDATE members SET name=?, phone=?, email=? WHERE id=? AND user_id=?");
             $stmt->execute([$name, trim($_POST['phone'] ?? ''), trim($_POST['email'] ?? ''), $id, $userId]);
+            logActivity($db, $userId, 'member.update', 'member', $id, "Updated member: " . $name);
         }
     }
 
     elseif ($action === 'remove_member') {
         $stmt = $db->prepare("DELETE FROM members WHERE id=? AND user_id=?");
         $stmt->execute([(int)$_POST['id'], $userId]);
+        logActivity($db, $userId, 'member.remove', 'member', (int)$_POST['id'], "Removed member ID: " . (int)$_POST['id']);
     }
 
     elseif ($action === 'add_vehicle') {
@@ -156,6 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 (float)($_POST['nagareFee'] ?? 0),
                 isset($_POST['sold']) ? 1 : 0,
             ]);
+            logActivity($db, $userId, 'vehicle.add', 'vehicle', (int)$db->lastInsertId(), "Added vehicle: " . $make . " " . trim($_POST['model'] ?? '') . " lot " . trim($_POST['lot'] ?? ''));
         }
     }
 
@@ -178,17 +186,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $id,
                 $userId,
             ]);
+            logActivity($db, $userId, 'vehicle.update', 'vehicle', $id, "Updated vehicle ID: " . $id);
         }
     }
 
     elseif ($action === 'remove_vehicle') {
         $stmt = $db->prepare("DELETE FROM vehicles WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
         $stmt->execute([(int)$_POST['id'], $userId]);
+        logActivity($db, $userId, 'vehicle.delete', 'vehicle', (int)$_POST['id'], "Deleted vehicle ID: " . (int)$_POST['id']);
     }
 
     elseif ($action === 'toggle_sold') {
         $stmt = $db->prepare("UPDATE vehicles SET sold = NOT sold WHERE id=? AND auction_id IN (SELECT id FROM auction WHERE user_id=?)");
         $stmt->execute([(int)$_POST['id'], $userId]);
+        logActivity($db, $userId, 'vehicle.sold', 'vehicle', (int)$_POST['id'], "Toggled sold status vehicle ID: " . (int)$_POST['id']);
     }
 
 
