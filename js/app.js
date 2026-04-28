@@ -1227,9 +1227,11 @@ function showCsvFileName(input) {
     nameText.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
     nameDiv.classList.remove('hidden');
     importBtn.disabled = false;
+    importBtn.classList.remove('opacity-50', 'cursor-not-allowed');
   } else {
     nameDiv.classList.add('hidden');
     importBtn.disabled = true;
+    importBtn.classList.add('opacity-50', 'cursor-not-allowed');
   }
 }
 
