@@ -7,3 +7,17 @@
  Order allow,deny
  Deny from all
 </Files>
+<Files ".env">
+ Order allow,deny
+ Deny from all
+</Files>
+<Files "migrations.sql">
+ Order allow,deny
+ Deny from all
+</Files>
+
+# Custom error pages
+ErrorDocument 403 /403.php
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
+ErrorDocument 503 /503.php
