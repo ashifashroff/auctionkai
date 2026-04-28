@@ -1218,14 +1218,32 @@ const MembersPager = {
 };
 
 // ── CSV Import ────────────────────────────────
+function showCsvFileName(input) {
+  const file = input.files[0];
+  const nameDiv = document.getElementById('csvFileName');
+  const nameText = document.getElementById('csvFileNameText');
+  const importBtn = document.getElementById('csvImportBtn');
+  if (file) {
+    nameText.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+    nameDiv.classList.remove('hidden');
+    importBtn.disabled = false;
+  } else {
+    nameDiv.classList.add('hidden');
+    importBtn.disabled = true;
+  }
+}
+
 function handleCsvImport(input) {
   const file = input.files[0];
   if (!file) return;
 
   const resultDiv = document.getElementById('csvImportResult');
+  const importBtn = document.getElementById('csvImportBtn');
   resultDiv.classList.remove('hidden');
   resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-bg text-ak-muted';
-  resultDiv.textContent = 'Uploading...';
+  resultDiv.textContent = '⏳ Importing members...';
+  importBtn.disabled = true;
+  importBtn.textContent = 'Importing...';
 
   const fd = new FormData();
   fd.append('csv_file', file);
@@ -1250,10 +1268,15 @@ function handleCsvImport(input) {
       resultDiv.textContent = '✗ ' + (data.message || 'Import failed');
     }
     input.value = '';
+    importBtn.disabled = true;
+    importBtn.textContent = '↑ Import CSV';
+    document.getElementById('csvFileName').classList.add('hidden');
   })
   .catch(() => {
     resultDiv.className = 'mt-3 p-3 rounded-lg text-sm border bg-ak-red/15 text-ak-red border-ak-red/30';
     resultDiv.textContent = '✗ Connection error';
     input.value = '';
+    importBtn.disabled = true;
+    importBtn.textContent = '↑ Import CSV';
   });
 }

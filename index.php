@@ -415,8 +415,10 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     </div>
     <div class="flex flex-col gap-2 shrink-0">
       <a href="api/csv_template.php" class="btn btn-dark btn-sm text-center">↓ Download Template</a>
-      <label class="btn btn-gold btn-sm cursor-pointer text-center">↑ Import CSV<input type="file" id="csvImportInput" accept=".csv,.txt" class="hidden" onchange="handleCsvImport(this)"></label>
+      <label class="btn btn-dark btn-sm cursor-pointer text-center">📁 Choose File<input type="file" id="csvImportInput" accept=".csv,.txt" class="hidden" onchange="showCsvFileName(this)"></label>
+      <button id="csvImportBtn" class="btn btn-gold btn-sm" disabled onclick="handleCsvImport(document.getElementById('csvImportInput'))">↑ Import CSV</button>
     </div>
+    <div id="csvFileName" class="text-ak-muted text-xs mt-2 hidden">Selected: <span id="csvFileNameText" class="text-ak-gold font-mono"></span></div>
   </div>
   <div id="csvImportResult" class="hidden mt-3 p-3 rounded-lg text-sm border"></div>
 </div>
