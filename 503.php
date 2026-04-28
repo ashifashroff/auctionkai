@@ -1,5 +1,5 @@
 <?php
-http_response_code(503);
+// Don't set 503 status — nginx already knows it's a 503
 ?>
 <!DOCTYPE html>
 <html lang="en">

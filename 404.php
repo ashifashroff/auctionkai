@@ -1,5 +1,6 @@
 <?php
-http_response_code(404);
+// Don't set 404 status — nginx already knows it's a 404
+// Setting it here causes an infinite redirect loop
 ?>
 <!DOCTYPE html>
 <html lang="en">

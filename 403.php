@@ -1,5 +1,5 @@
 <?php
-http_response_code(403);
+// Don't set 403 status — nginx already knows it's a 403
 ?>
 <!DOCTYPE html>
 <html lang="en">

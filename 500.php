@@ -1,5 +1,5 @@
 <?php
-http_response_code(500);
+// Don't set 500 status — nginx already knows it's a 500
 ?>
 <!DOCTYPE html>
 <html lang="en">
