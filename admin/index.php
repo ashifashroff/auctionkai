@@ -225,22 +225,26 @@ $tabs = [
 
 <?php elseif ($tab === 'activity'): ?>
 <div id="activity-log">
-  <div class="flex items-center gap-3 mb-4">
-    <h2 class="text-lg font-bold text-ak-gold whitespace-nowrap">📋 Activity Log</h2>
-    <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2 whitespace-nowrap" id="activityCountBadge">— events</span>
-    <select id="activityFilter" class="inp text-sm" onchange="loadActivityLog(1, this.value)">
-      <option value="all">All actions</option>
-      <option value="logins">Logins / Logouts</option>
-      <option value="vehicles">Vehicles</option>
-      <option value="members">Members</option>
-      <option value="auctions">Auctions</option>
-      <option value="admin">Admin</option>
-    </select>
-    <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')" class="inline-flex">
-      <input type="hidden" name="action" value="clear_old_logs">
-      <input type="hidden" name="_tok" value="<?= h($tok) ?>">
-      <button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear Old Logs</button>
-    </form>
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <h2 class="text-lg font-bold text-ak-gold whitespace-nowrap">📋 Activity Log</h2>
+      <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2 whitespace-nowrap" id="activityCountBadge">— events</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <select id="activityFilter" class="inp text-xs py-1 px-2" onchange="loadActivityLog(1, this.value)">
+        <option value="all">All</option>
+        <option value="logins">Logins</option>
+        <option value="vehicles">Vehicles</option>
+        <option value="members">Members</option>
+        <option value="auctions">Auctions</option>
+        <option value="admin">Admin</option>
+      </select>
+      <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')" class="inline-flex">
+        <input type="hidden" name="action" value="clear_old_logs">
+        <input type="hidden" name="_tok" value="<?= h($tok) ?>">
+        <button class="btn btn-sm text-[10px] px-2 py-1 bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear Old</button>
+      </form>
+    </div>
   </div>
   <div id="activityLogContent"><div class="text-center text-ak-muted py-8">Loading…</div></div>
   <div id="activityLogPagination" class="flex items-center justify-center gap-2 mt-4"></div>
