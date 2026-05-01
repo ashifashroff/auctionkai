@@ -276,6 +276,26 @@ try {
             $_SESSION['admin_success'] = "Cleared {$deleted} log entries older than {$days} days";
             header('Location: index.php?tab=activity#activity-log');
             exit;
+
+        case 'save_session_settings':
+            require_once __DIR__ . '/../includes/settings.php';
+
+            $enabled = isset($_POST['session_timeout_enabled']) ? '1' : '0';
+            $minutes = max(5, min(480, (int)($_POST['session_timeout_minutes'] ?? 30)));
+            $warnMins = max(1, min(10, (int)($_POST['session_timeout_warn_minutes'] ?? 2)));
+
+            saveSettings($db, [
+                'session_timeout_enabled'     => $enabled,
+                'session_timeout_minutes'     => (string)$minutes,
+                'session_timeout_warn_minutes' => (string)$warnMins,
+            ]);
+
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, $userId, 'settings.session', 'system', 0, "Session timeout set to {$minutes} minutes (enabled: {$enabled})");
+
+            $_SESSION['admin_success'] = 'Session settings saved successfully';
+            header('Location: index.php?tab=session');
+            exit;
     }
 } catch (Exception $e) {
     error_log('Admin action error: ' . $e->getMessage());

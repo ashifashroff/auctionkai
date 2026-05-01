@@ -154,7 +154,11 @@ INSERT INTO settings (`key`, value) VALUES
   ('mail_password', ''),
   ('mail_from_email', ''),
   ('mail_from_name', 'AuctionKai Settlement System'),
-  ('mail_encryption', 'tls');
+  ('mail_encryption', 'tls'),
+  ('session_timeout_enabled', '1'),
+  ('session_timeout_minutes', '30'),
+  ('session_timeout_warn_minutes', '2')
+ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- Migration for existing installs
 ALTER TABLE settings ADD COLUMN IF NOT EXISTS `key` VARCHAR(100) NOT NULL UNIQUE;

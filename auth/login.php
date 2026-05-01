@@ -18,6 +18,12 @@ $error = '';
 $success = '';
 $showRegister = isset($_GET['register']);
 
+// Show session timeout message
+$info = '';
+if (isset($_GET['timeout']) && $_GET['timeout'] == '1') {
+    $info = 'Your session expired due to inactivity. Please log in again.';
+}
+
 // Login history helper
 function logLoginHistory(PDO $db, int $userId, string $status): void {
   try {
@@ -184,6 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
       <?php endif; ?>
       <?php if ($success): ?>
         <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-5"><?= h($success) ?></div>
+      <?php endif; ?>
+      <?php if ($info): ?>
+        <div class="bg-ak-gold/10 border border-ak-gold/30 text-ak-gold px-4 py-3 rounded-lg text-sm mb-5">⏱ <?= h($info) ?></div>
       <?php endif; ?>
 
       <?php if ($showRegister): ?>

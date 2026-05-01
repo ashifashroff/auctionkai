@@ -1307,3 +1307,83 @@ function handleCsvImport(input) {
     importBtn.textContent = '↑ Import CSV';
   });
 }
+
+// ── Session Timeout Manager ───────────────────
+const SessionTimeout = {
+  timeoutMinutes: 30,
+  warnMinutes: 2,
+  lastActivity: Date.now(),
+  warningShown: false,
+  warnTimer: null,
+  logoutTimer: null,
+  enabled: true,
+
+  init(timeoutMinutes, warnMinutes) {
+    if (!this.enabled) return;
+    this.timeoutMinutes = timeoutMinutes || 30;
+    this.warnMinutes = warnMinutes || 2;
+
+    const events = ['mousedown','mousemove','keydown','scroll','touchstart','click'];
+    events.forEach(evt => {
+      document.addEventListener(evt, () => this.resetTimer(), { passive: true });
+    });
+
+    this.startTimers();
+  },
+
+  resetTimer() {
+    this.lastActivity = Date.now();
+    this.warningShown = false;
+    const existingWarn = document.getElementById('session-warn-toast');
+    if (existingWarn) existingWarn.remove();
+    this.clearTimers();
+    this.startTimers();
+  },
+
+  startTimers() {
+    const timeoutMs = this.timeoutMinutes * 60 * 1000;
+    const warnMs = timeoutMs - (this.warnMinutes * 60 * 1000);
+
+    if (warnMs > 0) {
+      this.warnTimer = setTimeout(() => { this.showWarning(); }, warnMs);
+    }
+    this.logoutTimer = setTimeout(() => { this.forceLogout(); }, timeoutMs);
+  },
+
+  clearTimers() {
+    clearTimeout(this.warnTimer);
+    clearTimeout(this.logoutTimer);
+  },
+
+  showWarning() {
+    if (this.warningShown) return;
+    this.warningShown = true;
+
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.id = 'session-warn-toast';
+    toast.style.cssText = 'background:#2B200D;border:1px solid #D4A84B;border-left:4px solid #D4A84B;border-radius:10px;padding:14px 18px;min-width:300px;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:all;opacity:0;transform:translateX(20px);transition:all .3s ease;';
+    toast.innerHTML = '<div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px">⏱</span><div style="flex:1"><div style="font-weight:700;color:#D4A84B;font-size:13px;margin-bottom:2px">Session expiring soon</div><div style="color:#A07828;font-size:12px">You will be logged out in ' + this.warnMinutes + ' minute(s) due to inactivity.</div></div><button onclick="SessionTimeout.resetTimer()" style="background:#D4A84B;color:#0A1420;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Stay Logged In</button></div>';
+
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(0)';
+      });
+    });
+  },
+
+  forceLogout() {
+    const container = document.getElementById('toast-container');
+    if (container) {
+      const toast = document.createElement('div');
+      toast.style.cssText = 'background:#2B0D0D;border:1px solid #CC7777;border-left:4px solid #CC7777;border-radius:10px;padding:14px 18px;min-width:260px;color:#CC7777;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4);pointer-events:all;';
+      toast.innerHTML = '🔒 Session expired — redirecting to login...';
+      container.appendChild(toast);
+    }
+    setTimeout(() => { window.location.href = 'auth/login.php?timeout=1'; }, 1500);
+  }
+};

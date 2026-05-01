@@ -50,6 +50,7 @@ $tabs = [
     'backup'   => ['icon' => '🗄', 'label' => 'Backup'],
     'activity' => ['icon' => '📋', 'label' => 'Activity Log'],
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
+    'session'  => ['icon' => '⏱', 'label' => 'Session'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -61,7 +62,7 @@ $tabs = [
 <title>AuctionKai — Admin Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3.2">
+<link rel="stylesheet" href="../css/style.css?v=3.3">
 <?php include '../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
@@ -385,6 +386,21 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   </div>
 </div>
 
+<?php elseif ($tab === 'session'): ?>
+<h2 class="text-lg font-bold text-ak-gold mb-4">⏱ Session Settings</h2>
+<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+  <div class="bg-ak-bg rounded-lg p-4 mb-5 text-ak-muted text-sm">💡 Users will be automatically logged out after the specified period of inactivity. A warning toast will appear before logout.</div>
+  <form id="sessionSettingsForm" data-parsley-validate>
+    <input type="hidden" name="action" value="save_session_settings">
+    <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-4">
+      <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="session_timeout_enabled" value="1" <?= ($settings['session_timeout_enabled'] ?? '1')==='1'?'checked':'' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Enable Session Timeout</span></label>
+    </div>
+    <div class="mb-4"><label class="lbl">Timeout Duration (minutes) *</label><input class="inp" type="number" name="session_timeout_minutes" value="<?= h($settings['session_timeout_minutes'] ?? '30') ?>" min="5" max="480" data-parsley-required="true" data-parsley-type="number" data-parsley-min="5" data-parsley-max="480" data-parsley-required-message="Timeout duration is required"></div>
+    <div class="mb-5"><label class="lbl">Warning Before Expiry (minutes) *</label><input class="inp" type="number" name="session_timeout_warn_minutes" value="<?= h($settings['session_timeout_warn_minutes'] ?? '2') ?>" min="1" max="10" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-max="10" data-parsley-required-message="Warning time is required"></div>
+    <button class="btn btn-gold w-full" type="submit" id="sessionSettingsBtn">💾 Save Session Settings</button>
+  </form>
+</div>
+
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
@@ -437,7 +453,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <?php require_once '../includes/footer.php'; ?>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
-<script src="../js/app.js?v=3.2"></script>
+<script src="../js/app.js?v=3.3"></script>
 <script>
 const CSRF_TOKEN = '<?= h($tok) ?>';
 
@@ -559,6 +575,13 @@ document.getElementById('adminSettingsForm')?.addEventListener('submit', async f
   const fd = new FormData(this);
   const data = await adminAjax(fd, 'adminSettingsBtn');
   if (data.success && data.message.includes('password')) { this.querySelector('[name=current_password]').value = ''; this.querySelector('[name=new_password]').value = ''; }
+});
+
+// ── Session Settings ──────────────────────────
+document.getElementById('sessionSettingsForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  const data = await adminAjax(fd, 'sessionSettingsBtn');
 });
 
 // ── Edit User ─────────────────────────────────

@@ -224,6 +224,12 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Shows browser, OS, IP address, timestamp on profile page
 - Admin panel shows last login per user
 - Failed attempts shown with red highlight
+- Session timeout — auto logout after configurable inactivity period (default 30 min)
+- Warning toast appears X minutes before expiry with "Stay Logged In" button
+- Configurable from Admin Panel → Session Settings
+- Timeout duration: 5–480 minutes
+- Warning time: 1–10 minutes before expiry
+- Auto-logout activity logged
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 
