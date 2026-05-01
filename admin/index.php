@@ -231,7 +231,7 @@ $tabs = [
       <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2 whitespace-nowrap" id="activityCountBadge">— events</span>
     </div>
     <div class="flex items-center gap-2">
-      <select id="activityFilter" class="inp text-xs py-1 px-2" onchange="loadActivityLog(1, this.value)">
+      <select id="activityFilter" class="inp text-sm py-1.5 px-3" onchange="loadActivityLog(1, this.value)">
         <option value="all">All</option>
         <option value="logins">Logins</option>
         <option value="vehicles">Vehicles</option>
@@ -242,7 +242,7 @@ $tabs = [
       <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')" class="inline-flex">
         <input type="hidden" name="action" value="clear_old_logs">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
-        <button class="btn btn-sm text-[10px] px-2 py-1 bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear Old</button>
+        <button class="btn btn-sm text-xs px-3 py-1.5 bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear Old</button>
       </form>
     </div>
   </div>
