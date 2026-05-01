@@ -186,8 +186,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         </div>
 
         <div class="mb-4">
-          <label class="lbl">Email</label>
-          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>" data-parsley-type="email" data-parsley-type-message="Please enter a valid email address">
+          <label class="lbl">Email *</label>
+          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>" data-parsley-required="true" data-parsley-type="email" data-parsley-required-message="Email is required" data-parsley-type-message="Please enter a valid email address">
         </div>
 
         <div class="mb-4">
