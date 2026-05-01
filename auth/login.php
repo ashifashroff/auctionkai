@@ -177,29 +177,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" data-parsley-required="true">
+          <input class="inp" name="name" placeholder="e.g. Ahmad Hassan" value="<?= h($_POST['name'] ?? '') ?>" data-parsley-required="true" data-parsley-required-message="Full name is required">
         </div>
 
         <div class="mb-4">
           <label class="lbl">Username *</label>
-          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3">
+          <input class="inp" name="username" placeholder="Choose a username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" data-parsley-required-message="Username is required" data-parsley-minlength-message="Username must be at least 3 characters">
         </div>
 
         <div class="mb-4">
           <label class="lbl">Email</label>
-          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>" data-parsley-type="email">
+          <input class="inp" type="email" name="email" placeholder="email@example.com" value="<?= h($_POST['email'] ?? '') ?>" data-parsley-type="email" data-parsley-type-message="Please enter a valid email address">
         </div>
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters">
           <div class="strength-bar-wrap" id="reg-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="reg-strength-label"></div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
-          <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true">
+          <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true" data-parsley-required-message="Please confirm your password">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
@@ -217,12 +217,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-4">
           <label class="lbl">Username</label>
-          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" autofocus>
+          <input class="inp" name="username" placeholder="Enter username" value="<?= h($_POST['username'] ?? '') ?>" data-parsley-required data-parsley-minlength="3" data-parsley-required-message="Username is required" data-parsley-minlength-message="Username must be at least 3 characters" autofocus>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Password</label>
-          <input class="inp" type="password" name="password" autocomplete="new-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8">
+          <input class="inp" type="password" name="password" autocomplete="new-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Log In</button>
@@ -237,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
           <input type="hidden" name="_tok" value="<?= h($tok) ?>">
           <div class="mb-4">
             <label class="lbl">Email Address</label>
-            <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email">
+            <input class="inp" type="email" name="email" placeholder="Enter your registered email" data-parsley-required data-parsley-type="email" data-parsley-required-message="Email address is required" data-parsley-type-message="Please enter a valid email address">
           </div>
           <button class="btn btn-gold w-full" type="submit">Send Reset Link</button>
           <div class="text-center mt-3">
