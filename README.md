@@ -90,6 +90,7 @@ auctionkai/
 ├── admin/
 │   ├── index.php               ← User management + Email Settings
 │   ├── actions.php             ← Handle admin POST actions
+│   ├── health.php              ← System health dashboard
 │   └── .htaccess
 ├── api/
 │   ├── add_vehicle.php
@@ -243,6 +244,7 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Paid timestamp recorded automatically
 - PAID/PARTIAL stamp on PDF statements
 - Payment status logged to activity log
+- System Health Check page showing PHP version, MySQL stats, disk space, PHP extensions, server info, app statistics, warning alerts, and quick actions
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 
