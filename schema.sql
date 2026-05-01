@@ -262,3 +262,36 @@ CREATE TABLE IF NOT EXISTS login_history (
   status ENUM('success','failed') DEFAULT 'success',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Payment Status ───────────────────────────
+CREATE TABLE IF NOT EXISTS payment_status (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  status ENUM('unpaid','paid','partial') DEFAULT 'unpaid',
+  paid_amount DECIMAL(12,0) DEFAULT 0,
+  paid_at TIMESTAMP NULL DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  updated_by INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_auction_member (`auction_id`, `member_id`),
+  INDEX idx_payment_auction (`auction_id`),
+  INDEX idx_payment_member (`member_id`),
+  INDEX idx_payment_status (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS payment_status (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  status ENUM('unpaid','paid','partial') DEFAULT 'unpaid',
+  paid_amount DECIMAL(12,0) DEFAULT 0,
+  paid_at TIMESTAMP NULL DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  updated_by INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_auction_member (`auction_id`, `member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

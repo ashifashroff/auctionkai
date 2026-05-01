@@ -105,6 +105,7 @@ auctionkai/
 │   ├── csv_template.php         ← Download CSV template
 │   └── delete_auction.php
 │   └── delete_account.php    ← GDPR account deletion
+│   └── update_payment.php    ← Payment status AJAX
 ├── auth/
 │   ├── login.php
 │   ├── logout.php
@@ -236,6 +237,12 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Prevents deletion of last admin account
 - Deletes all data: auctions, members, vehicles, login history, activity log
 - Session destroyed immediately after deletion
+- Payment status tracking per member (Unpaid / Partial / Paid)
+- One-click status update from Statements tab
+- Payment summary dashboard (total paid/unpaid)
+- Paid timestamp recorded automatically
+- PAID/PARTIAL stamp on PDF statements
+- Payment status logged to activity log
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

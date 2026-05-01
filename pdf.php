@@ -41,7 +41,15 @@ $targets = $printAll
 
 if (empty($targets)) { echo 'No members found.'; exit; }
 
-function renderStatement(array $m, array $s, array $auction): string {
+// Fetch payment statuses
+$paymentStatuses = [];
+if ($activeAuctionId) {
+    $psq = $db->prepare("SELECT member_id, status, paid_at FROM payment_status WHERE auction_id = ?");
+    $psq->execute([$activeAuctionId]);
+    foreach ($psq->fetchAll() as $ps) { $paymentStatuses[$ps['member_id']] = $ps; }
+}
+
+function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid'): string {
     $rows = '';
     foreach ($s['mv'] as $v) {
         $net = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0);
@@ -54,6 +62,7 @@ function renderStatement(array $m, array $s, array $auction): string {
     $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
     <div class='page'>
+      " . ($payStatus === 'paid' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #2E7D52;color:#2E7D52;padding:6px 16px;border-radius:4px;font-size:22px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PAID</div>" : ($payStatus === 'partial' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #B8912A;color:#B8912A;padding:6px 16px;border-radius:4px;font-size:18px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PARTIAL</div>" : '')) . "
       <div class='hdr'>
         <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div></div>
         <div class='meta'><strong>" . h($m['name']) . "</strong> " . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
@@ -95,7 +104,7 @@ function renderStatement(array $m, array $s, array $auction): string {
 <title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/pdf.css?v=3.2">
+<link rel="stylesheet" href="css/pdf.css?v=3.3">
 </head>
 <body>
 
@@ -109,7 +118,9 @@ function renderStatement(array $m, array $s, array $auction): string {
 <?php foreach ($targets as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
     if ($s['count'] === 0) continue;
-    echo renderStatement($m, $s, $auction);
+    $ps = $paymentStatuses[$m['id']] ?? null;
+    $payStatus = $ps['status'] ?? 'unpaid';
+    echo renderStatement($m, $s, $auction, $payStatus);
 endforeach; ?>
 
 </body>

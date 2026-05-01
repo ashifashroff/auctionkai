@@ -216,6 +216,16 @@ $vehicles = $activeAuctionId
     ? (function() use ($db, $activeAuctionId, $userId) { $q = $db->prepare("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=? AND m.user_id=? ORDER BY v.id"); $q->execute([$activeAuctionId, $userId]); return $q->fetchAll(); })()
     : [];
 
+// Fetch payment statuses for active auction
+$paymentStatuses = [];
+if ($activeAuctionId) {
+    $psq = $db->prepare("SELECT member_id, status, paid_amount, paid_at, notes FROM payment_status WHERE auction_id = ?");
+    $psq->execute([$activeAuctionId]);
+    foreach ($psq->fetchAll() as $ps) {
+        $paymentStatuses[$ps['member_id']] = $ps;
+    }
+}
+
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
@@ -547,6 +557,40 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   </div>
 </div>
 
+<?php
+$totalPaid = 0; $totalUnpaid = 0; $totalPartial = 0; $totalNetPayout = 0;
+foreach ($members as $m) {
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    if ($s['count'] === 0) continue;
+    $ps = $paymentStatuses[$m['id']] ?? null;
+    $payStatus = $ps['status'] ?? 'unpaid';
+    $totalNetPayout += $s['netPayout'];
+    if ($payStatus === 'paid') $totalPaid++;
+    elseif ($payStatus === 'partial') $totalPartial++;
+    else $totalUnpaid++;
+}
+?>
+
+<!-- Payment Summary -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+    <div class="text-2xl font-bold font-mono text-ak-gold"><?= fmt($totalNetPayout) ?></div>
+    <div class="text-ak-muted text-xs mt-1">Total Net Payout</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-green/30 text-center">
+    <div class="text-2xl font-bold font-mono text-ak-green"><?= $totalPaid ?></div>
+    <div class="text-ak-muted text-xs mt-1">✓ Paid</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-yellow-500/30 text-center">
+    <div class="text-2xl font-bold font-mono text-yellow-400"><?= $totalPartial ?></div>
+    <div class="text-ak-muted text-xs mt-1">◑ Partial</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-red/30 text-center">
+    <div class="text-2xl font-bold font-mono text-ak-red"><?= $totalUnpaid ?></div>
+    <div class="text-ak-muted text-xs mt-1">✗ Unpaid</div>
+  </div>
+</div>
+
 <!-- Statements Grid (2 columns) -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="statements-container">
 <?php if (empty($members)): ?>
@@ -557,11 +601,42 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
     if ($s['count'] === 0) continue;
     $hasSales = true;
+    $ps = $paymentStatuses[$m['id']] ?? null;
+    $payStatus = $ps['status'] ?? 'unpaid';
+    $payClass = match($payStatus) {
+        'paid' => 'bg-ak-green/15 text-ak-green border-ak-green/30',
+        'partial' => 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+        default => 'bg-ak-red/10 text-ak-red border-ak-red/20',
+    };
+    $payIcon = match($payStatus) {
+        'paid' => '✓ Paid',
+        'partial' => '◑ Partial',
+        default => '✗ Unpaid',
+    };
   ?>
   <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>">
     <div class="sh">
-      <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div></div>
+      <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
+      <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>
+        <div class="text-ak-green text-[11px] mt-0.5">✓ Paid on <?= date('Y-m-d H:i', strtotime($ps['paid_at'])) ?></div>
+      <?php endif; ?>
+      </div>
       <div class="sa">
+        <div class="relative" id="pay-wrap-<?= (int)$m['id'] ?>">
+          <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>">
+            <?= $payIcon ?>
+            <span class="text-[10px] opacity-60">▾</span>
+          </button>
+          <div id="pay-menu-<?= (int)$m['id'] ?>" class="hidden absolute right-0 top-full mt-1 bg-ak-card border border-ak-border rounded-xl shadow-2xl z-50 min-w-[200px] overflow-hidden">
+            <div class="px-3 py-2 border-b border-ak-border"><div class="text-ak-muted text-[10px] uppercase tracking-wider">Update Payment Status</div></div>
+            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'paid', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-ak-green hover:bg-ak-green/10 transition-colors flex items-center gap-2">✓ Mark as Paid</button>
+            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'partial', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-yellow-400 hover:bg-yellow-500/10 transition-colors flex items-center gap-2">◑ Mark as Partial</button>
+            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'unpaid', 0)" class="w-full px-4 py-2.5 text-left text-sm text-ak-red hover:bg-ak-red/10 transition-colors flex items-center gap-2">✗ Mark as Unpaid</button>
+            <?php if ($ps && $ps['notes']): ?>
+            <div class="px-4 py-2 border-t border-ak-border text-ak-muted text-xs italic">Note: <?= h($ps['notes']) ?></div>
+            <?php endif; ?>
+          </div>
+        </div>
         <button onclick="sendStatementEmail(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="btn-email" id="email-btn-<?= (int)$m['id'] ?>">✉ Send Email</button>
         <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>

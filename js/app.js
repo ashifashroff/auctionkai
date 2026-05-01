@@ -1387,3 +1387,59 @@ const SessionTimeout = {
     setTimeout(() => { window.location.href = 'auth/login.php?timeout=1'; }, 1500);
   }
 };
+
+// ── Payment Status Manager ────────────────────
+function togglePaymentMenu(memberId, auctionId, netPayout) {
+  document.querySelectorAll('[id^="pay-menu-"]').forEach(m => {
+    if (m.id !== `pay-menu-${memberId}`) m.classList.add('hidden');
+  });
+  const menu = document.getElementById(`pay-menu-${memberId}`);
+  if (menu) menu.classList.toggle('hidden');
+  const closeHandler = (e) => {
+    const wrap = document.getElementById(`pay-wrap-${memberId}`);
+    if (wrap && !wrap.contains(e.target)) {
+      menu?.classList.add('hidden');
+      document.removeEventListener('click', closeHandler);
+    }
+  };
+  setTimeout(() => { document.addEventListener('click', closeHandler); }, 0);
+}
+
+async function setPaymentStatus(memberId, auctionId, status, netPayout) {
+  const menu = document.getElementById(`pay-menu-${memberId}`);
+  if (menu) menu.classList.add('hidden');
+  const btn = document.getElementById(`pay-btn-${memberId}`);
+  if (btn) { btn.innerHTML = '⏳ Updating...'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('api/update_payment.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auction_id: auctionId, member_id: memberId, status: status, paid_amount: status === 'paid' ? netPayout : 0 })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      const classes = {
+        paid: 'bg-ak-green/15 text-ak-green border-ak-green/30',
+        partial: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+        unpaid: 'bg-ak-red/10 text-ak-red border-ak-red/20'
+      };
+      const icons = { paid: '✓ Paid', partial: '◑ Partial', unpaid: '✗ Unpaid' };
+
+      if (btn) {
+        btn.className = `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all ${classes[status]}`;
+        btn.innerHTML = `${icons[status]} <span class="text-[10px] opacity-60">▾</span>`;
+        btn.disabled = false;
+      }
+
+      showToast(`Payment marked as ${status}`, status === 'paid' ? 'success' : status === 'partial' ? 'warning' : 'info');
+    } else {
+      showToast(data.message || 'Update failed', 'error');
+      if (btn) btn.disabled = false;
+    }
+  } catch {
+    showToast('Connection error. Please try again.', 'error');
+    if (btn) btn.disabled = false;
+  }
+}
