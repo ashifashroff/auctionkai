@@ -18,6 +18,20 @@ $error = '';
 $success = '';
 $showRegister = isset($_GET['register']);
 
+// Login history helper
+function logLoginHistory(PDO $db, int $userId, string $status): void {
+  try {
+    $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+    $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
+    $stmt = $db->prepare("INSERT INTO login_history (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)");
+    $stmt->execute([$userId, $ip, $ua, $status]);
+    // Keep only last 50 records per user
+    $db->prepare("DELETE FROM login_history WHERE user_id = ? AND id NOT IN (SELECT id FROM (SELECT id FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 50) t)")->execute([$userId, $userId]);
+  } catch (Exception $e) {
+    error_log('Login history error: ' . $e->getMessage());
+  }
+}
+
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
 
@@ -72,6 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             if ($userStatus === 'active') {
                 unset($_SESSION[$attemptKey]);
                 logActivity($db, (int)$user['id'], 'login', 'user', (int)$user['id'], "Login from IP: " . ($_SERVER['REMOTE_ADDR'] ?? ''));
+                logLoginHistory($db, (int)$user['id'], 'success');
                 $_SESSION['user_id'] = (int)$user['id'];
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_role'] = $user['role'];
@@ -86,6 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             $error = 'Invalid credentials.';
             require_once __DIR__ . '/../includes/activity.php';
             logActivity($db, 0, 'login.failed', 'user', 0, "Failed login for username: " . $username);
+            $failedUserId = isset($user['id']) ? (int)$user['id'] : 0;
+            logLoginHistory($db, $failedUserId, 'failed');
         }
     }
     } // end rate limit else

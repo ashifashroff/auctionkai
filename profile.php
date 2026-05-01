@@ -70,6 +70,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/activity.php';
+
+// Fetch last 10 login attempts
+$stmt = $db->prepare("SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+$stmt->execute([$userId]);
+$loginHistory = $stmt->fetchAll();
+
+// Helper: parse browser from user agent
+function parseBrowser(string $ua): string {
+  if (str_contains($ua, 'Chrome') && !str_contains($ua, 'Edg')) return 'Chrome';
+  if (str_contains($ua, 'Firefox')) return 'Firefox';
+  if (str_contains($ua, 'Safari') && !str_contains($ua, 'Chrome')) return 'Safari';
+  if (str_contains($ua, 'Edg')) return 'Edge';
+  if (str_contains($ua, 'Opera') || str_contains($ua, 'OPR')) return 'Opera';
+  return 'Unknown Browser';
+}
+
+// Helper: parse OS from user agent
+function parseOS(string $ua): string {
+  if (str_contains($ua, 'Windows NT')) return 'Windows';
+  if (str_contains($ua, 'Mac OS X')) return 'macOS';
+  if (str_contains($ua, 'Linux')) return 'Linux';
+  if (str_contains($ua, 'Android')) return 'Android';
+  if (str_contains($ua, 'iPhone') || str_contains($ua, 'iPad')) return 'iOS';
+  return 'Unknown OS';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -192,6 +217,51 @@ require_once __DIR__ . '/includes/activity.php';
           <div class="flex-1 min-w-0">
             <div class="text-ak-text text-sm"><?= h($a['description'] ?: $a['action']) ?></div>
             <div class="text-ak-muted text-[11px]"><?= timeAgo($a['created_at']) ?> · <?= h($a['action']) ?></div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+    </div>
+
+    <!-- Login History -->
+    <div class="bg-ak-card border border-ak-border rounded-xl mb-5 animate-fade-in-up overflow-hidden">
+      <div class="px-6 py-4 border-b border-ak-border flex justify-between items-center">
+        <div>
+          <h3 class="text-ak-text font-bold">🔑 Login History</h3>
+          <p class="text-ak-muted text-xs mt-0.5">Your last 10 login attempts</p>
+        </div>
+      </div>
+      <?php if (empty($loginHistory)): ?>
+        <div class="p-8 text-center text-ak-muted text-sm">No login history yet.</div>
+      <?php else: ?>
+      <div class="divide-y divide-ak-border">
+        <?php foreach ($loginHistory as $log):
+          $browser = parseBrowser($log['user_agent'] ?? '');
+          $os = parseOS($log['user_agent'] ?? '');
+          $isSuccess = $log['status'] === 'success';
+        ?>
+        <div class="flex items-center gap-4 px-6 py-3 <?= !$isSuccess ? 'bg-ak-red/5' : 'hover:bg-ak-infield/50' ?> transition-colors">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 <?= $isSuccess ? 'bg-ak-green/15 text-ak-green' : 'bg-ak-red/15 text-ak-red' ?>">
+            <?= $isSuccess ? '✓' : '✗' ?>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-sm font-medium <?= $isSuccess ? 'text-ak-text' : 'text-ak-red' ?>">
+                <?= $isSuccess ? 'Successful login' : 'Failed attempt' ?>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-mono <?= $isSuccess ? 'bg-ak-green/15 text-ak-green' : 'bg-ak-red/15 text-ak-red' ?>">
+                <?= h($log['status']) ?>
+              </span>
+            </div>
+            <div class="text-ak-muted text-xs mt-0.5 flex gap-3 flex-wrap">
+              <span>🌐 <?= h($log['ip_address'] ?? 'Unknown IP') ?></span>
+              <span>💻 <?= h($browser) ?> on <?= h($os) ?></span>
+            </div>
+          </div>
+          <div class="text-ak-muted text-xs shrink-0 font-mono text-right">
+            <div><?= timeAgo($log['created_at']) ?></div>
+            <div class="text-[10px] opacity-60"><?= date('Y-m-d H:i', strtotime($log['created_at'])) ?></div>
           </div>
         </div>
         <?php endforeach; ?>

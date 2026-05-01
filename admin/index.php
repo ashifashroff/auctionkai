@@ -27,7 +27,11 @@ $totalVehicles  = (int)$db->query("SELECT COUNT(*) FROM vehicles")->fetchColumn(
 $users = $db->query("
     SELECT u.*, 
            COUNT(DISTINCT a.id) as auction_count,
-           COUNT(DISTINCT m.id) as member_count
+           COUNT(DISTINCT m.id) as member_count,
+           (SELECT created_at FROM login_history 
+            WHERE user_id = u.id AND status = 'success'
+            ORDER BY created_at DESC LIMIT 1
+           ) as last_login
     FROM users u
     LEFT JOIN auction a ON a.user_id = u.id
     LEFT JOIN members m ON m.user_id = u.id
@@ -134,6 +138,7 @@ $tabs = [
         <th class="px-4 py-3 text-center">Members</th>
         <th class="px-4 py-3 text-left">Status</th>
         <th class="px-4 py-3 text-left">Joined</th>
+        <th class="px-4 py-3 text-left">Last Login</th>
         <th class="px-4 py-3 text-center">Actions</th>
       </tr>
     </thead>
@@ -158,6 +163,7 @@ $tabs = [
           <?php if ($st==='suspended'&&!empty($u['suspended_until'])): ?><span class="text-[10px] text-ak-muted ml-1">until <?= h(date('M j, Y',strtotime($u['suspended_until']))) ?></span><?php endif; ?>
         </td>
         <td class="px-4 py-3 text-ak-muted text-xs"><?= h(date('M j, Y',strtotime($u['created_at']))) ?></td>
+        <td class="px-4 py-3 text-ak-muted text-xs font-mono"><?= $u['last_login'] ? date('Y-m-d H:i', strtotime($u['last_login'])) : 'Never' ?></td>
         <td class="px-4 py-3 text-center">
           <div class="flex gap-1.5 justify-center flex-wrap">
             <?php if (!$isSelf): ?>

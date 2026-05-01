@@ -220,6 +220,10 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Suspended users blocked at login with expiry date shown
 - Duplicate email and username checks on registration
 - Duplicate lot number check via real-time AJAX before vehicle save
+- Login history — tracks last 50 login attempts per user (success and failed)
+- Shows browser, OS, IP address, timestamp on profile page
+- Admin panel shows last login per user
+- Failed attempts shown with red highlight
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 
@@ -232,6 +236,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v3.3** — Login history tracking: records success and failed login attempts per user (browser, OS, IP, timestamp). Profile page shows last 10 attempts. Admin panel shows last login per user. Failed attempts highlighted in red. Auto-cleanup keeps last 50 records per user.
 
 **v3.2** — Bulk member import via CSV file upload. CSV template download with example data. Auto duplicate detection on import. Per-row error reporting.
 

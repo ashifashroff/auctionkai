@@ -236,3 +236,25 @@ CREATE TABLE IF NOT EXISTS activity_log (
   ip_address VARCHAR(45) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Login History ────────────────────────────
+CREATE TABLE IF NOT EXISTS login_history (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  user_agent VARCHAR(500) DEFAULT NULL,
+  status ENUM('success','failed') DEFAULT 'success',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_login_history_user_id (`user_id`),
+  INDEX idx_login_history_created (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS login_history (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  user_agent VARCHAR(500) DEFAULT NULL,
+  status ENUM('success','failed') DEFAULT 'success',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
