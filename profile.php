@@ -113,7 +113,8 @@ function parseOS(string $ua): string {
   <div class="w-full max-w-lg">
 
     <!-- Header -->
-    <div class="text-center mb-8 animate-fade-in">
+    <div class="text-center mb-8 animate-fade-in relative">
+      <a href="index.php" class="absolute -top-2 right-0 text-ak-muted text-sm hover:text-ak-gold transition-colors">← Dashboard</a>
       <div class="w-16 h-16 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-2xl mx-auto mb-4"><?= mb_strtoupper(mb_substr($user['name'], 0, 1)) ?></div>
       <h1 class="text-2xl font-bold text-ak-gold">⚡ AuctionKai</h1>
       <p class="text-ak-muted text-sm mt-1">Account Settings</p>
@@ -186,7 +187,6 @@ function parseOS(string $ua): string {
 
     <!-- Back Link -->
     <div class="text-center mt-5 animate-fade-in">
-      <a href="index.php" class="text-ak-muted text-sm hover:text-ak-gold transition-colors">← Back to Dashboard</a>
     </div>
 
     <!-- Recent Activity -->
