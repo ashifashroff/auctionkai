@@ -104,6 +104,7 @@ auctionkai/
 │   ├── import_members_csv.php  ← CSV bulk member import
 │   ├── csv_template.php         ← Download CSV template
 │   └── delete_auction.php
+│   └── delete_account.php    ← GDPR account deletion
 ├── auth/
 │   ├── login.php
 │   ├── logout.php
@@ -230,6 +231,11 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Timeout duration: 5–480 minutes
 - Warning time: 1–10 minutes before expiry
 - Auto-logout activity logged
+- Account deletion (GDPR) — users can permanently delete their account and all associated data
+- Password confirmation required before deletion
+- Prevents deletion of last admin account
+- Deletes all data: auctions, members, vehicles, login history, activity log
+- Session destroyed immediately after deletion
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

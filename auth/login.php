@@ -23,6 +23,9 @@ $info = '';
 if (isset($_GET['timeout']) && $_GET['timeout'] == '1') {
     $info = 'Your session expired due to inactivity. Please log in again.';
 }
+if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
+    $info = 'Your account has been permanently deleted. Thank you for using AuctionKai.';
+}
 
 // Login history helper
 function logLoginHistory(PDO $db, int $userId, string $status): void {

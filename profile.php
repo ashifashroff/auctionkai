@@ -269,6 +269,21 @@ function parseOS(string $ua): string {
       <?php endif; ?>
     </div>
 
+    <!-- Danger Zone -->
+    <div class="bg-ak-card rounded-xl border border-ak-red/30 overflow-hidden mb-6">
+      <div class="px-6 py-4 border-b border-ak-red/30 bg-ak-red/5">
+        <h3 class="text-ak-red font-bold">⚠ Danger Zone</h3>
+        <p class="text-ak-muted text-xs mt-0.5">These actions are permanent and cannot be undone.</p>
+      </div>
+      <div class="px-6 py-5 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <div class="text-ak-text font-semibold text-sm mb-1">Delete My Account</div>
+          <div class="text-ak-muted text-xs leading-relaxed max-w-md">Permanently deletes your account and ALL associated data including auctions, members, vehicles, and statements. This action cannot be undone.</div>
+        </div>
+        <button onclick="showDeleteAccountModal()" class="btn btn-ghost btn-sm shrink-0" style="background:rgba(204,119,119,0.15);color:#CC7777;border:1px solid rgba(204,119,119,0.3)">🗑 Delete Account</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -293,6 +308,101 @@ document.addEventListener('DOMContentLoaded', function() {
   <?php else: ?>
   SessionTimeout.enabled = false;
   <?php endif; ?>
+});
+</script>
+
+<!-- Delete Account Modal -->
+<div id="deleteAccountModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center">
+  <div class="bg-ak-card border border-ak-red/40 rounded-2xl p-8 max-w-[440px] w-[90%] shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="text-5xl mb-3">⚠️</div>
+      <h3 class="text-ak-red text-xl font-bold mb-2">Delete Account?</h3>
+      <p class="text-ak-muted text-sm leading-relaxed">This will permanently delete your account and <strong class="text-ak-red">all your data</strong>:</p>
+      <ul class="text-ak-muted text-xs mt-3 space-y-1 text-left bg-ak-infield rounded-lg p-3">
+        <li>✗ All your auctions</li>
+        <li>✗ All your members/sellers</li>
+        <li>✗ All vehicle records</li>
+        <li>✗ All settlement history</li>
+        <li>✗ Your login history</li>
+        <li>✗ Your account permanently</li>
+      </ul>
+    </div>
+    <div class="mb-5">
+      <label class="text-ak-muted text-xs block mb-2">Type your password to confirm:</label>
+      <input type="password" id="deleteAccountPassword" class="inp w-full" placeholder="Enter your password">
+      <div id="deleteAccountError" class="hidden text-ak-red text-xs mt-2"></div>
+    </div>
+    <div class="mb-4">
+      <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" id="deleteAccountConfirm" class="accent-ak-red">
+        <span class="text-ak-muted text-xs">I understand this is permanent and cannot be undone</span>
+      </label>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="closeDeleteAccountModal()" class="btn btn-dark flex-1">Cancel</button>
+      <button onclick="submitDeleteAccount()" id="deleteAccountBtn" class="btn flex-1" style="background:#CC7777;color:#fff;border:none">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showDeleteAccountModal() {
+  const modal = document.getElementById('deleteAccountModal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('deleteAccountPassword').focus();
+}
+
+function closeDeleteAccountModal() {
+  const modal = document.getElementById('deleteAccountModal');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+  document.getElementById('deleteAccountPassword').value = '';
+  document.getElementById('deleteAccountError').classList.add('hidden');
+  document.getElementById('deleteAccountConfirm').checked = false;
+}
+
+async function submitDeleteAccount() {
+  const password = document.getElementById('deleteAccountPassword').value.trim();
+  const confirmed = document.getElementById('deleteAccountConfirm').checked;
+  const errorDiv = document.getElementById('deleteAccountError');
+  const btn = document.getElementById('deleteAccountBtn');
+
+  if (!password) { errorDiv.textContent = 'Please enter your password'; errorDiv.classList.remove('hidden'); return; }
+  if (!confirmed) { errorDiv.textContent = 'Please check the confirmation box'; errorDiv.classList.remove('hidden'); return; }
+  if (!confirm('FINAL WARNING: Delete your account forever?')) return;
+
+  btn.textContent = 'Deleting...';
+  btn.disabled = true;
+  errorDiv.classList.add('hidden');
+
+  try {
+    const res = await fetch('api/delete_account.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0A1420;font-family:sans-serif;color:#E8DCC8;text-align:center;padding:20px"><div><div style="font-size:48px;margin-bottom:16px">✓</div><h2 style="color:#4CAF82;margin-bottom:8px">Account Deleted</h2><p style="color:#6A88A0;margin-bottom:24px">Your account and all data have been permanently deleted.</p><p style="color:#3A5570;font-size:13px">Redirecting to login...</p></div></div>';
+      setTimeout(() => { window.location.href = 'auth/login.php?deleted=1'; }, 2500);
+    } else {
+      errorDiv.textContent = data.message || 'Deletion failed';
+      errorDiv.classList.remove('hidden');
+      btn.textContent = 'Delete Forever';
+      btn.disabled = false;
+    }
+  } catch {
+    errorDiv.textContent = 'Connection error. Please try again.';
+    errorDiv.classList.remove('hidden');
+    btn.textContent = 'Delete Forever';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('deleteAccountModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteAccountModal();
 });
 </script>
 </body>
