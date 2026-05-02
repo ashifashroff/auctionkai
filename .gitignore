@@ -26,6 +26,10 @@ nbproject/
 # ─── PHP ─────────────────────────────────────
 # PHPMailer / Composer
 /vendor/
+
+# Backup files
+/backups/*.sql
+/backups/*.sql.gz
 composer.lock
 
 # Never commit real email credentials

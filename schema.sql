@@ -170,7 +170,13 @@ INSERT INTO settings (`key`, value) VALUES
   ('brand_address', ''),
   ('brand_logo_url', ''),
   ('brand_accent_color', '#D4A84B'),
-  ('brand_footer_text', 'Designed & Developed by Mirai Global Solutions')
+  ('brand_footer_text', 'Designed & Developed by Mirai Global Solutions'),
+  ('backup_enabled', '0'),
+  ('backup_frequency', 'daily'),
+  ('backup_retention_days', '30'),
+  ('backup_compress', '1'),
+  ('backup_last_run', ''),
+  ('backup_next_run', '')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- Migration for existing installs

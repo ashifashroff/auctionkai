@@ -91,6 +91,7 @@ auctionkai/
 │   ├── index.php               ← User management + Email Settings
 │   ├── actions.php             ← Handle admin POST actions
 │   ├── health.php              ← System health dashboard
+│   ├── download_backup.php     ← Secure backup download
 │   └── .htaccess
 ├── api/
 │   ├── add_vehicle.php
@@ -107,6 +108,10 @@ auctionkai/
 │   └── delete_auction.php
 │   └── delete_account.php    ← GDPR account deletion
 │   └── update_payment.php    ← Payment status AJAX
+├── backups/                  ← Auto-created backup files
+│   └── .htaccess             ← Block direct access
+├── scripts/
+│   └── backup.php            ← Cron backup script
 ├── auth/
 │   ├── login.php
 │   ├── logout.php
@@ -259,6 +264,13 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Branding applied to: app header, PDF statements, email templates, footer
 - Contact info (email, phone, address) appears on PDF statements
 - Changes take effect immediately — no code editing required
+- Scheduled backups (daily/weekly/monthly) with cron support
+- Configurable retention period
+- Gzip compression support
+- Manual trigger from admin panel
+- Backup file browser with download/delete
+- Protected backups/ folder
+- Cron setup instructions shown in panel
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

@@ -348,6 +348,43 @@ try {
             $_SESSION['admin_success'] = '🎨 Branding settings saved successfully';
             header('Location: index.php?tab=branding');
             exit;
+
+        case 'save_backup_settings':
+            require_once __DIR__ . '/../includes/settings.php';
+
+            $enabled = isset($_POST['backup_enabled']) ? '1' : '0';
+            $frequency = in_array($_POST['backup_frequency'] ?? '', ['daily', 'weekly', 'monthly']) ? $_POST['backup_frequency'] : 'daily';
+            $retention = max(1, min(365, (int)($_POST['backup_retention_days'] ?? 30)));
+            $compress = isset($_POST['backup_compress']) ? '1' : '0';
+
+            saveSettings($db, [
+                'backup_enabled' => $enabled,
+                'backup_frequency' => $frequency,
+                'backup_retention_days' => (string)$retention,
+                'backup_compress' => $compress,
+            ]);
+
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, $userId, 'admin.backup_settings', 'system', 0, "Backup settings: {$frequency}, retain {$retention} days, enabled: {$enabled}");
+
+            $_SESSION['admin_success'] = 'Backup settings saved successfully';
+            header('Location: index.php?tab=backups');
+            exit;
+
+        case 'delete_backup':
+            $filename = basename($_POST['filename'] ?? '');
+            $backupDir = __DIR__ . '/../../backups/';
+            $filepath = $backupDir . $filename;
+
+            if (!empty($filename) && preg_match('/^auctionkai_backup_[\w\-\.]+\.sql(\.gz)?$/', $filename) && file_exists($filepath)) {
+                unlink($filepath);
+                require_once __DIR__ . '/../includes/activity.php';
+                logActivity($db, $userId, 'backup.delete', 'system', 0, "Deleted backup: {$filename}");
+                $_SESSION['admin_success'] = "Backup {$filename} deleted";
+            }
+
+            header('Location: index.php?tab=backups');
+            exit;
     }
 } catch (Exception $e) {
     error_log('Admin action error: ' . $e->getMessage());

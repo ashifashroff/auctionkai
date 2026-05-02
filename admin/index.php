@@ -22,6 +22,24 @@ $settings = loadSettings($db);
 $brand = loadBranding($db);
 $maintenanceOn = ($settings['maintenance_mode'] ?? '0') === '1';
 
+// List existing backup files
+$backupDir = __DIR__ . '/../backups/';
+$backupFiles = [];
+if (is_dir($backupDir)) {
+    $files = glob($backupDir . '*.sql*');
+    if ($files) {
+        rsort($files);
+        foreach (array_slice($files, 0, 20) as $f) {
+            $backupFiles[] = [
+                'name' => basename($f),
+                'size' => filesize($f),
+                'size_fmt' => round(filesize($f)/1024, 1) . ' KB',
+                'date' => date('Y-m-d H:i:s', filemtime($f)),
+            ];
+        }
+    }
+}
+
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalAuctions  = (int)$db->query("SELECT COUNT(*) FROM auction")->fetchColumn();
 $totalMembers   = (int)$db->query("SELECT COUNT(*) FROM members")->fetchColumn();
@@ -56,6 +74,7 @@ $tabs = [
     'session'  => ['icon' => '⏱', 'label' => 'Session'],
     'maintenance' => ['icon' => '🚧', 'label' => 'Maintenance'],
     'branding' => ['icon' => '🎨', 'label' => 'Branding'],
+    'backups' => ['icon' => '💾', 'label' => 'Backups'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -435,6 +454,111 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <button class="btn btn-gold w-full" type="submit" id="maintenanceSettingsBtn">💾 Save Maintenance Settings</button>
   </form>
 </div>
+
+<?php elseif ($tab === 'backups'): ?>
+<h2 class="text-lg font-bold text-ak-gold mb-4">💾 Scheduled Backups</h2>
+
+<!-- Status Row -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+    <div class="text-2xl font-bold font-mono text-ak-gold"><?= count($backupFiles) ?></div>
+    <div class="text-ak-muted text-xs mt-1">Backup Files</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+    <div class="text-2xl font-bold font-mono text-ak-text"><?= h($settings['backup_last_run'] ?: 'Never') ?></div>
+    <div class="text-ak-muted text-xs mt-1">Last Run</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+    <div class="text-2xl font-bold font-mono text-ak-text"><?= h($settings['backup_next_run'] ?: 'Not scheduled') ?></div>
+    <div class="text-ak-muted text-xs mt-1">Next Run</div>
+  </div>
+  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+    <div class="text-2xl font-bold font-mono text-ak-gold"><?= ($settings['backup_enabled'] ?? '0') === '1' ? '✓ On' : '✗ Off' ?></div>
+    <div class="text-ak-muted text-xs mt-1">Auto Backup</div>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+<!-- Settings Form -->
+<div class="bg-ak-card border border-ak-border rounded-xl p-6">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-4">Backup Settings</div>
+  <form method="POST" action="actions.php" data-parsley-validate>
+    <input type="hidden" name="action" value="save_backup_settings">
+    <div class="flex items-center gap-3 mb-4 bg-ak-bg rounded-lg p-3">
+      <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="backup_enabled" value="1" <?= ($settings['backup_enabled'] ?? '0')==='1'?'checked':'' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Enable Scheduled Backups</span></label>
+    </div>
+    <div class="mb-4"><label class="lbl">Frequency</label><select class="inp" name="backup_frequency"><option value="daily" <?= ($settings['backup_frequency']??'daily')==='daily'?'selected':'' ?>>Daily</option><option value="weekly" <?= ($settings['backup_frequency']??'')==='weekly'?'selected':'' ?>>Weekly</option><option value="monthly" <?= ($settings['backup_frequency']??'')==='monthly'?'selected':'' ?>>Monthly</option></select></div>
+    <div class="mb-4"><label class="lbl">Retention (days)</label><input class="inp" type="number" name="backup_retention_days" value="<?= h($settings['backup_retention_days'] ?? '30') ?>" min="1" max="365"></div>
+    <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-3">
+      <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="backup_compress" value="1" <?= ($settings['backup_compress'] ?? '1')==='1'?'checked':'' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Gzip Compression</span></label>
+    </div>
+    <button class="btn btn-gold w-full" type="submit">💾 Save Settings</button>
+  </form>
+
+  <!-- Cron Instructions -->
+  <div class="mt-5 bg-ak-infield rounded-lg p-4 font-mono text-xs text-ak-text2">
+    <div class="text-ak-muted text-[10px] uppercase tracking-wider mb-2">Cron Job Command:</div>
+    <div>crontab -e</div><br>
+    <div class="text-ak-gold"># Daily at 2:00 AM:</div>
+    <div>0 2 * * * php <?= realpath(__DIR__ . '/../scripts/backup.php') ?: '/path/to/scripts/backup.php' ?> >> /var/log/auctionkai_backup.log 2>&1</div>
+  </div>
+
+  <button onclick="runManualBackup(this)" class="btn btn-gold btn-sm mt-4 w-full">▶ Run Backup Now</button>
+</div>
+
+<!-- Backup Files -->
+<div class="bg-ak-card border border-ak-border rounded-xl overflow-hidden">
+  <div class="px-5 py-3 border-b border-ak-border bg-ak-infield"><h3 class="font-bold text-ak-text">Backup Files</h3></div>
+  <?php if (empty($backupFiles)): ?>
+  <div class="p-6 text-center text-ak-muted text-sm">No backup files yet. Run a manual backup or set up a cron job.</div>
+  <?php else: ?>
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-4 py-3 text-left">Filename</th><th class="px-4 py-3 text-left">Size</th><th class="px-4 py-3 text-left">Created</th><th class="px-4 py-3 text-center">Actions</th></tr></thead>
+      <tbody>
+      <?php foreach ($backupFiles as $bf): ?>
+      <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">
+        <td class="px-4 py-3 font-mono text-xs text-ak-text2"><?= h($bf['name']) ?></td>
+        <td class="px-4 py-3 text-ak-muted text-xs"><?= h($bf['size_fmt']) ?></td>
+        <td class="px-4 py-3 text-ak-muted text-xs font-mono"><?= h($bf['date']) ?></td>
+        <td class="px-4 py-3 text-center">
+          <a href="download_backup.php?file=<?= urlencode($bf['name']) ?>" class="btn btn-dark btn-sm text-[11px]">↓ Download</a>
+          <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete this backup?')"><input type="hidden" name="action" value="delete_backup"><input type="hidden" name="filename" value="<?= h($bf['name']) ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">🗑</button></form>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
+  <?php endif; ?>
+</div>
+
+</div>
+
+<script>
+async function runManualBackup(btn) {
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Running backup...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('../scripts/backup.php', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('💾 ' + data.message, 'success', 5000);
+      setTimeout(() => { location.reload(); }, 2000);
+    } else {
+      showToast(data.message || 'Backup failed', 'error');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+  } catch (err) {
+    showToast('Backup failed. Check server logs.', 'error');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+}
+</script>
 
 <?php elseif ($tab === 'branding'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">🎨 Branding & Identity</h2>
