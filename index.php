@@ -5,6 +5,7 @@ require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/activity.php';
 require_once __DIR__ . '/includes/maintenance_check.php';
+require_once __DIR__ . '/includes/branding.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -34,6 +35,9 @@ $db = db();
 
 // ─── MAINTENANCE CHECK ────────────────────────────────────────────────────────
 checkMaintenanceMode($db, $userRole);
+
+// ─── BRANDING ────────────────────────────────────────────────────────────────
+$brand = loadBranding($db);
 
 // ─── ACTIVE AUCTION (selected via navbar or session) ─────────────────────────
 $allAuctions_q = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC");
@@ -248,14 +252,20 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=3.3">
 <?php include 'css/tailwind-config.php'; ?>
+<style>
+:root {
+  --ak-gold: <?= sanitizeColor($brand['brand_accent_color']) ?>;
+  --ak-gold-rgb: <?php $hex = ltrim(sanitizeColor($brand['brand_accent_color']), '#'); echo hexdec(substr($hex,0,2)) . ', ' . hexdec(substr($hex,2,2)) . ', ' . hexdec(substr($hex,4,2)); ?>;
+}
+</style>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
 <div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down topbar-inner">
   <div class="shrink-0">
-    <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai</div>
-    <div class="text-ak-muted text-[11px]">Settlement Management System</div>
+    <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ <?= h($brand['brand_name']) ?></div>
+    <div class="text-ak-muted text-[11px]"><?= h($brand['brand_tagline']) ?></div>
   </div>
   <?php if ($auction): ?>
   <div class="flex items-center gap-2 flex-1 justify-center">

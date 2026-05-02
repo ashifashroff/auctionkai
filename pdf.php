@@ -3,6 +3,7 @@ header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/maintenance_check.php';
+require_once __DIR__ . '/includes/branding.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -14,6 +15,9 @@ $db = db();
 // Maintenance check
 $userRole = $_SESSION['user_role'] ?? 'user';
 checkMaintenanceMode($db, $userRole);
+
+$brand = loadBranding($db);
+$accentColor = sanitizeColor($brand['brand_accent_color']);
 $userId = (int)$_SESSION['user_id'];
 
 $activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;
@@ -69,7 +73,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     <div class='page'>
       " . ($payStatus === 'paid' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #2E7D52;color:#2E7D52;padding:6px 16px;border-radius:4px;font-size:22px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PAID</div>" : ($payStatus === 'partial' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #B8912A;color:#B8912A;padding:6px 16px;border-radius:4px;font-size:18px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PARTIAL</div>" : '')) . "
       <div class='hdr'>
-        <div><div class='brand'>Auction<span>Kai</span> 精算書</div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div></div>
+        <div><div class='brand'>" . h($brand['brand_name']) . " <span>精算書</span></div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div>" . ((!empty($brand['brand_email']) || !empty($brand['brand_phone'])) ? "<div style='font-size:11px;color:#666;margin-top:4px'>" . (!empty($brand['brand_email']) ? '✉ ' . h($brand['brand_email']) . ' ' : '') . (!empty($brand['brand_phone']) ? '📞 ' . h($brand['brand_phone']) : '') . "</div>" : "") . "</div>" . h($auction['name']) . $exp . "</div></div>
         <div class='meta'><strong>" . h($m['name']) . "</strong> " . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
@@ -97,7 +101,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · AuctionKai Settlement System</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
     </div>";
 }
 ?>
@@ -106,7 +110,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Statements — <?= h($auction['name'] ?? 'AuctionKai') ?></title>
+<title>Statements — <?= h($brand['brand_name']) ?> · <?= h($auction['name'] ?? 'Auction') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pdf.css?v=3.3">

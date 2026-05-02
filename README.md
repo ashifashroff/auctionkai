@@ -125,6 +125,7 @@ auctionkai/
 │   ├── mailer.php
 │   ├── settings.php
 │   ├── maintenance_check.php ← Maintenance gate
+│   ├── branding.php          ← Dynamic branding loader
 │   └── footer.php
 ├── js/
 │   └── app.js
@@ -253,6 +254,11 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Animated gear icon with auto-refresh every 60 seconds
 - Yellow warning banner visible to admins when maintenance is active
 - Maintenance events logged to activity log
+- Custom branding — set system name, tagline, company name, contact details
+- Custom accent color with live color picker and live preview
+- Branding applied to: app header, PDF statements, email templates, footer
+- Contact info (email, phone, address) appears on PDF statements
+- Changes take effect immediately — no code editing required
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

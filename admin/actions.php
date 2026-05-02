@@ -324,6 +324,30 @@ try {
 
             header('Location: index.php?tab=maintenance');
             exit;
+
+        case 'save_branding':
+            require_once __DIR__ . '/../includes/settings.php';
+            require_once __DIR__ . '/../includes/branding.php';
+
+            $accentColor = sanitizeColor(trim($_POST['brand_accent_color'] ?? '#D4A84B'));
+
+            saveSettings($db, [
+                'brand_name'         => mb_substr(trim($_POST['brand_name'] ?? 'AuctionKai'), 0, 100),
+                'brand_tagline'      => mb_substr(trim($_POST['brand_tagline'] ?? 'Settlement Management System'), 0, 200),
+                'brand_owner'        => mb_substr(trim($_POST['brand_owner'] ?? 'Mirai Global Solutions'), 0, 200),
+                'brand_email'        => mb_substr(trim($_POST['brand_email'] ?? ''), 0, 200),
+                'brand_phone'        => mb_substr(trim($_POST['brand_phone'] ?? ''), 0, 50),
+                'brand_address'      => mb_substr(trim($_POST['brand_address'] ?? ''), 0, 500),
+                'brand_accent_color' => $accentColor,
+                'brand_footer_text'  => mb_substr(trim($_POST['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions'), 0, 300),
+            ]);
+
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, $userId, 'admin.branding', 'system', 0, 'Branding updated: ' . trim($_POST['brand_name'] ?? ''));
+
+            $_SESSION['admin_success'] = '🎨 Branding settings saved successfully';
+            header('Location: index.php?tab=branding');
+            exit;
     }
 } catch (Exception $e) {
     error_log('Admin action error: ' . $e->getMessage());

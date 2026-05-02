@@ -161,7 +161,16 @@ INSERT INTO settings (`key`, value) VALUES
   ('maintenance_mode', '0'),
   ('maintenance_title', 'System Maintenance'),
   ('maintenance_message', 'AuctionKai is currently undergoing scheduled maintenance. We will be back shortly. Thank you for your patience.'),
-  ('maintenance_eta', '')
+  ('maintenance_eta', ''),
+  ('brand_name', 'AuctionKai'),
+  ('brand_tagline', 'Settlement Management System'),
+  ('brand_owner', 'Mirai Global Solutions'),
+  ('brand_email', ''),
+  ('brand_phone', ''),
+  ('brand_address', ''),
+  ('brand_logo_url', ''),
+  ('brand_accent_color', '#D4A84B'),
+  ('brand_footer_text', 'Designed & Developed by Mirai Global Solutions')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- Migration for existing installs

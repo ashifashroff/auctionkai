@@ -3,13 +3,16 @@ header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-
 require_once 'includes/auth_check.php';
 require_once 'includes/db.php';
 require_once 'includes/helpers.php';
+require_once 'includes/branding.php';
+$db = db();
+$brand = loadBranding($db);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AuctionKai — About</title>
+<title><?= h($brand['brand_name']) ?> — About</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=3.3">
@@ -88,7 +91,7 @@ require_once 'includes/helpers.php';
 <!-- Section 5 — Developer -->
 <div class="bg-ak-card border border-ak-gold/30 rounded-xl p-8 text-center">
   <div class="text-ak-muted text-sm mb-2">Designed & Developed by</div>
-  <div class="text-ak-gold font-bold text-xl mb-2">Mirai Global Solutions</div>
+  <div class="text-ak-gold font-bold text-xl mb-2"><?= h($brand['brand_owner']) ?></div>
   <div class="text-ak-muted text-xs">© 2025–<?= date('Y') ?> All rights reserved.</div>
 </div>
 

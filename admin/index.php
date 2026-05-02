@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/settings.php';
+require_once __DIR__ . '/../includes/branding.php';
 
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
@@ -18,6 +19,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
 $userRole = $_SESSION['user_role'] ?? 'admin';
 $db = db();
 $settings = loadSettings($db);
+$brand = loadBranding($db);
 $maintenanceOn = ($settings['maintenance_mode'] ?? '0') === '1';
 
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
@@ -53,6 +55,7 @@ $tabs = [
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
     'session'  => ['icon' => '⏱', 'label' => 'Session'],
     'maintenance' => ['icon' => '🚧', 'label' => 'Maintenance'],
+    'branding' => ['icon' => '🎨', 'label' => 'Branding'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -432,6 +435,58 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <button class="btn btn-gold w-full" type="submit" id="maintenanceSettingsBtn">💾 Save Maintenance Settings</button>
   </form>
 </div>
+
+<?php elseif ($tab === 'branding'): ?>
+<h2 class="text-lg font-bold text-ak-gold mb-4">🎨 Branding & Identity</h2>
+<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+  <form id="brandingSettingsForm" data-parsley-validate>
+    <input type="hidden" name="action" value="save_branding">
+    <div class="mb-4"><label class="lbl">System Name</label><input class="inp" name="brand_name" value="<?= h($brand['brand_name'] ?? 'AuctionKai') ?>" placeholder="AuctionKai"></div>
+    <div class="mb-4"><label class="lbl">Tagline</label><input class="inp" name="brand_tagline" value="<?= h($brand['brand_tagline'] ?? '') ?>" placeholder="Settlement Management System"></div>
+    <div class="mb-4"><label class="lbl">Owner / Company</label><input class="inp" name="brand_owner" value="<?= h($brand['brand_owner'] ?? '') ?>" placeholder="Mirai Global Solutions"></div>
+    <div class="mb-4"><label class="lbl">Contact Email</label><input class="inp" type="email" name="brand_email" value="<?= h($brand['brand_email'] ?? '') ?>" placeholder="admin@example.com"></div>
+    <div class="mb-4"><label class="lbl">Contact Phone</label><input class="inp" name="brand_phone" value="<?= h($brand['brand_phone'] ?? '') ?>" placeholder="+81-xxx-xxx-xxxx"></div>
+    <div class="mb-4"><label class="lbl">Address</label><textarea class="inp" name="brand_address" rows="2" placeholder="Company address"><?= h($brand['brand_address'] ?? '') ?></textarea></div>
+    <div class="mb-4">
+      <label class="lbl">Accent Color</label>
+      <div class="flex gap-2 items-center">
+        <input type="color" name="brand_accent_color_picker" value="<?= h($brand['brand_accent_color'] ?? '#D4A84B') ?>" class="w-10 h-10 rounded cursor-pointer border border-ak-border bg-ak-infield" oninput="document.getElementById('accentColorText').value=this.value">
+        <input type="text" id="accentColorText" name="brand_accent_color" value="<?= h($brand['brand_accent_color'] ?? '#D4A84B') ?>" class="inp font-mono w-32" placeholder="#D4A84B" oninput="this.previousElementSibling.value=this.value">
+        <span class="text-ak-muted text-xs">Used in PDF, email, and app header</span>
+      </div>
+    </div>
+    <div class="mb-5"><label class="lbl">Footer Text</label><input class="inp" name="brand_footer_text" value="<?= h($brand['brand_footer_text'] ?? '') ?>" placeholder="Designed & Developed by Mirai Global Solutions"></div>
+
+    <!-- Live Preview -->
+    <div class="mt-4 p-4 bg-ak-infield rounded-xl border border-ak-border">
+      <div class="text-[10px] uppercase tracking-wider text-ak-muted mb-3">Live Preview</div>
+      <div class="flex items-center gap-3">
+        <div class="font-bold text-lg" id="brandPreviewName" style="color: <?= h($brand['brand_accent_color'] ?? '#D4A84B') ?>">⚡ <?= h($brand['brand_name'] ?? 'AuctionKai') ?></div>
+      </div>
+      <div class="text-xs text-ak-muted mt-1" id="brandPreviewTagline"><?= h($brand['brand_tagline'] ?? 'Settlement Management System') ?></div>
+      <div class="text-xs mt-2 pt-2 border-t border-ak-border text-ak-muted" id="brandPreviewFooter"><?= h($brand['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions') ?></div>
+    </div>
+
+    <button class="btn btn-gold w-full mt-5" type="submit" id="brandingSettingsBtn">💾 Save Branding</button>
+  </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const nameInput = document.querySelector('input[name="brand_name"]');
+  const taglineInput = document.querySelector('input[name="brand_tagline"]');
+  const footerInput = document.querySelector('input[name="brand_footer_text"]');
+  const colorInput = document.querySelector('input[name="brand_accent_color"]');
+  const previewName = document.getElementById('brandPreviewName');
+  const previewTagline = document.getElementById('brandPreviewTagline');
+  const previewFooter = document.getElementById('brandPreviewFooter');
+
+  if (nameInput) nameInput.addEventListener('input', () => { if (previewName) previewName.textContent = '⚡ ' + nameInput.value; });
+  if (taglineInput) taglineInput.addEventListener('input', () => { if (previewTagline) previewTagline.textContent = taglineInput.value; });
+  if (footerInput) footerInput.addEventListener('input', () => { if (previewFooter) previewFooter.textContent = footerInput.value; });
+  if (colorInput) colorInput.addEventListener('input', () => { if (previewName) previewName.style.color = colorInput.value; });
+});
+</script>
 
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>

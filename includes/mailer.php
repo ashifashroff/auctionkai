@@ -15,6 +15,8 @@ function sendSettlementEmail(
     string $htmlBody,
     PDO $db
 ): array {
+    require_once __DIR__ . '/branding.php';
+    $brand = loadBranding($db);
 
     $s = loadSettings($db);
 
@@ -99,7 +101,7 @@ function sendSettlementEmail(
         }
 
         $fromEmail = $s['mail_from_email'] ?? $s['mail_username'] ?? '';
-        $fromName = $s['mail_from_name'] ?? 'AuctionKai';
+        $fromName = $s['mail_from_name'] ?? ($brand['brand_name'] ?? 'AuctionKai');
 
         if (empty($fromEmail)) {
             return ['success' => false, 'message' => 'From email address is not set'];
@@ -108,7 +110,7 @@ function sendSettlementEmail(
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($member['email'], $member['name']);
 
-        $mail->Subject = '精算書 / Settlement Statement — ' . $auction['name'] . ' (' . $auction['date'] . ')';
+        $mail->Subject = '精算書 / Settlement Statement — ' . ($brand['brand_name'] ?? 'AuctionKai') . ' · ' . $auction['name'] . ' (' . $auction['date'] . ')';
         $mail->Body = $htmlBody;
         $mail->AltBody = strip_tags($htmlBody);
 
@@ -127,6 +129,12 @@ function buildEmailBody(
     array $s,
     array $fees
 ): string {
+    global $db;
+    require_once __DIR__ . '/branding.php';
+    $brand = isset($db) ? loadBranding($db) : [];
+    $brandName = $brand['brand_name'] ?? 'AuctionKai';
+    $accentColor = sanitizeColor($brand['brand_accent_color'] ?? '#D4A84B');
+    $footerText = $brand['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions';
     $rows = '';
     foreach ($s['mv'] as $v) {
         $rows .= "
@@ -142,7 +150,7 @@ function buildEmailBody(
     <body style='font-family:sans-serif;background:#f4f4f4;padding:20px;color:#111;font-size:13px'>
       <div style='max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)'>
         <div style='background:#0A1420;padding:24px 32px'>
-          <div style='font-size:22px;font-weight:700;color:#D4A84B'>⚡ AuctionKai 精算書</div>
+          <div style='font-size:22px;font-weight:700;color:' . $accentColor . ''>⚡ ' . h($brandName) . ' 精算書</div>
           <div style='font-size:12px;color:#6A88A0;margin-top:4px'>Settlement Statement · " . htmlspecialchars($auction['name']) . "</div>
         </div>
         <div style='padding:24px 32px 0'>
@@ -163,10 +171,10 @@ function buildEmailBody(
           <table style='width:100%;font-size:13px'>
             <tr><td style='padding:5px 0'>Gross Sales</td><td style='text-align:right;font-family:monospace'>¥" . number_format($s['grossSales']) . "</td></tr>
             <tr style='border-top:1px dashed #ddd'><td style='padding:8px 0 5px;color:#777'>Total Deductions</td><td style='text-align:right;font-family:monospace;color:#CC7777;padding-top:8px'>−¥" . number_format($s['totalDed']) . "</td></tr>
-            <tr style='border-top:2px solid #ccc;font-weight:700'><td style='padding:8px 0'>NET PAYOUT</td><td style='text-align:right;font-family:monospace;color:#D4A84B'>¥" . number_format($s['netPayout']) . "</td></tr>
+            <tr style='border-top:2px solid #ccc;font-weight:700'><td style='padding:8px 0'>NET PAYOUT</td><td style='text-align:right;font-family:monospace;color:' . $accentColor . ''>¥" . number_format($s['netPayout']) . "</td></tr>
           </table>
         </div>
-        <div style='background:#0A1420;padding:16px 32px;text-align:center;font-size:11px;color:#6A88A0'>" . htmlspecialchars($auction['name']) . " · " . htmlspecialchars($auction['date']) . "<br>Designed &amp; Developed by Mirai Global Solutions</div>
+        <div style='background:#0A1420;padding:16px 32px;text-align:center;font-size:11px;color:#6A88A0'>" . htmlspecialchars($auction['name']) . " · " . htmlspecialchars($auction['date']) . "<br>Designed &amp; Developed by ' . h($footerText) . '</div>
       </div>
     </body></html>";
 }
