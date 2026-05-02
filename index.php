@@ -589,12 +589,20 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   </div>
 </div>
 
-<!-- Search -->
-<div class="vehicles-search-wrap mb-4">
-  <div class="search-icon-wrap">
-    <span class="search-icon">🔍</span>
-    <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search by member name..." autocomplete="off">
+<!-- Search & Filter -->
+<div class="flex items-center gap-3 mb-4 flex-wrap">
+  <div class="vehicles-search-wrap flex-1 min-w-[200px]">
+    <div class="search-icon-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search by member name..." autocomplete="off">
+    </div>
   </div>
+  <select id="payment-filter" class="inp text-sm py-1.5 px-3" onchange="filterStatements()">
+    <option value="all">All Payments</option>
+    <option value="paid">✓ Paid</option>
+    <option value="unpaid">✗ Unpaid</option>
+    <option value="partial">◑ Partial</option>
+  </select>
 </div>
 
 <?php
@@ -654,7 +662,7 @@ foreach ($members as $m) {
         default => '✗ Unpaid',
     };
   ?>
-  <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>">
+  <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-payment="<?= $payStatus ?>">
     <div class="sh">
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
       <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>
@@ -755,12 +763,20 @@ foreach ($members as $m) {
 
 <script>
 document.getElementById('statement-search')?.addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
+  filterStatements();
+});
+
+function filterStatements() {
+  const q = (document.getElementById('statement-search')?.value || '').toLowerCase().trim();
+  const payFilter = document.getElementById('payment-filter')?.value || 'all';
   document.querySelectorAll('.statement-card').forEach(card => {
     const name = card.getAttribute('data-member-name') || '';
-    card.style.display = !q || name.includes(q) ? '' : 'none';
+    const payment = card.getAttribute('data-payment') || 'unpaid';
+    const matchSearch = !q || name.includes(q);
+    const matchPayment = payFilter === 'all' || payment === payFilter;
+    card.style.display = (matchSearch && matchPayment) ? '' : 'none';
   });
-});
+}
 </script>
 
 <?php endif; ?>
