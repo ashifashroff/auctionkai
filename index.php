@@ -590,15 +590,15 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 </div>
 
 <!-- Search & Filter -->
-<div class="flex items-center gap-3 mb-4 flex-wrap">
+<div class="flex items-center gap-2 mb-4">
   <div class="vehicles-search-wrap flex-1 min-w-[200px]">
     <div class="search-icon-wrap">
       <span class="search-icon">🔍</span>
       <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search by member name..." autocomplete="off">
     </div>
   </div>
-  <select id="payment-filter" class="inp text-sm py-1.5 px-3" onchange="filterStatements()">
-    <option value="all">All Payments</option>
+  <select id="payment-filter" class="inp text-xs py-1.5 px-2 w-auto" onchange="filterStatements()">
+    <option value="all">All</option>
     <option value="paid">✓ Paid</option>
     <option value="unpaid">✗ Unpaid</option>
     <option value="partial">◑ Partial</option>
@@ -640,7 +640,7 @@ foreach ($members as $m) {
 </div>
 
 <!-- Statements Grid (2 columns) -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="statements-container">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="statements-container" style="min-height:400px">
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sales history available for this auction.</div>
 <?php else: ?>
