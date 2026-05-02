@@ -40,7 +40,16 @@ if (is_dir($backupDir)) {
     }
 }
 
-// Recent statement history (loaded via AJAX)
+// Recent statement history
+$recentStatements = $db->query("
+    SELECT sh.*, m.name as member_name, u.name as user_name, u.username, a.name as auction_name
+    FROM statement_history sh
+    JOIN members m ON sh.member_id = m.id
+    JOIN users u ON sh.user_id = u.id
+    JOIN auction a ON sh.auction_id = a.id
+    ORDER BY sh.created_at DESC
+    LIMIT 50
+")->fetchAll();
 
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalAuctions  = (int)$db->query("SELECT COUNT(*) FROM auction")->fetchColumn();
@@ -565,84 +574,40 @@ async function runManualBackup(btn) {
 
 <?php elseif ($tab === 'stmt_history'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">📋 Statement History</h2>
+<p class="text-ak-muted text-sm mb-5">Last 50 statement actions across all users</p>
 
-<div class="flex items-center gap-3 mb-5 flex-wrap">
-  <select id="stmtActionFilter" class="inp text-sm py-1.5 px-3" onchange="loadStmtHistory(1)">
-    <option value="all">All Actions</option>
-    <option value="pdf">📄 PDF Only</option>
-    <option value="email">✉️ Email Only</option>
-  </select>
-  <select id="stmtPaymentFilter" class="inp text-sm py-1.5 px-3" onchange="loadStmtHistory(1)">
-    <option value="all">All Payments</option>
-    <option value="paid">✓ Paid</option>
-    <option value="unpaid">✗ Unpaid</option>
-    <option value="partial">◑ Partial</option>
-  </select>
-  <div class="flex-1 min-w-[200px]">
-    <input type="text" id="stmtSearchFilter" class="inp text-sm py-1.5 px-3 w-full" placeholder="Search member, user, auction..." oninput="debounceStmtSearch()">
-  </div>
-  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2 whitespace-nowrap" id="stmtCountBadge">— records</span>
+<?php if (empty($recentStatements)): ?>
+<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted text-sm">No statements generated yet.</div>
+<?php else: ?>
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">
+        <th class="px-4 py-3 text-left">Time</th>
+        <th class="px-4 py-3 text-left">User</th>
+        <th class="px-4 py-3 text-left">Member</th>
+        <th class="px-4 py-3 text-left">Auction</th>
+        <th class="px-4 py-3 text-left">Action</th>
+        <th class="px-4 py-3 text-right">Net Payout</th>
+        <th class="px-4 py-3 text-left">IP</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($recentStatements as $r): $isEmail = $r['action'] === 'email'; ?>
+    <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">
+      <td class="px-4 py-3 text-ak-muted text-xs font-mono whitespace-nowrap"><?= date('Y-m-d H:i', strtotime($r['created_at'])) ?></td>
+      <td class="px-4 py-3"><div class="text-ak-text text-xs"><?= h($r['user_name']) ?></div><div class="text-ak-muted text-[10px]"><?= h($r['username']) ?></div></td>
+      <td class="px-4 py-3 text-ak-text2 text-xs"><?= h($r['member_name']) ?></td>
+      <td class="px-4 py-3 text-ak-muted text-xs"><?= h($r['auction_name']) ?></td>
+      <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full font-mono <?= $isEmail ? 'bg-ak-gold/15 text-ak-gold' : 'bg-ak-text2/10 text-ak-text2' ?>"><?= $isEmail ? '✉️ Email' : '📄 PDF' ?></span></td>
+      <td class="px-4 py-3 text-ak-gold text-xs font-mono text-right"><?= fmt($r['net_payout']) ?></td>
+      <td class="px-4 py-3 text-ak-muted text-[11px] font-mono"><?= h($r['ip_address'] ?? '') ?></td>
+    </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
 </div>
-
-<div id="stmtHistoryContent"><div class="text-center text-ak-muted py-8">Loading…</div></div>
-<div id="stmtHistoryPagination" class="flex items-center justify-center gap-2 mt-4"></div>
-
-<script>
-let stmtSearchTimer = null;
-function debounceStmtSearch() {
-  clearTimeout(stmtSearchTimer);
-  stmtSearchTimer = setTimeout(() => loadStmtHistory(1), 300);
-}
-
-function loadStmtHistory(page) {
-  const action = document.getElementById('stmtActionFilter').value;
-  const payment = document.getElementById('stmtPaymentFilter').value;
-  const search = document.getElementById('stmtSearchFilter').value;
-  const content = document.getElementById('stmtHistoryContent');
-  const pagDiv = document.getElementById('stmtHistoryPagination');
-  const badge = document.getElementById('stmtCountBadge');
-  content.innerHTML = '<div class="text-center text-ak-muted py-8">Loading…</div>';
-  pagDiv.innerHTML = '';
-
-  fetch('../api/statement_history.php?page=' + page + '&action=' + encodeURIComponent(action) + '&payment=' + encodeURIComponent(payment) + '&search=' + encodeURIComponent(search))
-  .then(r => r.json())
-  .then(data => {
-    badge.textContent = data.total + ' records';
-    if (!data.rows || data.rows.length === 0) {
-      content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No statement history found.</div>';
-      return;
-    }
-    let html = '<div class="bg-ak-card border border-ak-border rounded-xl overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-4 py-3 text-left">Time</th><th class="px-4 py-3 text-left">User</th><th class="px-4 py-3 text-left">Member</th><th class="px-4 py-3 text-left">Auction</th><th class="px-4 py-3 text-left">Action</th><th class="px-4 py-3 text-left">Payment</th><th class="px-4 py-3 text-right">Net Payout</th><th class="px-4 py-3 text-left">IP</th></tr></thead><tbody>';
-    data.rows.forEach(r => {
-      html += '<tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">';
-      html += '<td class="px-4 py-3 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
-      html += '<td class="px-4 py-3"><div class="text-ak-text text-xs">' + r.user_name + '</div><div class="text-ak-muted text-[10px]">' + r.username + '</div></td>';
-      html += '<td class="px-4 py-3 text-ak-text2 text-xs">' + r.member_name + '</td>';
-      html += '<td class="px-4 py-3 text-ak-muted text-xs">' + r.auction_name + '</td>';
-      html += '<td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full font-mono ' + r.action_class + '">' + r.action_icon + '</span></td>';
-      html += '<td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full font-mono ' + r.payment_class + '">' + r.payment_icon + '</span></td>';
-      html += '<td class="px-4 py-3 text-ak-gold text-xs font-mono text-right">' + r.net_payout + '</td>';
-      html += '<td class="px-4 py-3 text-ak-muted text-[11px] font-mono">' + r.ip_address + '</td>';
-      html += '</tr>';
-    });
-    html += '</tbody></table></div>';
-    content.innerHTML = html;
-
-    if (data.lastPage > 1) {
-      let ph = '';
-      if (page > 1) ph += '<button class="btn btn-dark btn-sm" onclick="loadStmtHistory(' + (page-1) + ')">← Prev</button>';
-      for (let p = Math.max(1, page-2); p <= Math.min(data.lastPage, page+2); p++) {
-        ph += '<button class="px-3 py-1.5 rounded-lg text-sm font-semibold ' + (p===page ? 'bg-ak-gold text-ak-bg' : 'bg-ak-card text-ak-muted hover:text-ak-text2 border border-ak-border') + '" onclick="loadStmtHistory(' + p + ')">' + p + '</button>';
-      }
-      if (page < data.lastPage) ph += '<button class="btn btn-dark btn-sm" onclick="loadStmtHistory(' + (page+1) + ')">Next →</button>';
-      pagDiv.innerHTML = ph;
-    }
-  })
-  .catch(() => { content.innerHTML = '<div class="bg-ak-red/15 text-ak-red p-4 rounded-lg">Error loading statement history</div>'; });
-}
-
-loadStmtHistory(1);
-</script>
+<?php endif; ?>
 
 <?php elseif ($tab === 'branding'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">🎨 Branding & Identity</h2>
