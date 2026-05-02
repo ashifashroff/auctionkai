@@ -157,7 +157,11 @@ INSERT INTO settings (`key`, value) VALUES
   ('mail_encryption', 'tls'),
   ('session_timeout_enabled', '1'),
   ('session_timeout_minutes', '30'),
-  ('session_timeout_warn_minutes', '2')
+  ('session_timeout_warn_minutes', '2'),
+  ('maintenance_mode', '0'),
+  ('maintenance_title', 'System Maintenance'),
+  ('maintenance_message', 'AuctionKai is currently undergoing scheduled maintenance. We will be back shortly. Thank you for your patience.'),
+  ('maintenance_eta', '')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- Migration for existing installs

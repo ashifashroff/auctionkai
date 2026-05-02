@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/constants.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/activity.php';
+require_once __DIR__ . '/includes/maintenance_check.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -30,6 +31,9 @@ function postForm(string $action, string $tabTarget, string $tok): string {
 
 // ─── LOAD DB ─────────────────────────────────────────────────────────────────
 $db = db();
+
+// ─── MAINTENANCE CHECK ────────────────────────────────────────────────────────
+checkMaintenanceMode($db, $userRole);
 
 // ─── ACTIVE AUCTION (selected via navbar or session) ─────────────────────────
 $allAuctions_q = $db->prepare("SELECT * FROM auction WHERE user_id=? ORDER BY date DESC, id DESC");
@@ -285,6 +289,22 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
     <a href="auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
   </div>
 </div>
+
+<?php
+$maintenanceOn = false;
+try {
+    $maintenanceOn = $db->query("SELECT value FROM settings WHERE `key`='maintenance_mode'")->fetchColumn() === '1';
+} catch (Exception $e) {}
+if ($maintenanceOn && $userRole === 'admin'):
+?>
+<div class="bg-yellow-500/20 border-b border-yellow-500/40 px-7 py-2 flex items-center justify-between gap-4">
+  <div class="flex items-center gap-2">
+    <span class="text-yellow-400 font-bold animate-pulse">🚧</span>
+    <span class="text-yellow-400 text-sm font-semibold">Maintenance Mode is ACTIVE — Non-admin users cannot access the system</span>
+  </div>
+  <a href="admin/index.php?tab=maintenance" class="text-yellow-400 text-xs hover:underline font-medium">Manage →</a>
+</div>
+<?php endif; ?>
 
 <!-- ─── AUCTION SELECTOR ────────────────────────────── -->
 <div class="bg-ak-bg border-b border-ak-border px-7 py-3">

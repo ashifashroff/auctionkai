@@ -124,6 +124,7 @@ auctionkai/
 │   ├── helpers.php
 │   ├── mailer.php
 │   ├── settings.php
+│   ├── maintenance_check.php ← Maintenance gate
 │   └── footer.php
 ├── js/
 │   └── app.js
@@ -245,6 +246,13 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - PAID/PARTIAL stamp on PDF statements
 - Payment status logged to activity log
 - System Health Check page showing PHP version, MySQL stats, disk space, PHP extensions, server info, app statistics, warning alerts, and quick actions
+- Maintenance mode — put system in maintenance with one toggle
+- Custom maintenance page title and message
+- Optional ETA display on maintenance page
+- Admins bypass maintenance and can still work normally
+- Animated gear icon with auto-refresh every 60 seconds
+- Yellow warning banner visible to admins when maintenance is active
+- Maintenance events logged to activity log
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

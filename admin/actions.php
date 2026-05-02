@@ -296,6 +296,34 @@ try {
             $_SESSION['admin_success'] = 'Session settings saved successfully';
             header('Location: index.php?tab=session');
             exit;
+
+        case 'save_maintenance_settings':
+            require_once __DIR__ . '/../includes/settings.php';
+
+            $enabled = isset($_POST['maintenance_mode']) ? '1' : '0';
+            $title = trim($_POST['maintenance_title'] ?? 'System Maintenance');
+            $message = trim($_POST['maintenance_message'] ?? '');
+            $eta = trim($_POST['maintenance_eta'] ?? '');
+
+            if (empty($title)) $title = 'System Maintenance';
+            if (mb_strlen($message) > 1000) $message = mb_substr($message, 0, 1000);
+
+            saveSettings($db, [
+                'maintenance_mode'    => $enabled,
+                'maintenance_title'   => $title,
+                'maintenance_message' => $message,
+                'maintenance_eta'     => $eta,
+            ]);
+
+            require_once __DIR__ . '/../includes/activity.php';
+            logActivity($db, $userId, 'admin.maintenance', 'system', 0, 'Maintenance mode ' . ($enabled === '1' ? 'ENABLED' : 'DISABLED'));
+
+            $_SESSION['admin_success'] = $enabled === '1'
+                ? '🚧 Maintenance mode is now ENABLED — users cannot access the system'
+                : '✅ Maintenance mode DISABLED — system is live';
+
+            header('Location: index.php?tab=maintenance');
+            exit;
     }
 } catch (Exception $e) {
     error_log('Admin action error: ' . $e->getMessage());

@@ -2,6 +2,7 @@
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/maintenance_check.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -9,6 +10,10 @@ session_start();
 if (empty($_SESSION['user_id'])) { header('Location: auth/login.php'); exit; }
 
 $db = db();
+
+// Maintenance check
+$userRole = $_SESSION['user_role'] ?? 'user';
+checkMaintenanceMode($db, $userRole);
 $userId = (int)$_SESSION['user_id'];
 
 $activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;

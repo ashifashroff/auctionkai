@@ -12,6 +12,10 @@ if (empty($_SESSION['user_id'])) {
 }
 
 $db = db();
+
+// Maintenance check
+$userRole = $_SESSION['user_role'] ?? 'user';
+checkMaintenanceMode($db, $userRole);
 $userId = (int)$_SESSION['user_id'];
 $error = '';
 $success = '';
@@ -70,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/activity.php';
+require_once __DIR__ . '/includes/maintenance_check.php';
 
 // Fetch last 10 login attempts
 $stmt = $db->prepare("SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");

@@ -18,6 +18,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
 $userRole = $_SESSION['user_role'] ?? 'admin';
 $db = db();
 $settings = loadSettings($db);
+$maintenanceOn = ($settings['maintenance_mode'] ?? '0') === '1';
 
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalAuctions  = (int)$db->query("SELECT COUNT(*) FROM auction")->fetchColumn();
@@ -51,6 +52,7 @@ $tabs = [
     'activity' => ['icon' => '📋', 'label' => 'Activity Log'],
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
     'session'  => ['icon' => '⏱', 'label' => 'Session'],
+    'maintenance' => ['icon' => '🚧', 'label' => 'Maintenance'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -399,6 +401,35 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <div class="mb-4"><label class="lbl">Timeout Duration (minutes) *</label><input class="inp" type="number" name="session_timeout_minutes" value="<?= h($settings['session_timeout_minutes'] ?? '30') ?>" min="5" max="480" data-parsley-required="true" data-parsley-type="number" data-parsley-min="5" data-parsley-max="480" data-parsley-required-message="Timeout duration is required"></div>
     <div class="mb-5"><label class="lbl">Warning Before Expiry (minutes) *</label><input class="inp" type="number" name="session_timeout_warn_minutes" value="<?= h($settings['session_timeout_warn_minutes'] ?? '2') ?>" min="1" max="10" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-max="10" data-parsley-required-message="Warning time is required"></div>
     <button class="btn btn-gold w-full" type="submit" id="sessionSettingsBtn">💾 Save Session Settings</button>
+  </form>
+</div>
+
+<?php elseif ($tab === 'maintenance'): ?>
+<h2 class="text-lg font-bold text-ak-gold mb-4">🚧 Maintenance Mode</h2>
+
+<?php if ($maintenanceOn): ?>
+<div class="bg-ak-red/10 border border-ak-red/30 rounded-xl p-4 mb-5 flex items-center gap-3 animate-pulse">
+  <span class="text-2xl">🚧</span>
+  <div><div class="text-ak-red font-bold text-sm">Maintenance Mode is ACTIVE</div><div class="text-ak-muted text-xs">Non-admin users cannot access the system</div></div>
+</div>
+<?php else: ?>
+<div class="bg-ak-green/10 border border-ak-green/30 rounded-xl p-4 mb-5 flex items-center gap-3">
+  <span class="text-2xl">✅</span>
+  <div><div class="text-ak-green font-bold text-sm">System is Live</div><div class="text-ak-muted text-xs">All users can access the system normally</div></div>
+</div>
+<?php endif; ?>
+
+<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+  <form id="maintenanceSettingsForm" data-parsley-validate>
+    <input type="hidden" name="action" value="save_maintenance_settings">
+    <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-4">
+      <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="maintenance_mode" value="1" <?= $maintenanceOn ? 'checked' : '' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Enable Maintenance Mode</span></label>
+    </div>
+    <div class="mb-4"><label class="lbl">Page Title</label><input class="inp" name="maintenance_title" value="<?= h($settings['maintenance_title'] ?? 'System Maintenance') ?>" placeholder="System Maintenance"></div>
+    <div class="mb-4"><label class="lbl">Message to Users</label><textarea class="inp" name="maintenance_message" rows="3" placeholder="We will be back shortly."><?= h($settings['maintenance_message'] ?? '') ?></textarea></div>
+    <div class="mb-5"><label class="lbl">Estimated Time (ETA)</label><input class="inp" name="maintenance_eta" value="<?= h($settings['maintenance_eta'] ?? '') ?>" placeholder="e.g. 2025-06-01 14:00"></div>
+    <div class="bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 mb-5 text-yellow-400 text-xs">⚠ When enabled, all non-admin users will see the maintenance page and cannot access the system. Admins can still log in and use the system normally.</div>
+    <button class="btn btn-gold w-full" type="submit" id="maintenanceSettingsBtn">💾 Save Maintenance Settings</button>
   </form>
 </div>
 
