@@ -109,6 +109,7 @@ auctionkai/
 │   └── delete_account.php    ← GDPR account deletion
 │   └── update_payment.php    ← Payment status AJAX
 │   └── log_statement.php     ← Statement event logger
+│   └── download_pdf_zip.php  ← Bulk ZIP download
 ├── backups/                  ← Auto-created backup files
 │   └── .htaccess             ← Block direct access
 ├── scripts/
@@ -276,6 +277,12 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Per-member collapsible history on Statements tab
 - Shows action type, net payout, timestamp, IP address
 - Admin panel shows full history across all users
+- Bulk PDF ZIP download — all member statements in one ZIP file
+- Each member gets their own HTML statement file (open in browser → print to PDF)
+- README.txt included in ZIP with instructions
+- Auction name and date in ZIP filename
+- Requires PHP ZipArchive extension (check System Health page)
+- ZIP download logged to activity log
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 
@@ -288,6 +295,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v3.4** — Login history tracking, session timeout with admin controls, GDPR account deletion, payment status tracking with PDF stamp, system health check page, maintenance mode, custom branding with color picker, scheduled backups with cron support, statement history tracking, bulk PDF ZIP download
 
 **v3.3** — Login history tracking: records success and failed login attempts per user (browser, OS, IP, timestamp). Profile page shows last 10 attempts. Admin panel shows last login per user. Failed attempts highlighted in red. Auto-cleanup keeps last 50 records per user.
 

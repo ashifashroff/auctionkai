@@ -585,6 +585,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
   <div class="flex gap-2">
     <a class="btn btn-dark" href="pdf.php?all=1&v=3.0&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
+    <a class="btn btn-dark" href="api/download_pdf_zip.php?auction_id=<?= (int)$activeAuctionId ?>" onclick="showToast('📦 Preparing ZIP download...','info',3000)">📦 Download ZIP</a>
     <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark">📊 Auction Summary</a>
   </div>
 </div>
