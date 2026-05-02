@@ -595,39 +595,6 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <h2 class="text-lg font-bold">💴 Special Fees — <?= h($auction['name']) ?></h2>
 </div>
 
-<div class="bg-ak-card rounded-xl p-4 mb-5 border border-ak-border">
-  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Quick Add Common Fees</div>
-  <div class="flex flex-wrap gap-2">
-  <?php
-  $presets = [
-    ['name'=>'Car Wash Fee','amount'=>3000,'type'=>'deduction'],
-    ['name'=>'Bank Charges','amount'=>500,'type'=>'deduction'],
-    ['name'=>'Storage Fee','amount'=>5000,'type'=>'deduction'],
-    ['name'=>'Transport Extra','amount'=>10000,'type'=>'deduction'],
-    ['name'=>'Repair Cost','amount'=>20000,'type'=>'deduction'],
-    ['name'=>'Inspection Fee','amount'=>8000,'type'=>'deduction'],
-    ['name'=>'Key Duplicate','amount'=>3500,'type'=>'deduction'],
-    ['name'=>'Bonus Payment','amount'=>5000,'type'=>'addition'],
-  ];
-  foreach ($presets as $p):
-  ?>
-  <button class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all <?= $p['type']==='addition' ? 'border-ak-green/40 text-ak-green hover:bg-ak-green/10' : 'border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold' ?>" onclick="setFeePreset('<?= h($p['name']) ?>',<?= $p['amount'] ?>,'<?= $p['type'] ?>')"><?= $p['type']==='addition' ? '+' : '−' ?> <?= h($p['name']) ?> (¥<?= number_format($p['amount']) ?>)</button>
-  <?php endforeach; ?>
-  </div>
-</div>
-
-<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
-  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Special Fee to Member</div>
-  <div class="grid grid-cols-5 gap-3 items-end">
-    <div class="col-span-1"><label class="lbl">Member *</label><select class="inp" id="sf_memberId"><option value="">Select…</option><?php foreach ($members as $m): ?><option value="<?= (int)$m['id'] ?>"><?= h($m['name']) ?></option><?php endforeach; ?></select></div>
-    <div class="col-span-1"><label class="lbl">Fee Name *</label><input class="inp" id="sf_feeName" placeholder="e.g. Car Wash Fee"></div>
-    <div class="col-span-1"><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="sf_amount" placeholder="3000" min="1"></div>
-    <div class="col-span-1"><label class="lbl">Type</label><select class="inp" id="sf_feeType"><option value="deduction">− Deduction</option><option value="addition">+ Addition</option></select></div>
-    <div class="col-span-1"><label class="lbl">Notes</label><input class="inp" id="sf_notes" placeholder="Optional"></div>
-  </div>
-  <div class="mt-3 flex justify-end"><button onclick="addSpecialFee()" class="btn btn-gold">+ Add Fee</button></div>
-</div>
-
 <div class="flex flex-col gap-4">
 <?php foreach ($members as $m):
   $mFees = $memberFeesAll[$m['id']] ?? [];
@@ -643,7 +610,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <?php if ($totalAdd > 0): ?><div><div class="font-mono font-bold text-ak-green text-sm">+¥<?= number_format($totalAdd) ?></div><div class="text-ak-muted text-[10px]">additions</div></div><?php endif; ?>
     <?php if (empty($mFees)): ?><div class="text-ak-muted text-xs italic">No special fees</div><?php endif; ?>
     </div>
-    <button onclick="showAddFeeForMember(<?= (int)$m['id'] ?>,'<?= h($m['name']) ?>')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>
+    <button onclick="openAddFeeModal(<?= (int)$m['id'] ?>,'<?= h($m['name']) ?>')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>
   </div>
   <?php if (!empty($mFees)): ?>
   <div id="fee-list-<?= (int)$m['id'] ?>">
@@ -653,7 +620,8 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium"><?= h($fee['fee_name']) ?></div><?php if (!empty($fee['notes'])): ?><div class="text-ak-muted text-xs"><?= h($fee['notes']) ?></div><?php endif; ?></div>
     <div class="font-mono font-bold text-sm <?= $fee['fee_type']==='addition' ? 'text-ak-green' : 'text-ak-red' ?>"><?= $fee['fee_type']==='addition' ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?></div>
     <div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></div>
-    <button onclick="deleteSpecialFee(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,<?= (int)$activeAuctionId ?>)" class="btn-icon shrink-0 hover:text-ak-red transition-colors">×</button>
+    <button onclick="openEditFeeModal(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,'<?= h(addslashes($fee['fee_name'])) ?>',<?= (float)$fee['amount'] ?>,'<?= $fee['fee_type'] ?>','<?= h(addslashes($fee['notes'] ?? '')) ?>')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button>
+    <button onclick="deleteSpecialFee(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,<?= (int)$activeAuctionId ?>)" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>
   </div>
   <?php endforeach; ?>
   </div>
@@ -1020,5 +988,48 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 <div class="shortcut-hint" id="shortcut-hint"></div>
+
+<!-- Add Fee Modal -->
+<div id="addFeeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl p-8 max-w-[520px] w-[92%] shadow-2xl max-h-[90vh] overflow-y-auto">
+    <h3 class="text-ak-gold font-bold text-lg mb-5">💴 Add Special Fee</h3>
+    <form id="addFeeForm" data-parsley-validate>
+      <input type="hidden" id="af_memberId">
+      <div class="mb-4"><label class="lbl">Member</label><input class="inp" id="af_memberName" disabled></div>
+      <div class="mb-4"><label class="lbl">Fee Name *</label><input class="inp" id="af_feeName" placeholder="e.g. Car Wash Fee" data-parsley-required="true" data-parsley-required-message="Fee name is required"></div>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="af_amount" placeholder="3000" min="1" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-required-message="Amount is required"></div>
+        <div><label class="lbl">Type</label><select class="inp" id="af_feeType"><option value="deduction">− Deduction</option><option value="addition">+ Addition</option></select></div>
+      </div>
+      <div class="mb-5"><label class="lbl">Notes</label><input class="inp" id="af_notes" placeholder="Optional"></div>
+      <div class="flex gap-3">
+        <button type="button" onclick="closeAddFeeModal()" class="btn btn-dark flex-1">Cancel</button>
+        <button type="submit" id="addFeeBtn" class="btn btn-gold flex-1">+ Add Fee</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Fee Modal -->
+<div id="editFeeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
+  <div class="bg-ak-card border border-ak-border rounded-2xl p-8 max-w-[520px] w-[92%] shadow-2xl max-h-[90vh] overflow-y-auto">
+    <h3 class="text-ak-gold font-bold text-lg mb-5">✎ Edit Fee</h3>
+    <form id="editFeeForm" data-parsley-validate>
+      <input type="hidden" id="ef_feeId">
+      <input type="hidden" id="ef_memberId">
+      <div class="mb-4"><label class="lbl">Fee Name *</label><input class="inp" id="ef_feeName" data-parsley-required="true" data-parsley-required-message="Fee name is required"></div>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="ef_amount" min="1" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-required-message="Amount is required"></div>
+        <div><label class="lbl">Type</label><select class="inp" id="ef_feeType"><option value="deduction">− Deduction</option><option value="addition">+ Addition</option></select></div>
+      </div>
+      <div class="mb-5"><label class="lbl">Notes</label><input class="inp" id="ef_notes" placeholder="Optional"></div>
+      <div class="flex gap-3">
+        <button type="button" onclick="closeEditFeeModal()" class="btn btn-dark flex-1">Cancel</button>
+        <button type="submit" id="editFeeBtn" class="btn btn-gold flex-1">💾 Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 </body>
 </html>

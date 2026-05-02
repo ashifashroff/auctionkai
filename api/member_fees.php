@@ -60,6 +60,28 @@ try {
         exit;
     }
 
+    // EDIT FEE
+    if ($action === 'edit') {
+        $feeId = (int)($data['fee_id'] ?? 0);
+        $feeName = trim($data['fee_name'] ?? '');
+        $amount = (float)($data['amount'] ?? 0);
+        $feeType = $data['fee_type'] ?? 'deduction';
+        $notes = trim($data['notes'] ?? '');
+
+        if (!$feeId) { echo json_encode(['success' => false, 'message' => 'Missing fee ID']); exit; }
+        if (empty($feeName)) { echo json_encode(['success' => false, 'message' => 'Fee name is required']); exit; }
+        if ($amount <= 0) { echo json_encode(['success' => false, 'message' => 'Amount must be greater than 0']); exit; }
+        if (!in_array($feeType, ['deduction', 'addition'])) $feeType = 'deduction';
+
+        $stmt = $db->prepare("UPDATE member_fees SET fee_name=?, amount=?, fee_type=?, notes=? WHERE id=? AND auction_id=? AND member_id=?");
+        $stmt->execute([$feeName, $amount, $feeType, $notes ?: null, $feeId, $auctionId, $memberId]);
+
+        logActivity($db, $userId, 'member_fee.edit', 'member', $memberId, "Edited fee '{$feeName}' ¥" . number_format($amount) . " for: {$member['name']}");
+
+        echo json_encode(['success' => true, 'fee' => ['id' => $feeId, 'fee_name' => $feeName, 'amount' => $amount, 'fee_type' => $feeType, 'notes' => $notes], 'message' => 'Fee updated']);
+        exit;
+    }
+
     // LIST FEES
     if ($action === 'list') {
         $stmt = $db->prepare("SELECT * FROM member_fees WHERE auction_id=? AND member_id=? ORDER BY created_at ASC");

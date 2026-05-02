@@ -1454,47 +1454,45 @@ function toggleStmtHistory(memberId) {
   if (arrow) arrow.textContent = isHidden ? '▴' : '▾';
 }
 
+
 // ── Special Member Fees ───────────────────────
-function setFeePreset(name, amount, type) {
-  const nameEl = document.getElementById('sf_feeName');
-  const amountEl = document.getElementById('sf_amount');
-  const typeEl = document.getElementById('sf_feeType');
-  if (nameEl) nameEl.value = name;
-  if (amountEl) amountEl.value = amount;
-  if (typeEl) typeEl.value = type;
-  document.getElementById('sf_memberId')?.scrollIntoView({ behavior: 'smooth' });
+function openAddFeeModal(memberId, memberName) {
+  document.getElementById('af_memberId').value = memberId;
+  document.getElementById('af_memberName').value = memberName;
+  document.getElementById('af_feeName').value = '';
+  document.getElementById('af_amount').value = '';
+  document.getElementById('af_feeType').value = 'deduction';
+  document.getElementById('af_notes').value = '';
+  const m = document.getElementById('addFeeModal');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('af_feeName').focus();
 }
 
-function showAddFeeForMember(memberId, memberName) {
-  const select = document.getElementById('sf_memberId');
-  if (select) select.value = memberId;
-  select?.scrollIntoView({ behavior: 'smooth' });
-  document.getElementById('sf_feeName')?.focus();
+function closeAddFeeModal() {
+  document.getElementById('addFeeModal').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
-async function addSpecialFee() {
-  const memberId = document.getElementById('sf_memberId')?.value;
-  const feeName = document.getElementById('sf_feeName')?.value.trim();
-  const amount = parseFloat(document.getElementById('sf_amount')?.value);
-  const feeType = document.getElementById('sf_feeType')?.value;
-  const notes = document.getElementById('sf_notes')?.value.trim();
+document.getElementById('addFeeForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const memberId = document.getElementById('af_memberId').value;
+  const feeName = document.getElementById('af_feeName').value.trim();
+  const amount = parseFloat(document.getElementById('af_amount').value);
+  const feeType = document.getElementById('af_feeType').value;
+  const notes = document.getElementById('af_notes').value.trim();
+  const btn = document.getElementById('addFeeBtn');
 
-  if (!memberId) { showToast('Please select a member', 'warning'); return; }
-  if (!feeName) { showToast('Please enter a fee name', 'warning'); return; }
-  if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
-
+  btn.textContent = 'Adding...'; btn.disabled = true;
   try {
     const res = await fetch('api/member_fees.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'add', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_name: feeName, amount, fee_type: feeType, notes })
     });
     const data = await res.json();
     if (data.success) {
       showToast(`✓ ${feeName} added`, 'success');
-      document.getElementById('sf_feeName').value = '';
-      document.getElementById('sf_amount').value = '';
-      document.getElementById('sf_notes').value = '';
+      closeAddFeeModal();
       const feeList = document.getElementById(`fee-list-${memberId}`);
       if (feeList && data.fee) {
         const f = data.fee; const isAdd = f.fee_type === 'addition';
@@ -1502,19 +1500,67 @@ async function addSpecialFee() {
         const row = document.createElement('div');
         row.id = `fee-row-${f.id}`;
         row.className = 'flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors animate-fade-in';
-        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0">×</button>`;
+        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="openEditFeeModal(${f.id},${memberId},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
         feeList.appendChild(row);
       }
-    } else { showToast(data.message || 'Failed to add fee', 'error'); }
+    } else { showToast(data.message || 'Failed', 'error'); }
   } catch { showToast('Connection error', 'error'); }
+  btn.textContent = '+ Add Fee'; btn.disabled = false;
+});
+
+function openEditFeeModal(feeId, memberId, feeName, amount, feeType, notes) {
+  document.getElementById('ef_feeId').value = feeId;
+  document.getElementById('ef_memberId').value = memberId;
+  document.getElementById('ef_feeName').value = feeName;
+  document.getElementById('ef_amount').value = amount;
+  document.getElementById('ef_feeType').value = feeType;
+  document.getElementById('ef_notes').value = notes;
+  const m = document.getElementById('editFeeModal');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('ef_feeName').focus();
 }
+
+function closeEditFeeModal() {
+  document.getElementById('editFeeModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('editFeeForm')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const feeId = document.getElementById('ef_feeId').value;
+  const memberId = document.getElementById('ef_memberId').value;
+  const feeName = document.getElementById('ef_feeName').value.trim();
+  const amount = parseFloat(document.getElementById('ef_amount').value);
+  const feeType = document.getElementById('ef_feeType').value;
+  const notes = document.getElementById('ef_notes').value.trim();
+  const btn = document.getElementById('editFeeBtn');
+
+  btn.textContent = 'Saving...'; btn.disabled = true;
+  try {
+    const res = await fetch('api/member_fees.php', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'edit', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_id: parseInt(feeId), fee_name: feeName, amount, fee_type: feeType, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✓ ${feeName} updated`, 'success');
+      closeEditFeeModal();
+      const row = document.getElementById(`fee-row-${feeId}`);
+      if (row && data.fee) {
+        const f = data.fee; const isAdd = f.fee_type === 'addition';
+        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="openEditFeeModal(${f.id},${memberId},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
+      }
+    } else { showToast(data.message || 'Failed', 'error'); }
+  } catch { showToast('Connection error', 'error'); }
+  btn.textContent = '💾 Save Changes'; btn.disabled = false;
+});
 
 async function deleteSpecialFee(feeId, memberId, auctionId) {
   if (!confirm('Delete this fee?')) return;
   try {
     const res = await fetch('api/member_fees.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'delete', auction_id: auctionId, member_id: memberId, fee_id: feeId })
     });
     const data = await res.json();
@@ -1525,3 +1571,7 @@ async function deleteSpecialFee(feeId, memberId, auctionId) {
     } else { showToast(data.message || 'Delete failed', 'error'); }
   } catch { showToast('Connection error', 'error'); }
 }
+
+// Modal backdrop close
+document.getElementById('addFeeModal')?.addEventListener('click', function(e) { if (e.target === this) closeAddFeeModal(); });
+document.getElementById('editFeeModal')?.addEventListener('click', function(e) { if (e.target === this) closeEditFeeModal(); });
