@@ -9,7 +9,7 @@ function h(string $s): string {
     return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
 }
 
-function calcStatement(int $memberId, array $vehicles, float $commissionFee): array {
+function calcStatement(int $memberId, array $vehicles, float $commissionFee, array $specialFees = []): array {
     $all = array_values(array_filter($vehicles, fn($v) => (int)$v['member_id'] === $memberId));
     $mv = array_values(array_filter($all, fn($v) => $v['sold']));
     $uv = array_values(array_filter($all, fn($v) => !$v['sold']));
@@ -23,12 +23,24 @@ function calcStatement(int $memberId, array $vehicles, float $commissionFee): ar
     $nagareFeeTotal  = array_sum(array_map(fn($v) => (float)($v['nagare_fee'] ?? 0), $uv)); // nagare for unsold only
 
     $commissionTotal = $commissionFee;
-    $totalReceived = $grossSales + $taxTotal + $recycleTotal;
+
+    // Special fees per member
+    $specialDeductions = 0;
+    $specialAdditions = 0;
+    foreach ($specialFees as $sf) {
+        if (($sf['fee_type'] ?? 'deduction') === 'deduction') {
+            $specialDeductions += (float)$sf['amount'];
+        } else {
+            $specialAdditions += (float)$sf['amount'];
+        }
+    }
+
+    $totalReceived = $grossSales + $taxTotal + $recycleTotal + $specialAdditions;
     $totalVehicleDed = $listingFeeTotal + $soldFeeTotal + $nagareFeeTotal;
-    $totalDed = $totalVehicleDed + $commissionTotal;
+    $totalDed = $totalVehicleDed + $commissionTotal + $specialDeductions;
     $netPayout = $count > 0 ? $totalReceived - $totalDed : 0;
 
-    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','commissionTotal','commissionFee','totalReceived','totalVehicleDed','totalDed','netPayout');
+    return compact('mv','uv','count','unsoldCount','grossSales','taxTotal','recycleTotal','listingFeeTotal','soldFeeTotal','nagareFeeTotal','commissionTotal','commissionFee','specialDeductions','specialAdditions','specialFees','totalReceived','totalVehicleDed','totalDed','netPayout');
 }
 
 function sanitizeInput(string $input, string $type = 'string'): mixed {

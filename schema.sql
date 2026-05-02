@@ -342,3 +342,29 @@ CREATE TABLE IF NOT EXISTS statement_history (
   ip_address VARCHAR(45) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Member Fees ───────────────────────────────
+CREATE TABLE IF NOT EXISTS member_fees (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  fee_name VARCHAR(200) NOT NULL,
+  amount DECIMAL(10,0) NOT NULL DEFAULT 0,
+  fee_type ENUM('deduction','addition') DEFAULT 'deduction',
+  notes VARCHAR(500) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_mfees_auction (`auction_id`),
+  INDEX idx_mfees_member (`member_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS member_fees (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  fee_name VARCHAR(200) NOT NULL,
+  amount DECIMAL(10,0) NOT NULL DEFAULT 0,
+  fee_type ENUM('deduction','addition') DEFAULT 'deduction',
+  notes VARCHAR(500) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

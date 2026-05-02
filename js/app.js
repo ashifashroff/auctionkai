@@ -1453,3 +1453,75 @@ function toggleStmtHistory(memberId) {
   panel.classList.toggle('hidden');
   if (arrow) arrow.textContent = isHidden ? '▴' : '▾';
 }
+
+// ── Special Member Fees ───────────────────────
+function setFeePreset(name, amount, type) {
+  const nameEl = document.getElementById('sf_feeName');
+  const amountEl = document.getElementById('sf_amount');
+  const typeEl = document.getElementById('sf_feeType');
+  if (nameEl) nameEl.value = name;
+  if (amountEl) amountEl.value = amount;
+  if (typeEl) typeEl.value = type;
+  document.getElementById('sf_memberId')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function showAddFeeForMember(memberId, memberName) {
+  const select = document.getElementById('sf_memberId');
+  if (select) select.value = memberId;
+  select?.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('sf_feeName')?.focus();
+}
+
+async function addSpecialFee() {
+  const memberId = document.getElementById('sf_memberId')?.value;
+  const feeName = document.getElementById('sf_feeName')?.value.trim();
+  const amount = parseFloat(document.getElementById('sf_amount')?.value);
+  const feeType = document.getElementById('sf_feeType')?.value;
+  const notes = document.getElementById('sf_notes')?.value.trim();
+
+  if (!memberId) { showToast('Please select a member', 'warning'); return; }
+  if (!feeName) { showToast('Please enter a fee name', 'warning'); return; }
+  if (!amount || amount <= 0) { showToast('Please enter a valid amount', 'warning'); return; }
+
+  try {
+    const res = await fetch('api/member_fees.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_name: feeName, amount, fee_type: feeType, notes })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`✓ ${feeName} added`, 'success');
+      document.getElementById('sf_feeName').value = '';
+      document.getElementById('sf_amount').value = '';
+      document.getElementById('sf_notes').value = '';
+      const feeList = document.getElementById(`fee-list-${memberId}`);
+      if (feeList && data.fee) {
+        const f = data.fee; const isAdd = f.fee_type === 'addition';
+        if (feeList.querySelector('.italic')) feeList.innerHTML = '';
+        const row = document.createElement('div');
+        row.id = `fee-row-${f.id}`;
+        row.className = 'flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors animate-fade-in';
+        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0">×</button>`;
+        feeList.appendChild(row);
+      }
+    } else { showToast(data.message || 'Failed to add fee', 'error'); }
+  } catch { showToast('Connection error', 'error'); }
+}
+
+async function deleteSpecialFee(feeId, memberId, auctionId) {
+  if (!confirm('Delete this fee?')) return;
+  try {
+    const res = await fetch('api/member_fees.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', auction_id: auctionId, member_id: memberId, fee_id: feeId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const row = document.getElementById(`fee-row-${feeId}`);
+      if (row) { row.style.opacity = '0'; row.style.transform = 'translateX(20px)'; row.style.transition = 'all 0.2s ease'; setTimeout(() => row.remove(), 200); }
+      showToast('Fee deleted', 'warning');
+    } else { showToast(data.message || 'Delete failed', 'error'); }
+  } catch { showToast('Connection error', 'error'); }
+}

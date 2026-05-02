@@ -18,6 +18,16 @@ checkMaintenanceMode($db, $userRole);
 
 $brand = loadBranding($db);
 $accentColor = sanitizeColor($brand['brand_accent_color']);
+
+// Fetch special fees per member
+$memberFeesAllPdf = [];
+if ($activeAuctionId) {
+    $mfq = $db->prepare("SELECT * FROM member_fees WHERE auction_id = ? ORDER BY member_id, created_at ASC");
+    $mfq->execute([$activeAuctionId]);
+    foreach ($mfq->fetchAll() as $mf) {
+        $memberFeesAllPdf[$mf['member_id']][] = $mf;
+    }
+}
 $userId = (int)$_SESSION['user_id'];
 
 $activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;
@@ -98,6 +108,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         " . ($s['soldFeeTotal'] > 0 ? "<div class='row dim'><span>− Sold Fees</span><span>" . fmt($s['soldFeeTotal']) . "</span></div>" : "") . "
         " . ($s['nagareFeeTotal'] > 0 ? "<div class='row dim'><span>− Nagare Fees</span><span>" . fmt($s['nagareFeeTotal']) . "</span></div>" : "") . "
         " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission ¥" . number_format($s['commissionFee']) . "/member</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
+        " . (!empty($s['specialFees']) ? implode('', array_map(function($sf) { $isAdd = ($sf['fee_type'] ?? 'deduction') === 'addition'; return "<div class='row dim'><span>" . ($isAdd ? '+ ' : '− ') . htmlspecialchars($sf['fee_name']) . "</span><span>" . ($isAdd ? '+' : '−') . '¥' . number_format((float)$sf['amount']) . "</span></div>"; }, $s['specialFees'])) : "") . "
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT / お支払い額</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
@@ -125,7 +136,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 </div>
 
 <?php foreach ($targets as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAllPdf[$m['id']] ?? []);
     if ($s['count'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';

@@ -244,12 +244,22 @@ if ($activeAuctionId) {
     }
 }
 
+// Fetch special member fees for this auction
+$memberFeesAll = [];
+if ($activeAuctionId) {
+    $mfq = $db->prepare("SELECT * FROM member_fees WHERE auction_id = ? ORDER BY member_id, created_at ASC");
+    $mfq->execute([$activeAuctionId]);
+    foreach ($mfq->fetchAll() as $mf) {
+        $memberFeesAll[$mf['member_id']][] = $mf;
+    }
+}
+
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
 // ─── ACTIVE TAB & STATS ───────────────────────────────────────────────────────
 $tab      = $_GET['tab'] ?? 'dashboard';
-$tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'statements'=>['icon'=>'📄','label'=>'Statements']];
+$tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'special_fees'=>['icon'=>'💴','label'=>'Fees'],'statements'=>['icon'=>'📄','label'=>'Statements']];
 $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 ?>
 <!DOCTYPE html>
@@ -385,7 +395,7 @@ if ($maintenanceOn && $userRole === 'admin'):
 <?php
 $totalGross = 0; $totalNet = 0; $memberRanking = [];
 foreach ($members as $m) {
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
     $totalGross += $s['grossSales'];
     $totalNet  += $s['netPayout'];
     $memberRanking[] = ['name'=>$m['name'], 'count'=>$s['count'], 'unsoldCount'=>$s['unsoldCount'], 'gross'=>$s['grossSales'], 'net'=>$s['netPayout']];
@@ -580,6 +590,82 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <!-- populated by JS -->
 </div>
 
+<?php elseif ($tab === 'special_fees'): ?>
+<div class="flex justify-between items-center mb-5 flex-wrap gap-3">
+  <h2 class="text-lg font-bold">💴 Special Fees — <?= h($auction['name']) ?></h2>
+</div>
+
+<div class="bg-ak-card rounded-xl p-4 mb-5 border border-ak-border">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Quick Add Common Fees</div>
+  <div class="flex flex-wrap gap-2">
+  <?php
+  $presets = [
+    ['name'=>'Car Wash Fee','amount'=>3000,'type'=>'deduction'],
+    ['name'=>'Bank Charges','amount'=>500,'type'=>'deduction'],
+    ['name'=>'Storage Fee','amount'=>5000,'type'=>'deduction'],
+    ['name'=>'Transport Extra','amount'=>10000,'type'=>'deduction'],
+    ['name'=>'Repair Cost','amount'=>20000,'type'=>'deduction'],
+    ['name'=>'Inspection Fee','amount'=>8000,'type'=>'deduction'],
+    ['name'=>'Key Duplicate','amount'=>3500,'type'=>'deduction'],
+    ['name'=>'Bonus Payment','amount'=>5000,'type'=>'addition'],
+  ];
+  foreach ($presets as $p):
+  ?>
+  <button class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-all <?= $p['type']==='addition' ? 'border-ak-green/40 text-ak-green hover:bg-ak-green/10' : 'border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold' ?>" onclick="setFeePreset('<?= h($p['name']) ?>',<?= $p['amount'] ?>,'<?= $p['type'] ?>')"><?= $p['type']==='addition' ? '+' : '−' ?> <?= h($p['name']) ?> (¥<?= number_format($p['amount']) ?>)</button>
+  <?php endforeach; ?>
+  </div>
+</div>
+
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Special Fee to Member</div>
+  <div class="grid grid-cols-5 gap-3 items-end">
+    <div class="col-span-1"><label class="lbl">Member *</label><select class="inp" id="sf_memberId"><option value="">Select…</option><?php foreach ($members as $m): ?><option value="<?= (int)$m['id'] ?>"><?= h($m['name']) ?></option><?php endforeach; ?></select></div>
+    <div class="col-span-1"><label class="lbl">Fee Name *</label><input class="inp" id="sf_feeName" placeholder="e.g. Car Wash Fee"></div>
+    <div class="col-span-1"><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="sf_amount" placeholder="3000" min="1"></div>
+    <div class="col-span-1"><label class="lbl">Type</label><select class="inp" id="sf_feeType"><option value="deduction">− Deduction</option><option value="addition">+ Addition</option></select></div>
+    <div class="col-span-1"><label class="lbl">Notes</label><input class="inp" id="sf_notes" placeholder="Optional"></div>
+  </div>
+  <div class="mt-3 flex justify-end"><button onclick="addSpecialFee()" class="btn btn-gold">+ Add Fee</button></div>
+</div>
+
+<div class="flex flex-col gap-4">
+<?php foreach ($members as $m):
+  $mFees = $memberFeesAll[$m['id']] ?? [];
+  $totalDed = array_sum(array_map(fn($f) => $f['fee_type']==='deduction' ? (float)$f['amount'] : 0, $mFees));
+  $totalAdd = array_sum(array_map(fn($f) => $f['fee_type']==='addition' ? (float)$f['amount'] : 0, $mFees));
+?>
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden" id="member-fees-card-<?= (int)$m['id'] ?>">
+  <div class="flex items-center gap-3 px-5 py-3 border-b border-ak-border">
+    <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
+    <div class="flex-1"><div class="font-semibold text-ak-text"><?= h($m['name']) ?></div><div class="text-ak-muted text-xs"><?= count($mFees) ?> fee(s)</div></div>
+    <div class="flex gap-4 text-right">
+    <?php if ($totalDed > 0): ?><div><div class="font-mono font-bold text-ak-red text-sm">−¥<?= number_format($totalDed) ?></div><div class="text-ak-muted text-[10px]">deductions</div></div><?php endif; ?>
+    <?php if ($totalAdd > 0): ?><div><div class="font-mono font-bold text-ak-green text-sm">+¥<?= number_format($totalAdd) ?></div><div class="text-ak-muted text-[10px]">additions</div></div><?php endif; ?>
+    <?php if (empty($mFees)): ?><div class="text-ak-muted text-xs italic">No special fees</div><?php endif; ?>
+    </div>
+    <button onclick="showAddFeeForMember(<?= (int)$m['id'] ?>,'<?= h($m['name']) ?>')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>
+  </div>
+  <?php if (!empty($mFees)): ?>
+  <div id="fee-list-<?= (int)$m['id'] ?>">
+  <?php foreach ($mFees as $fee): ?>
+  <div class="flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors" id="fee-row-<?= (int)$fee['id'] ?>">
+    <span class="text-lg"><?= $fee['fee_type']==='addition' ? '➕' : '➖' ?></span>
+    <div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium"><?= h($fee['fee_name']) ?></div><?php if (!empty($fee['notes'])): ?><div class="text-ak-muted text-xs"><?= h($fee['notes']) ?></div><?php endif; ?></div>
+    <div class="font-mono font-bold text-sm <?= $fee['fee_type']==='addition' ? 'text-ak-green' : 'text-ak-red' ?>"><?= $fee['fee_type']==='addition' ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?></div>
+    <div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></div>
+    <button onclick="deleteSpecialFee(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,<?= (int)$activeAuctionId ?>)" class="btn-icon shrink-0 hover:text-ak-red transition-colors">×</button>
+  </div>
+  <?php endforeach; ?>
+  </div>
+  <?php else: ?>
+  <div class="px-5 py-4 text-ak-muted text-sm text-center italic" id="fee-list-<?= (int)$m['id'] ?>">No special fees for this member yet.</div>
+  <?php endif; ?>
+</div>
+<?php endforeach; ?>
+</div>
+
+<script>const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
+
 <?php elseif ($tab === 'statements'): ?>
 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
   <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
@@ -609,7 +695,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php
 $totalPaid = 0; $totalUnpaid = 0; $totalPartial = 0; $totalNetPayout = 0;
 foreach ($members as $m) {
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
     if ($s['count'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
@@ -647,7 +733,7 @@ foreach ($members as $m) {
 <?php else: ?>
   <?php $hasSales = false; ?>
   <?php foreach ($members as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300));
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
     if ($s['count'] === 0) continue;
     $hasSales = true;
     $ps = $paymentStatuses[$m['id']] ?? null;
@@ -726,6 +812,11 @@ foreach ($members as $m) {
         <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <?php if (!empty($s['specialFees'])): ?>
+        <?php foreach ($s['specialFees'] as $sf): $isAdd = $sf['fee_type'] === 'addition'; ?>
+        <div class="dr"><span class="dr-l flex items-center gap-1"><?= $isAdd ? '➕' : '➖' ?> <?= h($sf['fee_name']) ?><?php if (!empty($sf['notes'])): ?> <span class="text-ak-muted text-[10px]">(<?= h($sf['notes']) ?>)</span><?php endif; ?></span><span class="dr-a <?= $isAdd ? 'text-ak-green' : '' ?>"><?= $isAdd ? '+' : '−' ?>¥<?= number_format((float)$sf['amount']) ?></span></div>
+        <?php endforeach; ?>
+        <?php endif; ?>
         <?php endif; ?>
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
