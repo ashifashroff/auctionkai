@@ -1443,3 +1443,13 @@ async function setPaymentStatus(memberId, auctionId, status, netPayout) {
     if (btn) btn.disabled = false;
   }
 }
+
+// ── Statement History Toggle ──────────────────
+function toggleStmtHistory(memberId) {
+  const panel = document.getElementById(`stmt-history-${memberId}`);
+  const arrow = document.getElementById(`stmt-history-arrow-${memberId}`);
+  if (!panel) return;
+  const isHidden = panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  if (arrow) arrow.textContent = isHidden ? '▴' : '▾';
+}

@@ -234,6 +234,16 @@ if ($activeAuctionId) {
     }
 }
 
+// Fetch statement history for active auction
+$stmtHistory = [];
+if ($activeAuctionId) {
+    $shq = $db->prepare("SELECT sh.*, m.name as member_name FROM statement_history sh JOIN members m ON sh.member_id = m.id WHERE sh.auction_id = ? AND sh.user_id = ? ORDER BY sh.created_at DESC LIMIT 100");
+    $shq->execute([$activeAuctionId, $userId]);
+    foreach ($shq->fetchAll() as $row) {
+        $stmtHistory[$row['member_id']][] = $row;
+    }
+}
+
 
 
 // ─── CALC STATEMENT ──────────────────────────────────────────────────────────
@@ -711,6 +721,29 @@ foreach ($members as $m) {
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
         <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
       </div>
+
+      <?php
+      $memberHistory = $stmtHistory[$m['id']] ?? [];
+      if (!empty($memberHistory)):
+      ?>
+      <div class="border-t border-ak-border mt-0">
+        <button onclick="toggleStmtHistory(<?= (int)$m['id'] ?>)" class="w-full px-6 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-text2 hover:bg-ak-infield/50 transition-colors">
+          <span>📋 Statement History (<?= count($memberHistory) ?> records)</span>
+          <span id="stmt-history-arrow-<?= (int)$m['id'] ?>">▾</span>
+        </button>
+        <div id="stmt-history-<?= (int)$m['id'] ?>" class="hidden border-t border-ak-border/50">
+        <?php foreach ($memberHistory as $h): $isEmail = $h['action'] === 'email'; ?>
+          <div class="flex items-center gap-3 px-6 py-2 text-xs border-b border-ak-border/30 last:border-0 hover:bg-ak-infield/30 transition-colors">
+            <span class="<?= $isEmail ? 'text-ak-gold' : 'text-ak-text2' ?>"><?= $isEmail ? '✉️' : '📄' ?></span>
+            <span class="text-ak-text2 font-medium"><?= $isEmail ? 'Email sent' : 'PDF generated' ?></span>
+            <span class="text-ak-muted font-mono"><?= fmt($h['net_payout']) ?></span>
+            <span class="text-ak-muted ml-auto font-mono"><?= date('Y-m-d H:i', strtotime($h['created_at'])) ?></span>
+          </div>
+        <?php endforeach; ?>
+        </div>
+      </div>
+      <?php endif; ?>
+
     </div>
   </div>
   <?php endforeach; ?>

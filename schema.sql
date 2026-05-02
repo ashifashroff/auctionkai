@@ -314,3 +314,31 @@ CREATE TABLE IF NOT EXISTS payment_status (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY unique_auction_member (`auction_id`, `member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Statement History ────────────────────────
+CREATE TABLE IF NOT EXISTS statement_history (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  action ENUM('pdf','email') NOT NULL,
+  net_payout DECIMAL(12,0) DEFAULT 0,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_stmt_auction (`auction_id`),
+  INDEX idx_stmt_member (`member_id`),
+  INDEX idx_stmt_user (`user_id`),
+  INDEX idx_stmt_created (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS statement_history (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  action ENUM('pdf','email') NOT NULL,
+  net_payout DECIMAL(12,0) DEFAULT 0,
+  ip_address VARCHAR(45) DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

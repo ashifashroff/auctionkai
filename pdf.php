@@ -130,6 +130,13 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
     echo renderStatement($m, $s, $auction, $payStatus);
+
+    // Log PDF generation to statement_history
+    try {
+        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+        $db->prepare("INSERT INTO statement_history (auction_id, member_id, user_id, action, net_payout, ip_address) VALUES (?, ?, ?, 'pdf', ?, ?)")->execute([$activeAuctionId, (int)$m['id'], $userId, $s['netPayout'], $ip]);
+    } catch (Exception $e) {}
+
 endforeach; ?>
 
 </body>

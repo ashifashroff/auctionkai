@@ -108,6 +108,7 @@ auctionkai/
 │   └── delete_auction.php
 │   └── delete_account.php    ← GDPR account deletion
 │   └── update_payment.php    ← Payment status AJAX
+│   └── log_statement.php     ← Statement event logger
 ├── backups/                  ← Auto-created backup files
 │   └── .htaccess             ← Block direct access
 ├── scripts/
@@ -271,6 +272,10 @@ Everything uses PDO prepared statements — no raw SQL interpolation anywhere. A
 - Backup file browser with download/delete
 - Protected backups/ folder
 - Cron setup instructions shown in panel
+- Statement history — tracks every PDF generated and email sent
+- Per-member collapsible history on Statements tab
+- Shows action type, net payout, timestamp, IP address
+- Admin panel shows full history across all users
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 

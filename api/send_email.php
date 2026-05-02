@@ -84,4 +84,12 @@ $result = sendSettlementEmail(
     $member, $auction, $htmlBody, $db
 );
 
+// Log email to statement_history
+if (!empty($result['success'])) {
+    try {
+        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+        $db->prepare("INSERT INTO statement_history (auction_id, member_id, user_id, action, net_payout, ip_address) VALUES (?, ?, ?, 'email', ?, ?)")->execute([$auctionId, $memberId, $userId, $s['netPayout'], $ip]);
+    } catch (Exception $e) {}
+}
+
 echo json_encode($result);
