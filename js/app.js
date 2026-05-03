@@ -1542,7 +1542,7 @@ function filterSfMembers() {
   if (filtered.length === 0 || query === '') { dropdown.style.display = 'none'; return; }
   dropdown.innerHTML = filtered.map(m => `
     <div class="member-dropdown-item" onclick="sfSelectMember(${m.id}, '${m.name.replace(/'/g,"\\'")}')">
-      ${m.name}
+      ${m.name}<span class="mdi-phone">${m.phone || ''}</span>
     </div>
   `).join('');
   dropdown.style.display = 'block';
