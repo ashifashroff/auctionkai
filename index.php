@@ -623,159 +623,123 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <!-- Notes row -->
     <div class="mt-2">
       <label class="lbl">Notes</label>
-      <input class="inp" id="sf_notes" placeholder="Optional notes…">
+      <input class="inp" id="sf_notes" placeholder="Notes (optional) — e.g. Invoice #123, Car plate number">
     </div>
+
+    <!-- Quick preset chips below the form -->
+    <div class="mt-3 flex flex-wrap gap-1.5">
+      <span class="text-[10px] uppercase tracking-wider text-ak-muted self-center mr-1">Quick:</span>
+      <?php
+      $presets = [
+        ['name' => 'Car Wash', 'amount' => 3000, 'type' => 'deduction'],
+        ['name' => 'Bank Charges', 'amount' => 500, 'type' => 'deduction'],
+        ['name' => 'Storage Fee', 'amount' => 5000, 'type' => 'deduction'],
+        ['name' => 'Transport Extra', 'amount' => 10000, 'type' => 'deduction'],
+        ['name' => 'Repair Cost', 'amount' => 20000, 'type' => 'deduction'],
+        ['name' => 'Inspection', 'amount' => 8000, 'type' => 'deduction'],
+        ['name' => 'Key Duplicate', 'amount' => 3500, 'type' => 'deduction'],
+        ['name' => 'Bonus', 'amount' => 5000, 'type' => 'addition'],
+      ];
+      foreach ($presets as $p):
+      ?>
+      <button type="button"
+        class="px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all
+          <?= $p['type'] === 'addition'
+            ? 'border-ak-green/40 text-ak-green hover:bg-ak-green/10'
+            : 'border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold' ?>"
+        onclick="sfSetPreset('<?= h($p['name']) ?>', <?= $p['amount'] ?>, '<?= $p['type'] ?>')">
+        <?= $p['type'] === 'addition' ? '+' : '−' ?>
+        <?= h($p['name']) ?>
+      </button>
+      <?php endforeach; ?>
+    </div>
+
     <div id="addSpecialFeeMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
 
-<!-- Fees Table Card -->
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto" id="fees-table-wrap">
-  <div id="fees-content"><div class="text-center text-ak-muted py-8">Loading…</div></div>
-  <div id="fees-pagination" class="flex items-center justify-center gap-2 py-3"></div>
+<!-- Records Table (same style as vehicles table) -->
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
+  <table class="vt">
+    <thead>
+      <tr>
+        <th>Member</th>
+        <th>Fee Name</th>
+        <th>Notes</th>
+        <th>Type</th>
+        <th class="r">Amount</th>
+        <th>Added</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="specialFeesTableBody">
+      <?php
+      $allSpecialFees = [];
+      foreach ($memberFeesAll as $mId => $fees) {
+        $memberName = '';
+        foreach ($members as $m) {
+          if ((int)$m['id'] === $mId) {
+            $memberName = $m['name'];
+            break;
+          }
+        }
+        foreach ($fees as $fee) {
+          $fee['member_name'] = $memberName;
+          $allSpecialFees[] = $fee;
+        }
+      }
+      usort($allSpecialFees, fn($a,$b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+      ?>
+      <?php if (empty($allSpecialFees)): ?>
+      <tr>
+        <td colspan="7" class="text-center text-ak-muted py-12">
+          No special fees yet for this auction. Use the form above to add fees.
+        </td>
+      </tr>
+      <?php else: ?>
+      <?php foreach ($allSpecialFees as $fee):
+        $isAdd = $fee['fee_type'] === 'addition';
+      ?>
+      <tr id="sf-row-<?= (int)$fee['id'] ?>" class="animate-fade-in">
+        <td class="font-medium text-ak-text"><?= h($fee['member_name']) ?></td>
+        <td class="text-ak-text2"><?= h($fee['fee_name']) ?></td>
+        <td class="text-ak-muted text-xs"><?= h($fee['notes'] ?? '—') ?></td>
+        <td>
+          <span class="text-[11px] px-2 py-0.5 rounded-full font-bold <?= $isAdd ? 'bg-ak-green/15 text-ak-green' : 'bg-ak-red/10 text-ak-red' ?>">
+            <?= $isAdd ? '+ Addition' : '− Deduction' ?>
+          </span>
+        </td>
+        <td class="text-right font-mono font-bold <?= $isAdd ? 'text-ak-green' : 'text-ak-red' ?>">
+          <?= $isAdd ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?>
+        </td>
+        <td class="text-ak-muted text-xs font-mono"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></td>
+        <td>
+          <button class="btn-icon" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
+        </td>
+      </tr>
+      <?php endforeach; ?>
+      <?php endif; ?>
+    </tbody>
+  </table>
+
+  <!-- Summary row at bottom -->
+  <?php if (!empty($allSpecialFees)):
+    $sumDed = array_sum(array_map(fn($f) => $f['fee_type'] === 'deduction' ? (float)$f['amount'] : 0, $allSpecialFees));
+    $sumAdd = array_sum(array_map(fn($f) => $f['fee_type'] === 'addition' ? (float)$f['amount'] : 0, $allSpecialFees));
+  ?>
+  <div class="px-5 py-3 border-t border-ak-border flex gap-6 text-sm">
+    <span class="text-ak-muted"><?= count($allSpecialFees) ?> fee(s) total</span>
+    <?php if ($sumDed > 0): ?>
+    <span class="font-mono text-ak-red font-bold">−¥<?= number_format($sumDed) ?> deductions</span>
+    <?php endif; ?>
+    <?php if ($sumAdd > 0): ?>
+    <span class="font-mono text-ak-green font-bold">+¥<?= number_format($sumAdd) ?> additions</span>
+    <?php endif; ?>
+  </div>
+  <?php endif; ?>
 </div>
 
-<script>
-const activeAuctionId = <?= (int)$activeAuctionId ?>;
-const sfMembersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name']], $members)) ?>;
 
-function filterSfMembers() {
-  const q = document.getElementById('sf_memberSearch').value.toLowerCase().trim();
-  const dropdown = document.getElementById('sf_memberDropdown');
-  document.getElementById('sf_memberId').value = '';
-  if (!q) { dropdown.style.display = 'none'; return; }
-  const filtered = sfMembersData.filter(m => m.name.toLowerCase().includes(q));
-  if (!filtered.length) { dropdown.style.display = 'none'; return; }
-  dropdown.innerHTML = filtered.map(m => `<div class="member-result" onclick="selectSfMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
-  dropdown.style.display = 'block';
-}
-
-function showSfMemberResults() {
-  const q = document.getElementById('sf_memberSearch').value.toLowerCase().trim();
-  if (!q) {
-    const dropdown = document.getElementById('sf_memberDropdown');
-    dropdown.innerHTML = sfMembersData.slice(0,10).map(m => `<div class="member-result" onclick="selectSfMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
-    dropdown.style.display = 'block';
-  }
-}
-
-function selectSfMember(id, name) {
-  document.getElementById('sf_memberId').value = id;
-  document.getElementById('sf_memberSearch').value = name;
-  document.getElementById('sf_memberDropdown').style.display = 'none';
-}
-
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#sf_memberSearch') && !e.target.closest('#sf_memberDropdown')) {
-    document.getElementById('sf_memberDropdown').style.display = 'none';
-  }
-});
-
-function submitAddSpecialFee(e) {
-  e.preventDefault();
-  const btn = document.getElementById('addSpecialFeeBtn');
-  const msgEl = document.getElementById('addSpecialFeeMsg');
-  const memberId = document.getElementById('sf_memberId').value;
-  if (!memberId) { msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent='Please select a member.'; msgEl.classList.remove('hidden'); return false; }
-  btn.disabled = true; btn.textContent = 'Adding…';
-  fetch('api/member_fees.php', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      action:'add',
-      auction_id: activeAuctionId,
-      member_id: parseInt(memberId),
-      fee_name: document.getElementById('sf_feeName').value.trim(),
-      amount: parseFloat(document.getElementById('sf_amount').value),
-      fee_type: document.getElementById('sf_feeType').value,
-      notes: document.getElementById('sf_notes').value.trim()
-    })
-  })
-  .then(r => r.json())
-  .then(data => {
-    btn.disabled = false; btn.textContent = 'Add';
-    if (data.success) {
-      document.getElementById('addSpecialFeeForm').reset();
-      document.getElementById('sf_memberId').value = '';
-      msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-green/15 text-ak-green'; msgEl.textContent='Fee added!'; msgEl.classList.remove('hidden');
-      setTimeout(()=>msgEl.classList.add('hidden'),3000);
-      FeesPager.page=1; FeesPager.load();
-    } else {
-      msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent=data.message||'Failed to add fee.'; msgEl.classList.remove('hidden');
-    }
-  })
-  .catch(() => { btn.disabled=false; btn.textContent='Add'; msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent='Network error.'; msgEl.classList.remove('hidden'); });
-  return false;
-}
-
-const FeesPager = {
-  page: 1, lastPage: 1, total: 0, perPage: 10, search: '', searchTimer: null,
-  init() {
-    document.getElementById('fees-search')?.addEventListener('input', () => {
-      clearTimeout(this.searchTimer);
-      this.searchTimer = setTimeout(() => { this.page = 1; this.load(); }, 300);
-    });
-    this.load();
-  },
-  load() {
-    const content = document.getElementById('fees-content');
-    const pagDiv = document.getElementById('fees-pagination');
-    this.search = document.getElementById('fees-search')?.value.trim() || '';
-    content.innerHTML = '<div class="text-center text-ak-muted py-8">Loading…</div>';
-    pagDiv.innerHTML = '';
-    fetch(`api/get_member_fees_page.php?auction_id=${activeAuctionId}&page=${this.page}&per_page=${this.perPage}&search=${encodeURIComponent(this.search)}`)
-    .then(r => r.json())
-    .then(data => {
-      this.total = data.total; this.lastPage = data.lastPage;
-      if (!data.fees || data.fees.length === 0) {
-        content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No special fees found.</div>';
-        pagDiv.innerHTML = '';
-        return;
-      }
-      const grouped = {};
-      data.fees.forEach(f => { if (!grouped[f.member_id]) grouped[f.member_id] = { name: f.member_name, fees: [] }; grouped[f.member_id].fees.push(f); });
-      let html = '<div class="flex flex-col gap-4">';
-      Object.entries(grouped).forEach(([mid, mg]) => {
-        const totalDed = mg.fees.filter(f=>f.fee_type==='deduction').reduce((s,f)=>s+parseFloat(f.amount),0);
-        const totalAdd = mg.fees.filter(f=>f.fee_type==='addition').reduce((s,f)=>s+parseFloat(f.amount),0);
-        html += `<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">`;
-        html += `<div class="flex items-center gap-3 px-5 py-3 border-b border-ak-border">`;
-        html += `<div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0">${mg.name.charAt(0).toUpperCase()}</div>`;
-        html += `<div class="flex-1"><div class="font-semibold text-ak-text">${mg.name}</div><div class="text-ak-muted text-xs">${mg.fees.length} fee(s)</div></div>`;
-        if (totalDed > 0) html += `<div class="font-mono font-bold text-ak-red text-sm">−¥${totalDed.toLocaleString('ja-JP')}</div>`;
-        if (totalAdd > 0) html += `<div class="font-mono font-bold text-ak-green text-sm">+¥${totalAdd.toLocaleString('ja-JP')}</div>`;
-        html += `</div>`;
-        mg.fees.forEach(f => {
-          const isAdd = f.fee_type === 'addition';
-          html += `<div class="flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors" id="fee-row-${f.id}">`;
-          html += `<span class="text-lg">${isAdd ? '➕' : '➖'}</span>`;
-          html += `<div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div>`;
-          html += `<div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div>`;
-          html += `<div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${f.created_at.slice(0,10)}</div>`;
-          html += `<button onclick="openEditFeeModal(${f.id},${mid},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button>`;
-          html += `<button onclick="deleteSpecialFee(${f.id},${mid},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
-          html += `</div>`;
-        });
-        html += `</div>`;
-      });
-      html += '</div>';
-      content.innerHTML = html;
-      if (this.lastPage > 1) {
-        let ph = `<span class="text-ak-muted text-xs mr-2">${this.total} fees · Page ${this.page} of ${this.lastPage}</span>`;
-        if (this.page > 1) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page-1};FeesPager.load()">← Prev</button>`;
-        for (let p = Math.max(1, this.page-2); p <= Math.min(this.lastPage, this.page+2); p++) {
-          ph += `<button class="px-3 py-1.5 rounded-lg text-sm font-semibold ${p===this.page ? 'bg-ak-gold text-ak-bg' : 'bg-ak-card text-ak-muted hover:text-ak-text2 border border-ak-border'}" onclick="FeesPager.page=${p};FeesPager.load()">${p}</button>`;
-        }
-        if (this.page < this.lastPage) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page+1};FeesPager.load()">Next →</button>`;
-        pagDiv.innerHTML = ph;
-      } else { pagDiv.innerHTML = `<span class="text-ak-muted text-xs">${this.total} fees</span>`; }
-    })
-    .catch(() => { content.innerHTML = '<div class="bg-ak-red/15 text-ak-red p-4 rounded-lg">Error loading fees</div>'; });
-  }
-};
-
-FeesPager.init();
-</script>
 
 <?php elseif ($tab === 'statements'): ?>
 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
