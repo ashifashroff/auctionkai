@@ -1598,6 +1598,7 @@ async function submitAddSpecialFee(event) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        _tok: CSRF_TOKEN,
         action: 'add',
         auction_id: activeAuctionId,
         member_id: parseInt(memberId),
