@@ -29,4 +29,5 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
   body{background:#fff!important}
   .page{margin:0!important;box-shadow:none!important;width:100%!important;min-height:auto!important;page-break-after:always}
   .page:last-child{page-break-after:auto}
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
 }
