@@ -147,7 +147,7 @@ function parseOS(string $ua): string {
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" value="<?= h($user['name']) ?>" data-parsley-required="true">
+          <input class="inp" name="name" value="<?= h($user['name']) ?>" data-parsley-required="true" data-parsley-required-message="Name is required">
         </div>
 
         <div class="mb-4">
@@ -172,19 +172,19 @@ function parseOS(string $ua): string {
 
         <div class="mb-4">
           <label class="lbl">Current Password *</label>
-          <input class="inp" type="password" name="current_password" placeholder="Enter current password" data-parsley-required="true">
+          <input class="inp" type="password" name="current_password" placeholder="Enter current password" data-parsley-required="true" data-parsley-required-message="Current password is required">
         </div>
 
         <div class="mb-4">
           <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-minlength="8">
+          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-required-message="New password is required" data-parsley-minlength="8" data-parsley-minlength-message="Password must be at least 8 characters">
           <div class="strength-bar-wrap" id="prof-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="prof-strength-label"></div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password *</label>
-          <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" data-parsley-required="true">
+          <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" data-parsley-required="true" data-parsley-required-message="Please confirm your new password" data-parsley-equalto="#profile-new-password" data-parsley-equalto-message="Passwords do not match">
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Change Password</button>
