@@ -2,6 +2,9 @@
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 require_once __DIR__ . '/includes/constants.php';
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/maintenance_check.php';
+require_once __DIR__ . '/includes/branding.php';
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_samesite', 'Strict');
 session_start();
@@ -72,9 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/activity.php';
-require_once __DIR__ . '/includes/maintenance_check.php';
 
 // Fetch last 10 login attempts
 $stmt = $db->prepare("SELECT * FROM login_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
