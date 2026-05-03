@@ -20,8 +20,6 @@ $db = db();
 $userRole = $_SESSION['user_role'] ?? 'user';
 checkMaintenanceMode($db, $userRole);
 $userId = (int)$_SESSION['user_id'];
-$error = '';
-$success = '';
 
 $user = $db->prepare("SELECT * FROM users WHERE id = ?");
 $user->execute([$userId]);
@@ -31,48 +29,6 @@ if (!$user) {
     session_destroy();
     header('Location: auth/login.php');
     exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $action = $_POST['form'] ?? '';
-
-    if ($action === 'update_profile') {
-        $name  = trim($_POST['name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-
-        if ($name === '') {
-            $error = 'Name cannot be empty.';
-        } else {
-            $stmt = $db->prepare("UPDATE users SET name=?, email=? WHERE id=?");
-            $stmt->execute([$name, $email, $userId]);
-            $_SESSION['user_name'] = $name;
-            $success = 'Profile updated successfully.';
-            $user = $db->prepare("SELECT * FROM users WHERE id = ?");
-            $user->execute([$userId]);
-            $user = $user->fetch();
-        }
-    }
-
-    elseif ($action === 'change_password') {
-        $current  = $_POST['current_password'] ?? '';
-        $new      = $_POST['new_password'] ?? '';
-        $confirm  = $_POST['confirm_password'] ?? '';
-
-        if ($current === '' || $new === '' || $confirm === '') {
-            $error = 'Please fill in all password fields.';
-        } elseif (!password_verify($current, $user['password'])) {
-            $error = 'Current password is incorrect.';
-        } elseif (strlen($new) < MIN_PASSWORD_LENGTH) {
-            $error = 'New password must be at least 8 characters.';
-        } elseif ($new !== $confirm) {
-            $error = 'New passwords do not match.';
-        } else {
-            $hash = password_hash($new, PASSWORD_DEFAULT);
-            $db->prepare("UPDATE users SET password=? WHERE id=?")->execute([$hash, $userId]);
-            logActivity($db, $userId, 'password.change', 'user', $userId, "Password changed");
-            $success = 'Password changed successfully.';
-        }
-    }
 }
 
 require_once __DIR__ . '/includes/activity.php';
@@ -127,17 +83,14 @@ function parseOS(string $ua): string {
     </div>
 
     <!-- Messages -->
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
       <div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in"><?= h($error) ?></div>
-    <?php endif; ?>
-    <?php if ($success): ?>
-      <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-4 animate-fade-in"><?= h($success) ?></div>
     <?php endif; ?>
 
     <!-- Profile Info Card -->
     <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
       <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Profile Information</div>
-      <form method="POST" action="profile.php" data-parsley-validate>
+      <form id="profileForm" onsubmit="return submitProfileForm(event)" data-parsley-validate>
 
         <div class="mb-4">
           <label class="lbl">Username</label>
@@ -147,12 +100,12 @@ function parseOS(string $ua): string {
 
         <div class="mb-4">
           <label class="lbl">Full Name *</label>
-          <input class="inp" name="name" value="<?= h($user['name']) ?>" data-parsley-required="true" data-parsley-required-message="Name is required">
+          <input class="inp" name="name" id="pf_name" value="<?= h($user['name']) ?>" data-parsley-required="true" data-parsley-required-message="Name is required">
         </div>
 
         <div class="mb-4">
-          <label class="lbl">Email</label>
-          <input class="inp" type="email" name="email" value="<?= h($user['email']) ?>" placeholder="email@example.com" data-parsley-type="email">
+          <label class="lbl">Email *</label>
+          <input class="inp" type="email" name="email" id="pf_email" value="<?= h($user['email']) ?>" placeholder="email@example.com" data-parsley-required="true" data-parsley-required-message="Email is required" data-parsley-type="email" data-parsley-type-email-message="Please enter a valid email address">
         </div>
 
         <div class="mb-5">
@@ -160,19 +113,18 @@ function parseOS(string $ua): string {
           <input class="inp opacity-50 cursor-not-allowed capitalize" value="<?= h($user['role']) ?>" disabled>
         </div>
 
-        <button class="btn btn-gold w-full" type="submit">Save Changes</button>
+        <button class="btn btn-gold w-full" type="submit" id="profileSaveBtn">Save Changes</button>
       </form>
     </div>
 
     <!-- Password Card -->
     <div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-5 animate-fade-in-up">
       <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-5">Change Password</div>
-      <form method="POST" action="profile.php" data-parsley-validate>
-        <input type="hidden" name="form" value="change_password">
+      <form id="passwordForm" onsubmit="return submitPasswordForm(event)" data-parsley-validate>
 
         <div class="mb-4">
           <label class="lbl">Current Password *</label>
-          <input class="inp" type="password" name="current_password" placeholder="Enter current password" data-parsley-required="true" data-parsley-required-message="Current password is required">
+          <input class="inp" type="password" name="current_password" id="pf_current" placeholder="Enter current password" data-parsley-required="true" data-parsley-required-message="Current password is required">
         </div>
 
         <div class="mb-4">
@@ -184,10 +136,10 @@ function parseOS(string $ua): string {
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password *</label>
-          <input class="inp" type="password" name="confirm_password" placeholder="Confirm new password" data-parsley-required="true" data-parsley-required-message="Please confirm your new password" data-parsley-equalto="#profile-new-password" data-parsley-equalto-message="Passwords do not match">
+          <input class="inp" type="password" name="confirm_password" id="pf_confirm" placeholder="Confirm new password" data-parsley-required="true" data-parsley-required-message="Please confirm your new password" data-parsley-equalto="#profile-new-password" data-parsley-equalto-message="Passwords do not match">
         </div>
 
-        <button class="btn btn-gold w-full" type="submit">Change Password</button>
+        <button class="btn btn-gold w-full" type="submit" id="passwordChangeBtn">Change Password</button>
       </form>
     </div>
 
@@ -411,6 +363,76 @@ async function submitDeleteAccount() {
 document.getElementById('deleteAccountModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteAccountModal();
 });
+</script>
+
+<script>
+// AJAX Profile Update
+async function submitProfileForm(e) {
+  e.preventDefault();
+  if (!$(e.target).parsley().validate()) return false;
+
+  const btn = document.getElementById('profileSaveBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  try {
+    const res = await fetch('api/update_profile.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        _tok: CSRF_TOKEN,
+        action: 'update_profile',
+        name: document.getElementById('pf_name').value.trim(),
+        email: document.getElementById('pf_email').value.trim(),
+        username: '<?= h($user['username']) ?>'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✓ Profile updated', 'success');
+    } else {
+      showToast(data.message || 'Update failed', 'error');
+    }
+  } catch {
+    showToast('Connection error', 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Save Changes';
+  return false;
+}
+
+// AJAX Password Change
+async function submitPasswordForm(e) {
+  e.preventDefault();
+  if (!$(e.target).parsley().validate()) return false;
+
+  const btn = document.getElementById('passwordChangeBtn');
+  btn.disabled = true; btn.textContent = 'Changing…';
+
+  try {
+    const res = await fetch('api/update_profile.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        _tok: CSRF_TOKEN,
+        action: 'change_password',
+        current_password: document.getElementById('pf_current').value,
+        new_password: document.getElementById('profile-new-password').value
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✓ Password changed', 'success');
+      document.getElementById('passwordForm').reset();
+      document.getElementById('prof-strength-label').textContent = '';
+      document.querySelectorAll('#prof-strength-bars .strength-bar').forEach(b => b.className = 'strength-bar');
+    } else {
+      showToast(data.message || 'Change failed', 'error');
+    }
+  } catch {
+    showToast('Connection error', 'error');
+  }
+  btn.disabled = false; btn.textContent = 'Change Password';
+  return false;
+}
 </script>
 </body>
 </html>
