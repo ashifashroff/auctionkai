@@ -23,6 +23,29 @@ if (!$memberId || !$auctionId) {
     exit;
 }
 
+// Rate limiting: max 10 emails per minute per user
+$rateKey = 'email_rate_' . $userId;
+$now = time();
+$window = 60; // 1 minute
+$maxAttempts = 10;
+
+if (!isset($_SESSION[$rateKey])) {
+    $_SESSION[$rateKey] = [];
+}
+// Clean expired entries
+$_SESSION[$rateKey] = array_values(array_filter($_SESSION[$rateKey], fn($t) => ($now - $t) < $window));
+
+if (count($_SESSION[$rateKey]) >= $maxAttempts) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Too many emails sent. Please wait a minute and try again.'
+    ]);
+    exit;
+}
+
+// Record this attempt
+$_SESSION[$rateKey][] = $now;
+
 // Verify member belongs to this user
 $stmt = $db->prepare(
     "SELECT * FROM members WHERE id=? AND user_id=?"
