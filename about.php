@@ -15,7 +15,7 @@ $brand = loadBranding($db);
 <title><?= h($brand['brand_name']) ?> — About</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.3">
+<link rel="stylesheet" href="css/style.css?v=3.5">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -38,7 +38,7 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-gold/30 rounded-xl p-8 text-center">
   <div class="text-4xl font-bold text-ak-gold tracking-tight mb-2">⚡ AuctionKai</div>
   <div class="text-ak-muted text-sm mb-3">Settlement Management System</div>
-  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.2</span>
+  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.5</span>
   <p class="text-ak-text2 text-sm leading-relaxed mt-5 max-w-2xl mx-auto">
     AuctionKai is a purpose-built settlement management system for Japanese vehicle auction operators.
     Designed to replace manual paper-based accounting, AuctionKai allows auction house owners to manage
@@ -76,8 +76,10 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold text-lg mb-4">📋 Version History</h2>
   <div class="space-y-3">
-    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.2</span><span class="text-ak-text2 text-sm">Bulk member CSV import, activity log system across all actions, admin log viewer with AJAX pagination</span></div>
-    <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.1</span><span class="text-ak-text2 text-sm">Activity logging, profile activity history, admin log viewer</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.5</span><span class="text-ak-text2 text-sm">Special fees tab redesign, PDF fixes (branding, header, stamp positioning), delete auction fix, member dropdown consistency</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.4</span><span class="text-ak-text2 text-sm">Login history, session timeout, GDPR deletion, payment status, health check, maintenance mode, branding, backups, statement history, ZIP download, special fees</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.3</span><span class="text-ak-text2 text-sm">Login history tracking, failed attempt highlighting, auto-cleanup</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.2</span><span class="text-ak-text2 text-sm">Bulk member CSV import, activity log system, admin log viewer</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.0</span><span class="text-ak-text2 text-sm">Multi-provider email (PHPMailer), CSRF on all APIs, paginated vehicles + members, AJAX admin, security hardening</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v2.6</span><span class="text-ak-text2 text-sm">Admin panel, user management, Parsley.js validation, auth/ restructure</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v2.3</span><span class="text-ak-text2 text-sm">Security hardening, AJAX for everything, duplicate member check</span></div>

@@ -270,7 +270,7 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 <title>AuctionKai — Settlement System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.3">
+<link rel="stylesheet" href="css/style.css?v=3.5">
 <?php include 'css/tailwind-config.php'; ?>
 <style>
 :root {
@@ -948,7 +948,7 @@ function filterStatements() {
 
 <?php endif; ?>
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;const CSRF_TOKEN = '<?= h($tok) ?>';</script>
-<script src="js/app.js?v=3.3"></script>
+<script src="js/app.js?v=3.5"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof VehiclesPager !== 'undefined' && document.getElementById('vehicles-tbody')) {

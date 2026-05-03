@@ -96,7 +96,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>System Health — AuctionKai Admin</title>
-<link rel="stylesheet" href="../css/style.css?v=3.3">
+<link rel="stylesheet" href="../css/style.css?v=3.5">
 <?php include '../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
@@ -289,6 +289,6 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
-<script src="../js/app.js?v=3.3"></script>
+<script src="../js/app.js?v=3.5"></script>
 </body>
 </html>

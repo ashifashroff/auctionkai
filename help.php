@@ -15,7 +15,7 @@ $userRole = $_SESSION['user_role'] ?? 'user';
 <title>AuctionKai — Help & Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.3">
+<link rel="stylesheet" href="css/style.css?v=3.5">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -72,19 +72,32 @@ $sections = [
     ],
   ],
   [
+    'title' => '💴 Special Fees',
+    'items' => [
+      '<b>What are special fees?</b> — Custom per-member fees for each auction. Use them for car wash fees, bank charges, storage fees, repair costs, inspection fees, key duplicates, bonus payments, or any other custom charge.',
+      '<b>Adding a special fee</b> — Go to the Fees tab. Select a member from the search dropdown, enter the fee name and amount, choose Deduction (−) or Addition (+), and click Add.',
+      '<b>Quick preset chips</b> — Click any preset button below the form to auto-fill the fee name, amount, and type. Then just select a member and click Add.',
+      '<b>Deductions vs Additions</b> — Deductions (shown in red) subtract from the member\'s payout. Additions (shown in green) add to the payout. Both appear in the settlement statement and PDF.',
+      '<b>Deleting a fee</b> — Click the × button on any fee row. The row animates out. This cannot be undone.',
+      '<b>Fee summary</b> — The bottom of the fees table shows a summary row with total count, total deductions, and total additions.',
+    ],
+  ],
+  [
     'title' => '📄 Statements & PDF',
     'items' => [
-      '<b>Net payout calculation</b> — Total Received (Sold Price + 10% Tax + Recycle Fee) minus Total Deductions (Listing Fee + Sold Fee + Nagare Fee + Other Fee + Commission).',
+      '<b>Net payout calculation</b> — Total Received (Sold Price + 10% Tax + Recycle Fee) minus Total Deductions (Listing Fee + Sold Fee + Nagare Fee + Commission + Special Fee Deductions − Special Fee Additions).',
       '<b>Generating a PDF for one member</b> — Click the "↓ PDF" button on any member\'s statement card in the Statements tab.',
       '<b>Printing all PDFs at once</b> — Click "↓ Print All PDFs" at the top of the Statements tab.',
+      '<b>Downloading all PDFs as ZIP</b> — Click "📦 Download ZIP" to get all member statements in one ZIP file.',
       '<b>Sending email to a member</b> — Click the "✉ Send Email" button. This opens your default email client with a pre-filled subject and settlement summary.',
+      '<b>Payment status</b> — Click the status button (Unpaid/Partial/Paid) on any member\'s card to update it. Paid members get a PAID stamp on their PDF.',
     ],
   ],
   [
     'title' => '⚙️ Fee Settings',
     'items' => [
       '<b>How commission fee works</b> — Commission is a flat fee per member (not per vehicle, not a percentage). Default is ¥3,300. It is deducted once from each member who has at least one sold vehicle. Change it per auction from the top bar.',
-      '<b>Per-vehicle fees vs per-member commission</b> — Listing Fee, Sold Fee, Nagare Fee, and Other Fee are charged per vehicle. Commission is charged once per member regardless of how many vehicles they sold.',
+      '<b>Per-vehicle fees vs per-member commission</b> — Listing Fee, Sold Fee, and Nagare Fee are charged per vehicle. Commission is charged once per member regardless of how many vehicles they sold. Special fees are charged once per member per auction.',
     ],
   ],
 ];

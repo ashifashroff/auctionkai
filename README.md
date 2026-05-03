@@ -8,7 +8,7 @@ Japanese auto auction settlement system. Dark premium theme, vanilla PHP + Tailw
 
 - PHP 8.0+ with PDO MySQL
 - MySQL 5.7+ or MariaDB 10.3+
-- XAMPP (or similar stack)
+- XAMPP or similar stack (or any Plesk/cPanel hosting)
 - Internet connection (Tailwind CDN + Google Fonts load from the web)
 
 ---
@@ -45,15 +45,17 @@ Or register a new account. Usernames and emails must be unique.
 
 **Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Paginated vehicles table (10/25/50/100 per page). Real-time search filter by lot, make, model, member name. AJAX pagination — no full page reload. Skeleton loading animation while fetching. Stays on same page after add/edit/delete. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
 
-**Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Download individual or all-statement PDFs. Email drafts via mailto link.
+**Special Fees** — add custom per-member fees for each auction. Supports deductions (car wash, bank charges, storage, repairs, inspection, key duplicate) and additions (bonus payments). Quick preset chips for common fees. Fees appear in settlement statements and PDF documents. Server-rendered table with member name, fee name, type badge, amount, and date. Summary row shows total deductions and additions. Delete fees individually with animated row removal. All fee changes logged to activity log.
 
-**PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions. Net payout in bold. White background, print-friendly layout.
+**Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Special fees included in deductions/additions. Download individual or all-statement PDFs. Email drafts via mailto link. Payment status tracking (Unpaid / Partial / Paid) with one-click update. Paid timestamp recorded automatically. PAID/PARTIAL stamp on PDF statements.
+
+**PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions including special fees (bold). Net payout in bold. PAID/PARTIAL watermark stamp. White background, print-friendly layout. Bulk ZIP download — all member statements in one ZIP file.
 
 **🛡 Admin Panel** — view all registered users with status badges (active/suspended/restricted). Create new users and admins. Edit any user's name, email, username, role. Suspend users for a specific number of days with reason. Delete users and all their data. Login As any user to view their dashboard. Return to Admin Panel button shown in topbar when impersonating.
 
-**📋 Activity Log** — tracks all important actions automatically. Actions logged: login/logout, auction create/update/delete, member add/update/remove, vehicle add/update/delete/toggle, PDF generate, email send, backup download, admin actions, password changes. Admin panel shows full log for all users with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
+**📋 Activity Log** — tracks all important actions automatically. Actions logged: login/logout, auction create/update/delete, member add/update/remove, vehicle add/update/delete/toggle, PDF generate, email send, backup download, admin actions, password changes, special fee add/edit/delete, payment status changes. Admin panel shows full log for all users with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
 
-**📖 Help & Guide** — built-in accordion-style help page covering getting started, managing members, vehicles, statements, and fee settings.
+**📖 Help & Guide** — built-in accordion-style help page covering getting started, managing members, vehicles, special fees, statements, and fee settings.
 
 **🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
 
@@ -69,13 +71,17 @@ Commission is a flat fee per member (not per vehicle, not a percentage). Default
 
 Nagare fee only applies to unsold vehicles. When you mark a vehicle as sold, the nagare field disables and the sold-price fields enable. When unsold, it flips — nagare enables, sold fields disable.
 
+Special fees are per-member, per-auction. They can be deductions (subtract from payout) or additions (add to payout). They appear in the settlement statement fee breakdown and PDF.
+
 ---
 
 ## The Math
 
 ```
 Total Received  = Sold Price + 10% Tax + Recycle Fee
-Total Deductions = Listing Fee + Sold Fee + Nagare Fee (unsold only) + Commission (flat/member)
+Total Deductions = Listing Fee + Sold Fee + Nagare Fee (unsold only)
+                  + Commission (flat/member)
+                  + Special Fee Deductions − Special Fee Additions
 NET PAYOUT      = Total Received − Total Deductions
 ```
 
@@ -88,11 +94,10 @@ No sold vehicles means ¥0 net payout.
 ```
 auctionkai/
 ├── admin/
-│   ├── index.php               ← User management + Email Settings
+│   ├── index.php               ← User management + Email Settings + Backups
 │   ├── actions.php             ← Handle admin POST actions
 │   ├── health.php              ← System health dashboard
-│   ├── download_backup.php     ← Secure backup download
-│   └── .htaccess
+│   └── download_backup.php     ← Secure backup download
 ├── api/
 │   ├── add_vehicle.php
 │   ├── delete_vehicle.php
@@ -103,23 +108,22 @@ auctionkai/
 │   ├── check_lot.php
 │   ├── get_vehicles_page.php
 │   ├── send_email.php
-│   ├── import_members_csv.php  ← CSV bulk member import
-│   ├── csv_template.php         ← Download CSV template
-│   └── delete_auction.php
-│   └── delete_account.php    ← GDPR account deletion
-│   └── update_payment.php    ← Payment status AJAX
-│   └── log_statement.php     ← Statement event logger
-│   └── download_pdf_zip.php  ← Bulk ZIP download
-│   └── member_fees.php       ← Special fees CRUD
-├── backups/                  ← Auto-created backup files
-│   └── .htaccess             ← Block direct access
-├── scripts/
-│   └── backup.php            ← Cron backup script
+│   ├── import_members_csv.php
+│   ├── csv_template.php
+│   ├── delete_auction.php
+│   ├── delete_account.php
+│   ├── update_payment.php
+│   ├── log_statement.php
+│   ├── download_pdf_zip.php
+│   ├── get_member_fees_page.php
+│   └── member_fees.php         ← Special fees CRUD
 ├── auth/
 │   ├── login.php
 │   ├── logout.php
 │   ├── forgot_password.php
 │   └── reset_password.php
+├── backups/
+│   └── .htaccess
 ├── css/
 │   ├── style.css
 │   ├── pdf.css
@@ -132,11 +136,14 @@ auctionkai/
 │   ├── helpers.php
 │   ├── mailer.php
 │   ├── settings.php
-│   ├── maintenance_check.php ← Maintenance gate
-│   ├── branding.php          ← Dynamic branding loader
+│   ├── activity.php
+│   ├── maintenance_check.php
+│   ├── branding.php
 │   └── footer.php
 ├── js/
 │   └── app.js
+├── scripts/
+│   └── backup.php              ← Cron backup script
 ├── vendor/                     ← PHPMailer (gitignored)
 ├── .htaccess
 ├── .gitignore
@@ -149,59 +156,7 @@ auctionkai/
 ├── help.php
 ├── about.php
 ├── privacy.php
-└── README.md
-```
-│   ├── add_vehicle.php
-│   ├── delete_vehicle.php
-│   ├── get_vehicle.php
-│   ├── update_vehicle.php
-│   ├── get_member_detail.php
-│   ├── update_member.php
-│   └── check_lot.php           ← Duplicate lot number check
-│   └── get_vehicles_page.php    ← Paginated vehicle fetch
-│   └── send_email.php          ← AJAX email endpoint
-│
-├── admin/                       ← Admin panel
-│   ├── index.php               ← User management + Email Settings
-│   ├── actions.php             ← Handle admin POST actions (users + email)
-│   └── .htaccess               ← Protect admin directory
-│
-│   └── db_backup.php             ← Admin-only SQL backup generator
-├── auth/                       ← Authentication pages
-│   ├── login.php
-│   ├── logout.php
-│   ├── forgot_password.php
-│   └── reset_password.php
-│
-├── css/
-│   ├── style.css               ← Custom styles (forms, tables, statements, toasts, shortcuts)
-│   ├── pdf.css                 ← PDF print layout
-│   └── tailwind-config.php     ← Tailwind CDN + theme colors
-│
-├── includes/                   ← Shared PHP components
-│   ├── auth_check.php          ← Session guard for protected pages
-│   ├── db.php                  ← PDO connection
-│   ├── helpers.php             ← fmt(), h(), calcStatement()
-│   ├── mailer.php              ← PHPMailer wrapper, multi-provider
-│   ├── settings.php             ← DB settings helper
-│   ├── activity.php             ← Activity logging helper
-│   └── footer.php              ← Shared footer component
-│
-├── js/
-│   └── app.js                  ← All client-side JS (toasts, shortcuts, AJAX)
-│
-├── .htaccess                   ← Protect config.php and schema.sql
-├── .gitignore                  ← Exclude config.php, logs, OS files
-├── config.php                  ← Database credentials
-├── schema.sql                  ← Full schema + seed data + indexes
-├── index.php                   ← Main app (dashboard, members, vehicles, statements)
-├── profile.php                 ← Edit name, email, password
-├── pdf.php                     ← A4 PDF settlement statements
-├── vendor/                     ← PHPMailer (gitignored)
-├── help.php                    ← Help & guide (accordion FAQ)
-├── about.php                   ← About AuctionKai + tech stack + version history
-├── privacy.php                 ← Privacy policy
-├── terms.php                   ← Terms of Use page
+├── terms.php
 └── README.md
 ```
 
@@ -211,11 +166,18 @@ auctionkai/
 
 ```
 users ──< auction ──< vehicles >── members
+                   └─< member_fees >── members
+                   └─< payment_status >── members
 password_resets (token-based password reset)
+activity_log (tracks all user actions)
+statement_history (tracks PDF/email events)
+settings (key-value store for branding, email, maintenance, session)
 ```
 
 - Members belong to users (shared across auctions)
 - Vehicles belong to auctions (connected to members via member_id)
+- Member fees belong to auctions + members (per-member, per-auction)
+- Payment status tracked per member per auction (Unpaid/Partial/Paid)
 - Commission fee lives on the auction table
 - Nagare fee lives on the vehicles table (only used for unsold)
 - Users have status (active/suspended/restricted) with suspend tracking
@@ -227,70 +189,18 @@ password_resets (token-based password reset)
 
 Everything uses PDO prepared statements — no raw SQL interpolation anywhere. All vehicle write queries (delete, toggle sold, update) verify ownership through `auction.user_id`. CSRF tokens protect every form. Passwords are bcrypt with `password_hash()`. Login regenerates the session ID to prevent fixation attacks. After 5 failed login attempts for the same username, there's a 30-second cooldown. No real personal data in the seed file.
 
-- schema.sql seed data uses placeholder credentials only — never commit real usernames or passwords to public repos
 - Admin role required to access admin/ panel
 - User impersonation tracked via session `original_admin_id`
 - Suspended users blocked at login with expiry date shown
 - Duplicate email and username checks on registration
 - Duplicate lot number check via real-time AJAX before vehicle save
 - Login history — tracks last 50 login attempts per user (success and failed)
-- Shows browser, OS, IP address, timestamp on profile page
-- Admin panel shows last login per user
-- Failed attempts shown with red highlight
 - Session timeout — auto logout after configurable inactivity period (default 30 min)
-- Warning toast appears X minutes before expiry with "Stay Logged In" button
-- Configurable from Admin Panel → Session Settings
-- Timeout duration: 5–480 minutes
-- Warning time: 1–10 minutes before expiry
-- Auto-logout activity logged
-- Account deletion (GDPR) — users can permanently delete their account and all associated data
-- Password confirmation required before deletion
-- Prevents deletion of last admin account
-- Deletes all data: auctions, members, vehicles, login history, activity log
-- Session destroyed immediately after deletion
+- Account deletion (GDPR) — users can permanently delete their account and all data
 - Payment status tracking per member (Unpaid / Partial / Paid)
-- One-click status update from Statements tab
-- Payment summary dashboard (total paid/unpaid)
-- Paid timestamp recorded automatically
 - PAID/PARTIAL stamp on PDF statements
-- Payment status logged to activity log
-- System Health Check page showing PHP version, MySQL stats, disk space, PHP extensions, server info, app statistics, warning alerts, and quick actions
-- Maintenance mode — put system in maintenance with one toggle
-- Custom maintenance page title and message
-- Optional ETA display on maintenance page
-- Admins bypass maintenance and can still work normally
-- Animated gear icon with auto-refresh every 60 seconds
-- Yellow warning banner visible to admins when maintenance is active
-- Maintenance events logged to activity log
-- Custom branding — set system name, tagline, company name, contact details
-- Custom accent color with live color picker and live preview
-- Branding applied to: app header, PDF statements, email templates, footer
-- Contact info (email, phone, address) appears on PDF statements
-- Changes take effect immediately — no code editing required
-- Scheduled backups (daily/weekly/monthly) with cron support
-- Configurable retention period
-- Gzip compression support
-- Manual trigger from admin panel
-- Backup file browser with download/delete
-- Protected backups/ folder
-- Cron setup instructions shown in panel
-- Statement history — tracks every PDF generated and email sent
-- Per-member collapsible history on Statements tab
-- Shows action type, net payout, timestamp, IP address
-- Admin panel shows full history across all users
-- Bulk PDF ZIP download — all member statements in one ZIP file
-- Each member gets their own HTML statement file (open in browser → print to PDF)
-- README.txt included in ZIP with instructions
-- Auction name and date in ZIP filename
-- Requires PHP ZipArchive extension (check System Health page)
-- ZIP download logged to activity log
-- Special Fees tab — add custom per-member fees for each auction
-- Supports deductions (car wash, bank charges, storage, repairs) and additions (bonus payments)
-- Quick preset buttons for common fees
-- Fees appear in settlement statements and PDF documents
-- Real-time UI update without page reload
-- Delete fees individually
-- All fee changes logged to activity log
+- Maintenance mode — put system in maintenance with one toggle, admins bypass
+- Custom branding — system name, tagline, company, contact details, accent color
 - All form validation via Parsley.js (no HTML5 native validation)
 - Password minimum 8 characters with strength indicator
 
@@ -304,46 +214,45 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.4** — Login history tracking, session timeout with admin controls, GDPR account deletion, payment status tracking with PDF stamp, system health check page, maintenance mode, custom branding with color picker, scheduled backups with cron support, statement history tracking, bulk PDF ZIP download, special fees tab per member per auction with presets
+**v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency.
+
+**v3.4** — Login history tracking, session timeout with admin controls, GDPR account deletion, payment status tracking with PDF stamp, system health check page, maintenance mode, custom branding with color picker, scheduled backups with cron support, statement history tracking, bulk PDF ZIP download, special fees tab per member per auction with presets.
 
 **v3.3** — Login history tracking: records success and failed login attempts per user (browser, OS, IP, timestamp). Profile page shows last 10 attempts. Admin panel shows last login per user. Failed attempts highlighted in red. Auto-cleanup keeps last 50 records per user.
 
-**v3.2** — Bulk member import via CSV file upload. CSV template download with example data. Auto duplicate detection on import. Per-row error reporting.
+**v3.2** — Bulk member CSV import, activity log system across all actions, admin log viewer with AJAX pagination.
 
-**v3.1** — Activity log system across all actions. Admin panel shows full log with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
+**v3.1** — Activity logging, profile activity history, admin log viewer.
 
-**v3.0** — Security hardening: CSRF on all API endpoints, secure session cookies (httponly+samesite), rate limiting on password reset, input length limits, removed duplicate admin.php. Multi-provider email settings via admin panel (Server Mail/Gmail/Xserver/Sakura/Custom SMTP). Email credentials stored in DB (not config files). AJAX admin forms (no page refresh). Paginated vehicles + members tables with search and AJAX loading. Skeleton loading states. 2-column statement cards with member search. API bootstrap for consistent auth/CSRF.
+**v3.0** — Multi-provider email (PHPMailer), CSRF on all APIs, paginated vehicles + members, AJAX admin, security hardening.
 
-**v2.6** — Admin panel with user management (separate admin/ folder). Disable/enable user accounts. Role management (admin/user). User stats dashboard. Disabled users blocked at login.
+**v2.6** — Admin panel with user management. Disable/enable user accounts. Role management. User stats dashboard.
 
-**v2.5** — Removed Other Fee from all UI/forms/tables/statements/PDF. Real-time duplicate lot number check. Password strength indicator (Weak/Fair/Good/Strong). Member search filter. New members appear at top without page reload. Keyboard shortcuts with help modal. Toast notifications across all pages. Parsley.js form validation. Mobile responsive vehicles table (card view). Help, About, Privacy pages. Shared footer component. Forgot password / reset password flow. Duplicate email check on registration. Cache-busting for CSS/JS. Fixed vehicle add/edit bugs (placeholder count, variable names).
+**v2.5** — Real-time duplicate lot check. Password strength indicator. Member search. Keyboard shortcuts. Toast notifications. Parsley.js validation. Mobile responsive. Help, About, Privacy pages. Forgot password flow.
 
-**v2.4** — Real email sending via PHPMailer + Gmail SMTP. HTML settlement email with full fee breakdown. Email config status in admin panel. Paginated vehicles table with AJAX loading. Real-time search across all vehicle fields. 10/25/50/100 per page selector. Skeleton loading state.
+**v2.4** — Full admin panel with user impersonation, suspend/unsuspend, brute force protection. Real email via PHPMailer + Gmail SMTP.
 
-**v2.4** — Full admin panel with user management. Login As user impersonation. Suspend / unsuspend users. Create new users and admins. Session regeneration after login. Brute force login protection. Auth/ and includes/ folder restructure.
+**v2.3** — AJAX for everything, delete auction page, duplicate member check.
 
-**v2.3** — AJAX for everything (no page reloads on any form), delete auction page with stats and confirmation, duplicate member name check, auction toggle fix, date field disabled after creation
+**v2.2** — Brute force login protection, CSRF tokens, session regeneration.
 
-**v2.2** — Brute force login protection, CSRF tokens on login/register, session regeneration, removed personal data from schema
+**v2.1** — Dashboard tab, vehicle search, PDO prepared statements, DB indexes.
 
-**v2.1** — Dashboard tab, vehicle search, PDO prepared statements everywhere, vehicle ownership verification, DB indexes
+**v2.0** — Tailwind CSS migration, modal-based editing, AJAX add/edit/delete, profile page.
 
-**v2.0** — Tailwind CSS migration, modal-based editing, AJAX add/edit/delete, profile page
-
-**v1.0–1.6** — Initial build, fee system overhaul, commission as flat fee, nagare for unsold, PDF improvements
+**v1.0–1.6** — Initial build, fee system overhaul, commission as flat fee, nagare for unsold, PDF improvements.
 
 ---
 
 ## Troubleshooting
 
-If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. CSS and JS files include `?v=2.5` cache-busting to help. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables. If toast notifications don't appear, clear browser cache and reload.
+If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. CSS and JS files include `?v=3.5` cache-busting to help. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables. If toast notifications don't appear, clear browser cache and reload.
 
 ---
 
 ## 📧 Email Setup
 
-Email is configured through the Admin Panel.
-No credentials in code files — safe for GitHub.
+Email is configured through the Admin Panel. No credentials in code files — safe for GitHub.
 
 ### First-Time Setup: Install PHPMailer
 
@@ -406,6 +315,7 @@ Database indexes are included in schema.sql for all frequently queried columns:
 - auction — indexed on user_id, expires_at, composite (user_id, date)
 - members — indexed on user_id
 - users — indexed on username, email, role
+- member_fees — indexed on auction_id, member_id
 
 For existing installs, run the index creation queries at the bottom of schema.sql in phpMyAdmin → SQL tab.
 
