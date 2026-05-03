@@ -593,30 +593,76 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php elseif ($tab === 'special_fees'): ?>
 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
   <h2 class="text-lg font-bold">💴 Special Fees — <?= h($auction['name']) ?></h2>
-  <button onclick="openAddFeeModal(0,'')" class="btn btn-gold btn-sm">+ Add Fee</button>
 </div>
 
-<div class="flex items-center gap-2 mb-4">
-  <div class="vehicles-search-wrap flex-1 min-w-[200px]">
-    <div class="search-icon-wrap">
-      <span class="search-icon">🔍</span>
-      <input type="text" id="fees-search" class="vehicles-search-input" placeholder="Search member, fee name, notes..." autocomplete="off">
+<!-- Add Fee Form (inline, like vehicle add) -->
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+  <form id="addFeeForm" data-parsley-validate>
+    <div class="grid grid-cols-6 gap-2 items-end">
+      <div class="col-span-2 relative">
+        <label class="lbl">Member *</label>
+        <input class="inp" id="feeMemberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showFeeMemberResults()" oninput="filterFeeMembers()">
+        <input type="hidden" id="feeMemberId">
+        <div id="feeMemberDropdown" class="member-dropdown" style="display:none"></div>
+      </div>
+      <div><label class="lbl">Fee Description *</label><input class="inp" id="af_feeName" placeholder="e.g. Car Wash Fee" data-parsley-required="true" data-parsley-required-message="Fee description is required"></div>
+      <div><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="af_amount" placeholder="3000" min="1" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-required-message="Amount is required"></div>
+      <div>
+        <label class="lbl">Type</label>
+        <select class="inp" id="af_feeType">
+          <option value="deduction">− Deduction</option>
+          <option value="addition">+ Addition</option>
+        </select>
+      </div>
+      <div class="flex items-end pt-[22px]">
+        <button type="submit" id="addFeeBtn" class="btn btn-gold">+ Add Fee</button>
+      </div>
     </div>
-  </div>
+  </form>
 </div>
 
+<!-- Fees list (AJAX paginated) -->
 <div id="fees-content"><div class="text-center text-ak-muted py-8">Loading…</div></div>
 <div id="fees-pagination" class="flex items-center justify-center gap-2 mt-4"></div>
 
 <script>
-const FeesPager = {
-  page: 1,
-  lastPage: 1,
-  total: 0,
-  perPage: 10,
-  search: '',
-  searchTimer: null,
+const activeAuctionId = <?= (int)$activeAuctionId ?>;
+const feeMembersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name']], $members)) ?>;
 
+function filterFeeMembers() {
+  const q = document.getElementById('feeMemberSearch').value.toLowerCase().trim();
+  const dropdown = document.getElementById('feeMemberDropdown');
+  document.getElementById('feeMemberId').value = '';
+  if (!q) { dropdown.style.display = 'none'; return; }
+  const filtered = feeMembersData.filter(m => m.name.toLowerCase().includes(q));
+  if (!filtered.length) { dropdown.style.display = 'none'; return; }
+  dropdown.innerHTML = filtered.map(m => `<div class="member-result" onclick="selectFeeMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
+  dropdown.style.display = 'block';
+}
+
+function showFeeMemberResults() {
+  const q = document.getElementById('feeMemberSearch').value.toLowerCase().trim();
+  if (!q) {
+    const dropdown = document.getElementById('feeMemberDropdown');
+    dropdown.innerHTML = feeMembersData.slice(0,10).map(m => `<div class="member-result" onclick="selectFeeMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
+    dropdown.style.display = 'block';
+  }
+}
+
+function selectFeeMember(id, name) {
+  document.getElementById('feeMemberId').value = id;
+  document.getElementById('feeMemberSearch').value = name;
+  document.getElementById('feeMemberDropdown').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#feeMemberSearch') && !e.target.closest('#feeMemberDropdown')) {
+    document.getElementById('feeMemberDropdown').style.display = 'none';
+  }
+});
+
+const FeesPager = {
+  page: 1, lastPage: 1, total: 0, perPage: 10, search: '', searchTimer: null,
   init() {
     document.getElementById('fees-search')?.addEventListener('input', () => {
       clearTimeout(this.searchTimer);
@@ -624,31 +670,23 @@ const FeesPager = {
     });
     this.load();
   },
-
   load() {
     const content = document.getElementById('fees-content');
     const pagDiv = document.getElementById('fees-pagination');
     this.search = document.getElementById('fees-search')?.value.trim() || '';
     content.innerHTML = '<div class="text-center text-ak-muted py-8">Loading…</div>';
     pagDiv.innerHTML = '';
-
     fetch(`api/get_member_fees_page.php?auction_id=${activeAuctionId}&page=${this.page}&per_page=${this.perPage}&search=${encodeURIComponent(this.search)}`)
     .then(r => r.json())
     .then(data => {
-      this.total = data.total;
-      this.lastPage = data.lastPage;
+      this.total = data.total; this.lastPage = data.lastPage;
       if (!data.fees || data.fees.length === 0) {
         content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No special fees found.</div>';
+        pagDiv.innerHTML = '';
         return;
       }
-
-      // Group by member
       const grouped = {};
-      data.fees.forEach(f => {
-        if (!grouped[f.member_id]) grouped[f.member_id] = { name: f.member_name, fees: [] };
-        grouped[f.member_id].fees.push(f);
-      });
-
+      data.fees.forEach(f => { if (!grouped[f.member_id]) grouped[f.member_id] = { name: f.member_name, fees: [] }; grouped[f.member_id].fees.push(f); });
       let html = '<div class="flex flex-col gap-4">';
       Object.entries(grouped).forEach(([mid, mg]) => {
         const totalDed = mg.fees.filter(f=>f.fee_type==='deduction').reduce((s,f)=>s+parseFloat(f.amount),0);
@@ -659,7 +697,6 @@ const FeesPager = {
         html += `<div class="flex-1"><div class="font-semibold text-ak-text">${mg.name}</div><div class="text-ak-muted text-xs">${mg.fees.length} fee(s)</div></div>`;
         if (totalDed > 0) html += `<div class="font-mono font-bold text-ak-red text-sm">−¥${totalDed.toLocaleString('ja-JP')}</div>`;
         if (totalAdd > 0) html += `<div class="font-mono font-bold text-ak-green text-sm">+¥${totalAdd.toLocaleString('ja-JP')}</div>`;
-        html += `<button onclick="openAddFeeModal(${mid},'${mg.name.replace(/'/g,"\\'")}')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>`;
         html += `</div>`;
         mg.fees.forEach(f => {
           const isAdd = f.fee_type === 'addition';
@@ -676,8 +713,6 @@ const FeesPager = {
       });
       html += '</div>';
       content.innerHTML = html;
-
-      // Pagination
       if (this.lastPage > 1) {
         let ph = `<span class="text-ak-muted text-xs mr-2">${this.total} fees · Page ${this.page} of ${this.lastPage}</span>`;
         if (this.page > 1) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page-1};FeesPager.load()">← Prev</button>`;
@@ -686,9 +721,7 @@ const FeesPager = {
         }
         if (this.page < this.lastPage) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page+1};FeesPager.load()">Next →</button>`;
         pagDiv.innerHTML = ph;
-      } else {
-        pagDiv.innerHTML = `<span class="text-ak-muted text-xs">${this.total} fees</span>`;
-      }
+      } else { pagDiv.innerHTML = `<span class="text-ak-muted text-xs">${this.total} fees</span>`; }
     })
     .catch(() => { content.innerHTML = '<div class="bg-ak-red/15 text-ak-red p-4 rounded-lg">Error loading fees</div>'; });
   }
@@ -1051,27 +1084,6 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 <div class="shortcut-hint" id="shortcut-hint"></div>
-
-<!-- Add Fee Modal -->
-<div id="addFeeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">
-  <div class="bg-ak-card border border-ak-border rounded-2xl p-8 max-w-[520px] w-[92%] shadow-2xl max-h-[90vh] overflow-y-auto">
-    <h3 class="text-ak-gold font-bold text-lg mb-5">💴 Add Special Fee</h3>
-    <form id="addFeeForm" data-parsley-validate>
-      <input type="hidden" id="af_memberId">
-      <div class="mb-4"><label class="lbl">Member</label><input class="inp" id="af_memberName" disabled></div>
-      <div class="mb-4"><label class="lbl">Fee Name *</label><input class="inp" id="af_feeName" placeholder="e.g. Car Wash Fee" data-parsley-required="true" data-parsley-required-message="Fee name is required"></div>
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="af_amount" placeholder="3000" min="1" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-required-message="Amount is required"></div>
-        <div><label class="lbl">Type</label><select class="inp" id="af_feeType"><option value="deduction">− Deduction</option><option value="addition">+ Addition</option></select></div>
-      </div>
-      <div class="mb-5"><label class="lbl">Notes</label><input class="inp" id="af_notes" placeholder="Optional"></div>
-      <div class="flex gap-3">
-        <button type="button" onclick="closeAddFeeModal()" class="btn btn-dark flex-1">Cancel</button>
-        <button type="submit" id="addFeeBtn" class="btn btn-gold flex-1">+ Add Fee</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 <!-- Edit Fee Modal -->
 <div id="editFeeModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] items-center justify-center" style="display:none">

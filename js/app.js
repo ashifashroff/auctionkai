@@ -1456,23 +1456,8 @@ function toggleStmtHistory(memberId) {
 
 
 // ── Special Member Fees ───────────────────────
-function openAddFeeModal(memberId, memberName) {
-  document.getElementById('af_memberId').value = memberId;
-  document.getElementById('af_memberName').value = memberName;
-  document.getElementById('af_feeName').value = '';
-  document.getElementById('af_amount').value = '';
-  document.getElementById('af_feeType').value = 'deduction';
-  document.getElementById('af_notes').value = '';
-  const m = document.getElementById('addFeeModal');
-  m.style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-  document.getElementById('af_feeName').focus();
-}
-
-function closeAddFeeModal() {
-  document.getElementById('addFeeModal').style.display = 'none';
-  document.body.style.overflow = '';
-}
+// Add form is inline on the Fees tab (not modal)
+// Member search dropdown, fee description, amount, type, add button
 
 document.getElementById('addFeeForm')?.addEventListener('submit', async function(e) {
   e.preventDefault();
