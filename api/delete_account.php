@@ -94,8 +94,11 @@ try {
     // 8. Finally delete the user
     $db->prepare("DELETE FROM users WHERE id = ?")->execute([$userId]);
 
-    // Destroy session
+    // Destroy session completely
+    // 1. Unset all session variables
     $_SESSION = [];
+
+    // 2. Delete the session cookie (prevents reuse)
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000,
@@ -103,7 +106,16 @@ try {
             $params['secure'], $params['httponly']
         );
     }
+
+    // 3. Regenerate ID before destroy (invalidates old session file)
+    session_regenerate_id(true);
+
+    // 4. Destroy the session on the server
     session_destroy();
+
+    // 5. Start a fresh session for the response
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    $_SESSION = []; // Ensure clean slate
 
     echo json_encode(['success' => true, 'message' => 'Account deleted successfully']);
 
