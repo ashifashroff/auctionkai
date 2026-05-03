@@ -40,16 +40,7 @@ if (is_dir($backupDir)) {
     }
 }
 
-// Recent statement history
-$recentStatements = $db->query("
-    SELECT sh.*, m.name as member_name, u.name as user_name, u.username, a.name as auction_name
-    FROM statement_history sh
-    JOIN members m ON sh.member_id = m.id
-    JOIN users u ON sh.user_id = u.id
-    JOIN auction a ON sh.auction_id = a.id
-    ORDER BY sh.created_at DESC
-    LIMIT 50
-")->fetchAll();
+// Recent statement history (loaded via AJAX on main app)
 
 $totalUsers     = (int)$db->query("SELECT COUNT(*) FROM users")->fetchColumn();
 $totalAuctions  = (int)$db->query("SELECT COUNT(*) FROM auction")->fetchColumn();
@@ -86,7 +77,6 @@ $tabs = [
     'maintenance' => ['icon' => '🚧', 'label' => 'Maintenance'],
     'branding' => ['icon' => '🎨', 'label' => 'Branding'],
     'backups' => ['icon' => '💾', 'label' => 'Backups'],
-    'stmt_history' => ['icon' => '📋', 'label' => 'Stmt History'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -571,43 +561,6 @@ async function runManualBackup(btn) {
   }
 }
 </script>
-
-<?php elseif ($tab === 'stmt_history'): ?>
-<h2 class="text-lg font-bold text-ak-gold mb-4">📋 Statement History</h2>
-<p class="text-ak-muted text-sm mb-5">Last 50 statement actions across all users</p>
-
-<?php if (empty($recentStatements)): ?>
-<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted text-sm">No statements generated yet.</div>
-<?php else: ?>
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead>
-      <tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">
-        <th class="px-4 py-3 text-left">Time</th>
-        <th class="px-4 py-3 text-left">User</th>
-        <th class="px-4 py-3 text-left">Member</th>
-        <th class="px-4 py-3 text-left">Auction</th>
-        <th class="px-4 py-3 text-left">Action</th>
-        <th class="px-4 py-3 text-right">Net Payout</th>
-        <th class="px-4 py-3 text-left">IP</th>
-      </tr>
-    </thead>
-    <tbody>
-    <?php foreach ($recentStatements as $r): $isEmail = $r['action'] === 'email'; ?>
-    <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">
-      <td class="px-4 py-3 text-ak-muted text-xs font-mono whitespace-nowrap"><?= date('Y-m-d H:i', strtotime($r['created_at'])) ?></td>
-      <td class="px-4 py-3"><div class="text-ak-text text-xs"><?= h($r['user_name']) ?></div><div class="text-ak-muted text-[10px]"><?= h($r['username']) ?></div></td>
-      <td class="px-4 py-3 text-ak-text2 text-xs"><?= h($r['member_name']) ?></td>
-      <td class="px-4 py-3 text-ak-muted text-xs"><?= h($r['auction_name']) ?></td>
-      <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full font-mono <?= $isEmail ? 'bg-ak-gold/15 text-ak-gold' : 'bg-ak-text2/10 text-ak-text2' ?>"><?= $isEmail ? '✉️ Email' : '📄 PDF' ?></span></td>
-      <td class="px-4 py-3 text-ak-gold text-xs font-mono text-right"><?= fmt($r['net_payout']) ?></td>
-      <td class="px-4 py-3 text-ak-muted text-[11px] font-mono"><?= h($r['ip_address'] ?? '') ?></td>
-    </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table>
-</div>
-<?php endif; ?>
 
 <?php elseif ($tab === 'branding'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">🎨 Branding & Identity</h2>
