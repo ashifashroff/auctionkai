@@ -593,46 +593,109 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <?php elseif ($tab === 'special_fees'): ?>
 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
   <h2 class="text-lg font-bold">💴 Special Fees — <?= h($auction['name']) ?></h2>
+  <button onclick="openAddFeeModal(0,'')" class="btn btn-gold btn-sm">+ Add Fee</button>
 </div>
 
-<div class="flex flex-col gap-4">
-<?php foreach ($members as $m):
-  $mFees = $memberFeesAll[$m['id']] ?? [];
-  $totalDed = array_sum(array_map(fn($f) => $f['fee_type']==='deduction' ? (float)$f['amount'] : 0, $mFees));
-  $totalAdd = array_sum(array_map(fn($f) => $f['fee_type']==='addition' ? (float)$f['amount'] : 0, $mFees));
-?>
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden" id="member-fees-card-<?= (int)$m['id'] ?>">
-  <div class="flex items-center gap-3 px-5 py-3 border-b border-ak-border">
-    <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
-    <div class="flex-1"><div class="font-semibold text-ak-text"><?= h($m['name']) ?></div><div class="text-ak-muted text-xs"><?= count($mFees) ?> fee(s)</div></div>
-    <div class="flex gap-4 text-right">
-    <?php if ($totalDed > 0): ?><div><div class="font-mono font-bold text-ak-red text-sm">−¥<?= number_format($totalDed) ?></div><div class="text-ak-muted text-[10px]">deductions</div></div><?php endif; ?>
-    <?php if ($totalAdd > 0): ?><div><div class="font-mono font-bold text-ak-green text-sm">+¥<?= number_format($totalAdd) ?></div><div class="text-ak-muted text-[10px]">additions</div></div><?php endif; ?>
-    <?php if (empty($mFees)): ?><div class="text-ak-muted text-xs italic">No special fees</div><?php endif; ?>
+<div class="flex items-center gap-2 mb-4">
+  <div class="vehicles-search-wrap flex-1 min-w-[200px]">
+    <div class="search-icon-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="fees-search" class="vehicles-search-input" placeholder="Search member, fee name, notes..." autocomplete="off">
     </div>
-    <button onclick="openAddFeeModal(<?= (int)$m['id'] ?>,'<?= h($m['name']) ?>')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>
   </div>
-  <?php if (!empty($mFees)): ?>
-  <div id="fee-list-<?= (int)$m['id'] ?>">
-  <?php foreach ($mFees as $fee): ?>
-  <div class="flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors" id="fee-row-<?= (int)$fee['id'] ?>">
-    <span class="text-lg"><?= $fee['fee_type']==='addition' ? '➕' : '➖' ?></span>
-    <div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium"><?= h($fee['fee_name']) ?></div><?php if (!empty($fee['notes'])): ?><div class="text-ak-muted text-xs"><?= h($fee['notes']) ?></div><?php endif; ?></div>
-    <div class="font-mono font-bold text-sm <?= $fee['fee_type']==='addition' ? 'text-ak-green' : 'text-ak-red' ?>"><?= $fee['fee_type']==='addition' ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?></div>
-    <div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></div>
-    <button onclick="openEditFeeModal(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,'<?= h(addslashes($fee['fee_name'])) ?>',<?= (float)$fee['amount'] ?>,'<?= $fee['fee_type'] ?>','<?= h(addslashes($fee['notes'] ?? '')) ?>')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button>
-    <button onclick="deleteSpecialFee(<?= (int)$fee['id'] ?>,<?= (int)$m['id'] ?>,<?= (int)$activeAuctionId ?>)" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>
-  </div>
-  <?php endforeach; ?>
-  </div>
-  <?php else: ?>
-  <div class="px-5 py-4 text-ak-muted text-sm text-center italic" id="fee-list-<?= (int)$m['id'] ?>">No special fees for this member yet.</div>
-  <?php endif; ?>
-</div>
-<?php endforeach; ?>
 </div>
 
-<script>const activeAuctionId = <?= (int)$activeAuctionId ?>;</script>
+<div id="fees-content"><div class="text-center text-ak-muted py-8">Loading…</div></div>
+<div id="fees-pagination" class="flex items-center justify-center gap-2 mt-4"></div>
+
+<script>
+const FeesPager = {
+  page: 1,
+  lastPage: 1,
+  total: 0,
+  perPage: 10,
+  search: '',
+  searchTimer: null,
+
+  init() {
+    document.getElementById('fees-search')?.addEventListener('input', () => {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = setTimeout(() => { this.page = 1; this.load(); }, 300);
+    });
+    this.load();
+  },
+
+  load() {
+    const content = document.getElementById('fees-content');
+    const pagDiv = document.getElementById('fees-pagination');
+    this.search = document.getElementById('fees-search')?.value.trim() || '';
+    content.innerHTML = '<div class="text-center text-ak-muted py-8">Loading…</div>';
+    pagDiv.innerHTML = '';
+
+    fetch(`api/get_member_fees_page.php?auction_id=${activeAuctionId}&page=${this.page}&per_page=${this.perPage}&search=${encodeURIComponent(this.search)}`)
+    .then(r => r.json())
+    .then(data => {
+      this.total = data.total;
+      this.lastPage = data.lastPage;
+      if (!data.fees || data.fees.length === 0) {
+        content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No special fees found.</div>';
+        return;
+      }
+
+      // Group by member
+      const grouped = {};
+      data.fees.forEach(f => {
+        if (!grouped[f.member_id]) grouped[f.member_id] = { name: f.member_name, fees: [] };
+        grouped[f.member_id].fees.push(f);
+      });
+
+      let html = '<div class="flex flex-col gap-4">';
+      Object.entries(grouped).forEach(([mid, mg]) => {
+        const totalDed = mg.fees.filter(f=>f.fee_type==='deduction').reduce((s,f)=>s+parseFloat(f.amount),0);
+        const totalAdd = mg.fees.filter(f=>f.fee_type==='addition').reduce((s,f)=>s+parseFloat(f.amount),0);
+        html += `<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">`;
+        html += `<div class="flex items-center gap-3 px-5 py-3 border-b border-ak-border">`;
+        html += `<div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0">${mg.name.charAt(0).toUpperCase()}</div>`;
+        html += `<div class="flex-1"><div class="font-semibold text-ak-text">${mg.name}</div><div class="text-ak-muted text-xs">${mg.fees.length} fee(s)</div></div>`;
+        if (totalDed > 0) html += `<div class="font-mono font-bold text-ak-red text-sm">−¥${totalDed.toLocaleString('ja-JP')}</div>`;
+        if (totalAdd > 0) html += `<div class="font-mono font-bold text-ak-green text-sm">+¥${totalAdd.toLocaleString('ja-JP')}</div>`;
+        html += `<button onclick="openAddFeeModal(${mid},'${mg.name.replace(/'/g,"\\'")}')" class="btn btn-dark btn-sm shrink-0">+ Add Fee</button>`;
+        html += `</div>`;
+        mg.fees.forEach(f => {
+          const isAdd = f.fee_type === 'addition';
+          html += `<div class="flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors" id="fee-row-${f.id}">`;
+          html += `<span class="text-lg">${isAdd ? '➕' : '➖'}</span>`;
+          html += `<div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div>`;
+          html += `<div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div>`;
+          html += `<div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${f.created_at.slice(0,10)}</div>`;
+          html += `<button onclick="openEditFeeModal(${f.id},${mid},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button>`;
+          html += `<button onclick="deleteSpecialFee(${f.id},${mid},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      });
+      html += '</div>';
+      content.innerHTML = html;
+
+      // Pagination
+      if (this.lastPage > 1) {
+        let ph = `<span class="text-ak-muted text-xs mr-2">${this.total} fees · Page ${this.page} of ${this.lastPage}</span>`;
+        if (this.page > 1) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page-1};FeesPager.load()">← Prev</button>`;
+        for (let p = Math.max(1, this.page-2); p <= Math.min(this.lastPage, this.page+2); p++) {
+          ph += `<button class="px-3 py-1.5 rounded-lg text-sm font-semibold ${p===this.page ? 'bg-ak-gold text-ak-bg' : 'bg-ak-card text-ak-muted hover:text-ak-text2 border border-ak-border'}" onclick="FeesPager.page=${p};FeesPager.load()">${p}</button>`;
+        }
+        if (this.page < this.lastPage) ph += `<button class="btn btn-dark btn-sm" onclick="FeesPager.page=${this.page+1};FeesPager.load()">Next →</button>`;
+        pagDiv.innerHTML = ph;
+      } else {
+        pagDiv.innerHTML = `<span class="text-ak-muted text-xs">${this.total} fees</span>`;
+      }
+    })
+    .catch(() => { content.innerHTML = '<div class="bg-ak-red/15 text-ak-red p-4 rounded-lg">Error loading fees</div>'; });
+  }
+};
+
+FeesPager.init();
+</script>
 
 <?php elseif ($tab === 'statements'): ?>
 <div class="flex justify-between items-center mb-5 flex-wrap gap-3">

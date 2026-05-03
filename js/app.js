@@ -1493,16 +1493,7 @@ document.getElementById('addFeeForm')?.addEventListener('submit', async function
     if (data.success) {
       showToast(`✓ ${feeName} added`, 'success');
       closeAddFeeModal();
-      const feeList = document.getElementById(`fee-list-${memberId}`);
-      if (feeList && data.fee) {
-        const f = data.fee; const isAdd = f.fee_type === 'addition';
-        if (feeList.querySelector('.italic')) feeList.innerHTML = '';
-        const row = document.createElement('div');
-        row.id = `fee-row-${f.id}`;
-        row.className = 'flex items-center gap-3 px-5 py-2.5 border-b border-ak-border/40 last:border-0 hover:bg-ak-infield/30 transition-colors animate-fade-in';
-        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="openEditFeeModal(${f.id},${memberId},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
-        feeList.appendChild(row);
-      }
+      if (typeof FeesPager !== 'undefined') FeesPager.load();
     } else { showToast(data.message || 'Failed', 'error'); }
   } catch { showToast('Connection error', 'error'); }
   btn.textContent = '+ Add Fee'; btn.disabled = false;
@@ -1546,11 +1537,7 @@ document.getElementById('editFeeForm')?.addEventListener('submit', async functio
     if (data.success) {
       showToast(`✓ ${feeName} updated`, 'success');
       closeEditFeeModal();
-      const row = document.getElementById(`fee-row-${feeId}`);
-      if (row && data.fee) {
-        const f = data.fee; const isAdd = f.fee_type === 'addition';
-        row.innerHTML = `<span class="text-lg">${isAdd ? '➕' : '➖'}</span><div class="flex-1 min-w-0"><div class="text-ak-text text-sm font-medium">${f.fee_name}</div>${f.notes ? `<div class="text-ak-muted text-xs">${f.notes}</div>` : ''}</div><div class="font-mono font-bold text-sm ${isAdd ? 'text-ak-green' : 'text-ak-red'}">${isAdd ? '+' : '−'}¥${parseInt(f.amount).toLocaleString('ja-JP')}</div><div class="text-ak-muted text-[10px] font-mono w-28 text-right shrink-0">${new Date().toISOString().slice(0,10)}</div><button onclick="openEditFeeModal(${f.id},${memberId},'${f.fee_name.replace(/'/g,"\\'")}',${f.amount},'${f.fee_type}','${(f.notes||'').replace(/'/g,"\\'")}')" class="btn-icon shrink-0 hover:text-ak-gold transition-colors" title="Edit">✎</button><button onclick="deleteSpecialFee(${f.id},${memberId},${activeAuctionId})" class="btn-icon shrink-0 hover:text-ak-red transition-colors" title="Delete">×</button>`;
-      }
+      if (typeof FeesPager !== 'undefined') FeesPager.load();
     } else { showToast(data.message || 'Failed', 'error'); }
   } catch { showToast('Connection error', 'error'); }
   btn.textContent = '💾 Save Changes'; btn.disabled = false;
@@ -1565,9 +1552,8 @@ async function deleteSpecialFee(feeId, memberId, auctionId) {
     });
     const data = await res.json();
     if (data.success) {
-      const row = document.getElementById(`fee-row-${feeId}`);
-      if (row) { row.style.opacity = '0'; row.style.transform = 'translateX(20px)'; row.style.transition = 'all 0.2s ease'; setTimeout(() => row.remove(), 200); }
       showToast('Fee deleted', 'warning');
+      if (typeof FeesPager !== 'undefined') FeesPager.load();
     } else { showToast(data.message || 'Delete failed', 'error'); }
   } catch { showToast('Connection error', 'error'); }
 }
