@@ -18,16 +18,6 @@ checkMaintenanceMode($db, $userRole);
 
 $brand = loadBranding($db);
 $accentColor = sanitizeColor($brand['brand_accent_color']);
-
-// Fetch special fees per member
-$memberFeesAllPdf = [];
-if ($activeAuctionId) {
-    $mfq = $db->prepare("SELECT * FROM member_fees WHERE auction_id = ? ORDER BY member_id, created_at ASC");
-    $mfq->execute([$activeAuctionId]);
-    foreach ($mfq->fetchAll() as $mf) {
-        $memberFeesAllPdf[$mf['member_id']][] = $mf;
-    }
-}
 $userId = (int)$_SESSION['user_id'];
 
 $activeAuctionId = isset($_GET['auction_id']) ? (int)$_GET['auction_id'] : 0;
@@ -57,6 +47,16 @@ $memberId = isset($_GET['member']) ? (int)$_GET['member'] : null;
 $targets = $printAll
     ? $members
     : array_values(array_filter($members, fn($m) => (int)$m['id'] === $memberId));
+
+// Fetch special fees per member
+$memberFeesAllPdf = [];
+if ($activeAuctionId) {
+    $mfq = $db->prepare("SELECT * FROM member_fees WHERE auction_id = ? ORDER BY member_id, created_at ASC");
+    $mfq->execute([$activeAuctionId]);
+    foreach ($mfq->fetchAll() as $mf) {
+        $memberFeesAllPdf[$mf['member_id']][] = $mf;
+    }
+}
 
 if (empty($targets)) { echo 'No members found.'; exit; }
 
