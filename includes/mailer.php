@@ -9,6 +9,102 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 
 require_once __DIR__ . '/settings.php';
 
+function sendEmail(
+    PDO $db,
+    string $toEmail,
+    string $toName,
+    string $subject,
+    string $htmlBody
+): array {
+    require_once __DIR__ . '/branding.php';
+    $brand = loadBranding($db);
+    $s = loadSettings($db);
+
+    if (empty($s['mail_enabled']) || $s['mail_enabled'] !== '1') {
+        return ['success' => false, 'message' => 'Email sending is disabled.'];
+    }
+
+    if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+        return ['success' => false, 'message' => 'PHPMailer is not installed.'];
+    }
+
+    $provider = $s['mail_provider'] ?? 'smtp';
+
+    try {
+        $mail = new PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->isHTML(true);
+
+        if ($provider === 'servermail') {
+            $mail->isMail();
+        } else {
+            $mail->isSMTP();
+            $mail->SMTPAuth = true;
+            $mail->Username = $s['mail_username'] ?? '';
+            $mail->Password = $s['mail_password'] ?? '';
+            $mail->SMTPOptions = [
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true,
+                ],
+            ];
+
+            switch ($provider) {
+                case 'gmail':
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+                case 'xserver':
+                case 'sakura':
+                    $mail->Host = $s['mail_host'] ?? '';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+                case 'conoha':
+                    $mail->Host = 'smtp.conoha.ne.jp';
+                    $mail->Port = 587;
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+                case 'smtp':
+                default:
+                    $mail->Host = $s['mail_host'] ?? '';
+                    $mail->Port = (int)($s['mail_port'] ?? 587);
+                    $enc = $s['mail_encryption'] ?? 'tls';
+                    $mail->SMTPSecure = $enc === 'ssl'
+                        ? PHPMailer::ENCRYPTION_SMTPS
+                        : PHPMailer::ENCRYPTION_STARTTLS;
+                    break;
+            }
+
+            if (empty($mail->Host)) {
+                return ['success' => false, 'message' => 'SMTP host is not configured'];
+            }
+        }
+
+        $fromEmail = $s['mail_from_email'] ?? $s['mail_username'] ?? '';
+        $fromName = $s['mail_from_name'] ?? ($brand['brand_name'] ?? 'AuctionKai');
+
+        if (empty($fromEmail)) {
+            return ['success' => false, 'message' => 'From email address is not set'];
+        }
+
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($toEmail, $toName);
+        $mail->Subject = $subject;
+        $mail->Body = $htmlBody;
+        $mail->AltBody = strip_tags($htmlBody);
+
+        $mail->send();
+
+        return ['success' => true, 'message' => 'Email sent to ' . $toEmail];
+
+    } catch (Exception $e) {
+        return ['success' => false, 'message' => 'Send failed: ' . $mail->ErrorInfo];
+    }
+}
+
 function sendSettlementEmail(
     array $member,
     array $auction,
