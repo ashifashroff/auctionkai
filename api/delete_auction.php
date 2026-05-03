@@ -52,6 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_POST['confirm'] ?? '') === 'yes') {
     // Delete vehicles for this auction
     $db->prepare("DELETE FROM vehicles WHERE auction_id=?")->execute([$auctionId]);
+    // Delete member fees for this auction
+    $db->prepare("DELETE FROM member_fees WHERE auction_id=?")->execute([$auctionId]);
+    // Delete payment statuses for this auction
+    $db->prepare("DELETE FROM payment_status WHERE auction_id=?")->execute([$auctionId]);
     // Delete the auction
     $db->prepare("DELETE FROM auction WHERE id=? AND user_id=?")->execute([$auctionId, $userId]);
     // Clear session if this was active
@@ -60,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     header('Location: index.php?tab=dashboard');
     exit;
+    }
 }
 ?>
 <!DOCTYPE html>
