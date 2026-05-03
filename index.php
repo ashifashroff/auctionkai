@@ -591,75 +591,122 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 </div>
 
 <?php elseif ($tab === 'special_fees'): ?>
-<div class="flex justify-between items-center mb-5 flex-wrap gap-3">
-  <h2 class="text-lg font-bold">💴 Special Fees — <?= h($auction['name']) ?></h2>
-</div>
+<h2 class="text-lg font-bold mb-5">💴 Special Fees — <?= h($auction['name']) ?></h2>
 
-<!-- Add Fee Form (inline, like vehicle add) -->
+<!-- Add Special Fee Card -->
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
-  <form id="addFeeForm" data-parsley-validate>
-    <div class="grid grid-cols-6 gap-2 items-end">
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Special Fee</div>
+  <form id="addSpecialFeeForm" onsubmit="return submitAddSpecialFee(event)">
+    <div class="grid grid-cols-6 gap-2">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
-        <input class="inp" id="feeMemberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showFeeMemberResults()" oninput="filterFeeMembers()">
-        <input type="hidden" id="feeMemberId">
-        <div id="feeMemberDropdown" class="member-dropdown" style="display:none"></div>
+        <input class="inp" id="sf_memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showSfMemberResults()" oninput="filterSfMembers()">
+        <input type="hidden" id="sf_memberId" required>
+        <div id="sf_memberDropdown" class="member-dropdown" style="display:none"></div>
       </div>
-      <div><label class="lbl">Fee Description *</label><input class="inp" id="af_feeName" placeholder="e.g. Car Wash Fee" data-parsley-required="true" data-parsley-required-message="Fee description is required"></div>
-      <div><label class="lbl">Amount (¥) *</label><input class="inp font-mono" type="number" id="af_amount" placeholder="3000" min="1" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-required-message="Amount is required"></div>
+      <div class="col-span-2">
+        <label class="lbl">Fee Name *</label>
+        <input class="inp" id="sf_feeName" placeholder="e.g. Car Wash Fee" required>
+      </div>
       <div>
-        <label class="lbl">Type</label>
-        <select class="inp" id="af_feeType">
+        <label class="lbl">Amount (¥) *</label>
+        <input class="inp font-mono" type="number" id="sf_amount" placeholder="3000" min="1" required>
+      </div>
+      <div class="flex items-end gap-2 pt-[22px]">
+        <select class="inp" id="sf_feeType">
           <option value="deduction">− Deduction</option>
           <option value="addition">+ Addition</option>
         </select>
-      </div>
-      <div class="flex items-end pt-[22px]">
-        <button type="submit" id="addFeeBtn" class="btn btn-gold">+ Add Fee</button>
+        <button class="btn btn-gold" type="submit" id="addSpecialFeeBtn">Add</button>
       </div>
     </div>
+    <!-- Notes row -->
+    <div class="mt-2">
+      <label class="lbl">Notes</label>
+      <input class="inp" id="sf_notes" placeholder="Optional notes…">
+    </div>
+    <div id="addSpecialFeeMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
 
-<!-- Fees list (AJAX paginated) -->
-<div id="fees-content"><div class="text-center text-ak-muted py-8">Loading…</div></div>
-<div id="fees-pagination" class="flex items-center justify-center gap-2 mt-4"></div>
+<!-- Fees Table Card -->
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto" id="fees-table-wrap">
+  <div id="fees-content"><div class="text-center text-ak-muted py-8">Loading…</div></div>
+  <div id="fees-pagination" class="flex items-center justify-center gap-2 py-3"></div>
+</div>
 
 <script>
 const activeAuctionId = <?= (int)$activeAuctionId ?>;
-const feeMembersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name']], $members)) ?>;
+const sfMembersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name']], $members)) ?>;
 
-function filterFeeMembers() {
-  const q = document.getElementById('feeMemberSearch').value.toLowerCase().trim();
-  const dropdown = document.getElementById('feeMemberDropdown');
-  document.getElementById('feeMemberId').value = '';
+function filterSfMembers() {
+  const q = document.getElementById('sf_memberSearch').value.toLowerCase().trim();
+  const dropdown = document.getElementById('sf_memberDropdown');
+  document.getElementById('sf_memberId').value = '';
   if (!q) { dropdown.style.display = 'none'; return; }
-  const filtered = feeMembersData.filter(m => m.name.toLowerCase().includes(q));
+  const filtered = sfMembersData.filter(m => m.name.toLowerCase().includes(q));
   if (!filtered.length) { dropdown.style.display = 'none'; return; }
-  dropdown.innerHTML = filtered.map(m => `<div class="member-result" onclick="selectFeeMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
+  dropdown.innerHTML = filtered.map(m => `<div class="member-result" onclick="selectSfMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
   dropdown.style.display = 'block';
 }
 
-function showFeeMemberResults() {
-  const q = document.getElementById('feeMemberSearch').value.toLowerCase().trim();
+function showSfMemberResults() {
+  const q = document.getElementById('sf_memberSearch').value.toLowerCase().trim();
   if (!q) {
-    const dropdown = document.getElementById('feeMemberDropdown');
-    dropdown.innerHTML = feeMembersData.slice(0,10).map(m => `<div class="member-result" onclick="selectFeeMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
+    const dropdown = document.getElementById('sf_memberDropdown');
+    dropdown.innerHTML = sfMembersData.slice(0,10).map(m => `<div class="member-result" onclick="selectSfMember(${m.id},'${m.name.replace(/'/g,"\\'")}')">${m.name}</div>`).join('');
     dropdown.style.display = 'block';
   }
 }
 
-function selectFeeMember(id, name) {
-  document.getElementById('feeMemberId').value = id;
-  document.getElementById('feeMemberSearch').value = name;
-  document.getElementById('feeMemberDropdown').style.display = 'none';
+function selectSfMember(id, name) {
+  document.getElementById('sf_memberId').value = id;
+  document.getElementById('sf_memberSearch').value = name;
+  document.getElementById('sf_memberDropdown').style.display = 'none';
 }
 
 document.addEventListener('click', function(e) {
-  if (!e.target.closest('#feeMemberSearch') && !e.target.closest('#feeMemberDropdown')) {
-    document.getElementById('feeMemberDropdown').style.display = 'none';
+  if (!e.target.closest('#sf_memberSearch') && !e.target.closest('#sf_memberDropdown')) {
+    document.getElementById('sf_memberDropdown').style.display = 'none';
   }
 });
+
+function submitAddSpecialFee(e) {
+  e.preventDefault();
+  const btn = document.getElementById('addSpecialFeeBtn');
+  const msgEl = document.getElementById('addSpecialFeeMsg');
+  const memberId = document.getElementById('sf_memberId').value;
+  if (!memberId) { msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent='Please select a member.'; msgEl.classList.remove('hidden'); return false; }
+  btn.disabled = true; btn.textContent = 'Adding…';
+  fetch('api/member_fees.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action:'add',
+      auction_id: activeAuctionId,
+      member_id: parseInt(memberId),
+      fee_name: document.getElementById('sf_feeName').value.trim(),
+      amount: parseFloat(document.getElementById('sf_amount').value),
+      fee_type: document.getElementById('sf_feeType').value,
+      notes: document.getElementById('sf_notes').value.trim()
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    btn.disabled = false; btn.textContent = 'Add';
+    if (data.success) {
+      document.getElementById('addSpecialFeeForm').reset();
+      document.getElementById('sf_memberId').value = '';
+      msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-green/15 text-ak-green'; msgEl.textContent='Fee added!'; msgEl.classList.remove('hidden');
+      setTimeout(()=>msgEl.classList.add('hidden'),3000);
+      FeesPager.page=1; FeesPager.load();
+    } else {
+      msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent=data.message||'Failed to add fee.'; msgEl.classList.remove('hidden');
+    }
+  })
+  .catch(() => { btn.disabled=false; btn.textContent='Add'; msgEl.className='mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px] bg-ak-red/15 text-ak-red'; msgEl.textContent='Network error.'; msgEl.classList.remove('hidden'); });
+  return false;
+}
 
 const FeesPager = {
   page: 1, lastPage: 1, total: 0, perPage: 10, search: '', searchTimer: null,
