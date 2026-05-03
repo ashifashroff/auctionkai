@@ -41,8 +41,11 @@ try {
         $feeType = $data['fee_type'] ?? 'deduction';
         $notes = trim($data['notes'] ?? '');
 
-        if (empty($feeName)) { echo json_encode(['success' => false, 'message' => 'Fee name is required']); exit; }
-        if ($amount <= 0) { echo json_encode(['success' => false, 'message' => 'Amount must be greater than 0']); exit; }
+        if (empty($feeName)) { echo json_encode(["success" => false, "message" => "Fee name is required"]); exit; }
+        if (strlen($feeName) > 200) { echo json_encode(["success" => false, "message" => "Fee name too long"]); exit; }
+        if ($amount <= 0) { echo json_encode(["success" => false, "message" => "Amount must be greater than 0"]); exit; }
+        if ($amount > 999999999) { echo json_encode(["success" => false, "message" => "Amount exceeds maximum"]); exit; }
+        if (strlen($notes) > 500) { echo json_encode(["success" => false, "message" => "Notes too long"]); exit; }
         if (!in_array($feeType, ['deduction', 'addition'])) $feeType = 'deduction';
 
         $stmt = $db->prepare("INSERT INTO member_fees (auction_id, member_id, fee_name, amount, fee_type, notes) VALUES (?, ?, ?, ?, ?, ?)");
@@ -78,8 +81,11 @@ try {
         $notes = trim($data['notes'] ?? '');
 
         if (!$feeId) { echo json_encode(['success' => false, 'message' => 'Missing fee ID']); exit; }
-        if (empty($feeName)) { echo json_encode(['success' => false, 'message' => 'Fee name is required']); exit; }
-        if ($amount <= 0) { echo json_encode(['success' => false, 'message' => 'Amount must be greater than 0']); exit; }
+        if (empty($feeName)) { echo json_encode(["success" => false, "message" => "Fee name is required"]); exit; }
+        if (strlen($feeName) > 200) { echo json_encode(["success" => false, "message" => "Fee name too long"]); exit; }
+        if ($amount <= 0) { echo json_encode(["success" => false, "message" => "Amount must be greater than 0"]); exit; }
+        if ($amount > 999999999) { echo json_encode(["success" => false, "message" => "Amount exceeds maximum"]); exit; }
+        if (strlen($notes) > 500) { echo json_encode(["success" => false, "message" => "Notes too long"]); exit; }
         if (!in_array($feeType, ['deduction', 'addition'])) $feeType = 'deduction';
 
         $stmt = $db->prepare("UPDATE member_fees SET fee_name=?, amount=?, fee_type=?, notes=? WHERE id=? AND auction_id=? AND member_id=?");

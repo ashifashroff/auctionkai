@@ -65,6 +65,11 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
   `other_fee`   DECIMAL(12,0) DEFAULT 0,
   `sold`        TINYINT(1)   DEFAULT 1,
   `created_at`  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `chk_sold_price` CHECK (`sold_price` >= 0),
+  CONSTRAINT `chk_recycle_fee` CHECK (`recycle_fee` >= 0),
+  CONSTRAINT `chk_listing_fee` CHECK (`listing_fee` >= 0),
+  CONSTRAINT `chk_sold_fee` CHECK (`sold_fee` >= 0),
+  CONSTRAINT `chk_nagare_fee` CHECK (`nagare_fee` >= 0),
   FOREIGN KEY (`auction_id`) REFERENCES `auction`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`member_id`) REFERENCES `members`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -353,6 +358,7 @@ CREATE TABLE IF NOT EXISTS member_fees (
   fee_type ENUM('deduction','addition') DEFAULT 'deduction',
   notes VARCHAR(500) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `chk_fee_amount` CHECK (`amount` > 0),
   INDEX idx_mfees_auction (`auction_id`),
   INDEX idx_mfees_member (`member_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -366,5 +372,6 @@ CREATE TABLE IF NOT EXISTS member_fees (
   amount DECIMAL(10,0) NOT NULL DEFAULT 0,
   fee_type ENUM('deduction','addition') DEFAULT 'deduction',
   notes VARCHAR(500) DEFAULT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `chk_fee_amount` CHECK (`amount` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

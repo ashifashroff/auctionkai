@@ -38,9 +38,13 @@ if (!$sold) {
     $recycleFee = 0;
     $listingFee = 0;
     $soldFee = 0;
-} else {
-    if ($soldPrice < 0) $errors[] = 'Sold price cannot be negative.';
 }
+
+// Reject negative fee values (all scenarios)
+if ($soldPrice < 0) $errors[] = 'Sold price cannot be negative.';
+if ($recycleFee < 0) $errors[] = 'Recycle fee cannot be negative.';
+if ($listingFee < 0) $errors[] = 'Listing fee cannot be negative.';
+if ($soldFee < 0) $errors[] = 'Sold fee cannot be negative.';
 if ($nagareFee < 0) $errors[] = 'Nagare fee cannot be negative.';
 
 if (!empty($errors)) {

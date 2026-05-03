@@ -48,6 +48,13 @@ if (!$sold) {
     $soldFee = 0;
 }
 
+// Reject negative fee values
+if ($soldPrice < 0) $errors[] = 'Sold price cannot be negative.';
+if ($recycleFee < 0) $errors[] = 'Recycle fee cannot be negative.';
+if ($listingFee < 0) $errors[] = 'Listing fee cannot be negative.';
+if ($soldFee < 0) $errors[] = 'Sold fee cannot be negative.';
+if ($nagareFee < 0) $errors[] = 'Nagare fee cannot be negative.';
+
 // Check for duplicate lot number in same auction
 if ($lot !== '') {
     $dupLot = $db->prepare("SELECT COUNT(*) FROM vehicles WHERE auction_id = ? AND lot = ? AND lot != ''");
