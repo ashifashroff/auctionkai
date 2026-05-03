@@ -6,6 +6,14 @@ require_once __DIR__ . '/../includes/activity.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
+
+// CSRF check
+$csrfToken = $data['_tok'] ?? '';
+if (empty($_SESSION['tok']) || !hash_equals($_SESSION['tok'], $csrfToken)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    exit;
+}
+
 $auctionId = (int)($data['auction_id'] ?? 0);
 $memberId = (int)($data['member_id'] ?? 0);
 $status = $data['status'] ?? 'unpaid';

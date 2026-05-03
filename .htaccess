@@ -16,6 +16,10 @@
  Deny from all
 </Files>
 
+# Block access to .git directory and git files
+RedirectMatch 404 /\.git(?:/|$)
+RedirectMatch 404 /\.gitignore
+
 # Custom error pages
 ErrorDocument 403 /403.php
 ErrorDocument 404 /404.php

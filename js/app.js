@@ -1415,7 +1415,7 @@ async function setPaymentStatus(memberId, auctionId, status, netPayout) {
     const res = await fetch('api/update_payment.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ auction_id: auctionId, member_id: memberId, status: status, paid_amount: status === 'paid' ? netPayout : 0 })
+      body: JSON.stringify({ _tok: CSRF_TOKEN, auction_id: auctionId, member_id: memberId, status: status, paid_amount: status === 'paid' ? netPayout : 0 })
     });
     const data = await res.json();
 
@@ -1472,7 +1472,7 @@ document.getElementById('addFeeForm')?.addEventListener('submit', async function
   try {
     const res = await fetch('api/member_fees.php', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'add', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_name: feeName, amount, fee_type: feeType, notes })
+      body: JSON.stringify({ _tok: CSRF_TOKEN, action: 'add', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_name: feeName, amount, fee_type: feeType, notes })
     });
     const data = await res.json();
     if (data.success) {
@@ -1516,7 +1516,7 @@ document.getElementById('editFeeForm')?.addEventListener('submit', async functio
   try {
     const res = await fetch('api/member_fees.php', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'edit', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_id: parseInt(feeId), fee_name: feeName, amount, fee_type: feeType, notes })
+      body: JSON.stringify({ _tok: CSRF_TOKEN, action: 'edit', auction_id: activeAuctionId, member_id: parseInt(memberId), fee_id: parseInt(feeId), fee_name: feeName, amount, fee_type: feeType, notes })
     });
     const data = await res.json();
     if (data.success) {
@@ -1657,7 +1657,7 @@ async function sfDeleteFee(feeId, memberId, auctionId) {
     const res = await fetch('api/member_fees.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', auction_id: auctionId, member_id: memberId, fee_id: feeId })
+      body: JSON.stringify({ _tok: CSRF_TOKEN, action: 'delete', auction_id: auctionId, member_id: memberId, fee_id: feeId })
     });
     const data = await res.json();
     if (data.success) {

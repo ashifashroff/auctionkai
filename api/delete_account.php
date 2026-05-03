@@ -6,6 +6,23 @@ require_once __DIR__ . '/../includes/activity.php';
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
+
+// CSRF check
+$csrfToken = $data['_tok'] ?? '';
+if (empty($_SESSION['tok']) || !hash_equals($_SESSION['tok'], $csrfToken)) {
+    echo json_encode(['success' => false, 'message' => 'Invalid request']);
+    exit;
+}
+
+// Rate limiting: max 3 attempts per 5 minutes
+$rateKey = 'delacct_' . $userId;
+$attempts = (int)($_SESSION[$rateKey . '_count'] ?? 0);
+$lastAttempt = (int)($_SESSION[$rateKey . '_time'] ?? 0);
+if ($attempts >= 3 && (time() - $lastAttempt) < 300) {
+    echo json_encode(['success' => false, 'message' => 'Too many attempts. Try again in 5 minutes.']);
+    exit;
+}
+
 $password = $data['password'] ?? '';
 
 if (empty($password)) {
@@ -20,9 +37,14 @@ try {
     $user = $stmt->fetch();
 
     if (!$user || !password_verify($password, $user['password'])) {
+        $_SESSION[$rateKey . '_count'] = $attempts + 1;
+        $_SESSION[$rateKey . '_time'] = time();
         echo json_encode(['success' => false, 'message' => 'Incorrect password']);
         exit;
     }
+
+    // Reset rate limit on successful password
+    unset($_SESSION[$rateKey . '_count'], $_SESSION[$rateKey . '_time']);
 
     // Prevent admin from deleting their account if they are the only admin
     if ($user['role'] === 'admin') {
