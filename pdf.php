@@ -68,7 +68,10 @@ if ($activeAuctionId) {
     foreach ($psq->fetchAll() as $ps) { $paymentStatuses[$ps['member_id']] = $ps; }
 }
 
-function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid'): string {
+function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = []): string {
+    if (empty($brand)) {
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
+    }
     $rows = '';
     foreach ($s['mv'] as $v) {
         $net = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0);
@@ -140,7 +143,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     if ($s['count'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
-    echo renderStatement($m, $s, $auction, $payStatus);
+    echo renderStatement($m, $s, $auction, $payStatus, $brand);
 
     // Log PDF generation to statement_history
     try {
