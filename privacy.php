@@ -32,14 +32,14 @@ require_once 'includes/helpers.php';
 <div class="p-7 max-w-[900px] mx-auto space-y-6">
 
 <h1 class="text-2xl font-bold text-ak-gold mb-2">🔒 Privacy Policy</h1>
-<p class="text-ak-muted text-sm mb-6">Last updated: <?= date('F Y') ?></p>
+<p class="text-ak-muted text-sm mb-6">Last updated: May 2026</p>
 
 <!-- 1. Introduction -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold mb-3">1. Introduction</h2>
   <p class="text-ak-text2 text-sm leading-relaxed">
     AuctionKai is operated by Mirai Global Solutions. This policy explains what personal data we collect,
-    how we use it, and how we protect it.
+    how we use it, and how we protect it. This applies to both auction house operators and their members.
   </p>
 </div>
 
@@ -47,9 +47,11 @@ require_once 'includes/helpers.php';
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold mb-3">2. Data We Collect</h2>
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
-    <li>Member names, phone numbers, and email addresses entered by auction house operators</li>
-    <li>User account information (username, email)</li>
-    <li>Vehicle and transaction data entered by operators</li>
+    <li><b>Account data</b> — username, email address, hashed password</li>
+    <li><b>Member data</b> — names, phone numbers, and email addresses entered by auction house operators</li>
+    <li><b>Transaction data</b> — vehicle details, sale prices, fees, special fees, and payment statuses entered by operators</li>
+    <li><b>Activity data</b> — login history, actions performed (vehicle adds, edits, deletions, PDF generation, email sending, payment status changes), IP addresses, and timestamps</li>
+    <li><b>Session data</b> — session tokens stored as cookies for authentication</li>
   </ul>
 </div>
 
@@ -57,43 +59,92 @@ require_once 'includes/helpers.php';
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold mb-3">3. How We Use Your Data</h2>
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
-    <li>To generate settlement statements for auction members</li>
-    <li>To calculate fees and net payouts</li>
-    <li>To produce PDF documents for record-keeping</li>
+    <li>To generate settlement statements and PDF documents for auction members</li>
+    <li>To calculate fees, deductions, additions, and net payouts</li>
+    <li>To track payment statuses (Unpaid, Partial, Paid) and paid timestamps</li>
+    <li>To send email notifications (password reset links, settlement statements) via the system's configured email provider</li>
+    <li>To maintain an audit trail of all actions for accountability and security</li>
+    <li>To detect and prevent unauthorized access (brute-force protection, rate limiting)</li>
   </ul>
 </div>
 
-<!-- 4. Data Storage -->
+<!-- 4. Email Communications -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
-  <h2 class="text-ak-gold font-bold mb-3">4. Data Storage</h2>
+  <h2 class="text-ak-gold font-bold mb-3">4. Email Communications</h2>
+  <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
+    <li>Password reset emails are sent when a user requests one via the "Forgot Password" page. Reset links expire after 1 hour and are invalidated after use</li>
+    <li>Settlement statement emails may be sent by operators to members. These contain financial details including sale prices, fees, and net payout amounts</li>
+    <li>Emails are sent through the email provider configured in the Admin Panel (SMTP, Gmail, Xserver, Sakura, etc.)</li>
+    <li>Email sending is rate-limited to prevent abuse (10 emails per minute per user)</li>
+  </ul>
+</div>
+
+<!-- 5. Data Storage & Security -->
+<div class="bg-ak-card border border-ak-border rounded-xl p-7">
+  <h2 class="text-ak-gold font-bold mb-3">5. Data Storage & Security</h2>
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
     <li>All data is stored in a MySQL database on your self-hosted server</li>
-    <li>AuctionKai does not transmit personal data to any third-party services</li>
-    <li>Auction house operators are responsible for the security of their own server</li>
+    <li>AuctionKai does not transmit personal data to any third-party analytics or tracking services</li>
+    <li>Passwords are hashed using bcrypt — they are never stored in plaintext</li>
+    <li>Password reset tokens are stored as SHA-256 hashes — even database access cannot reveal usable tokens</li>
+    <li>All database queries use PDO prepared statements — protection against SQL injection</li>
+    <li>CSRF tokens protect all forms and API endpoints from cross-origin attacks</li>
+    <li>Login is rate-limited (5 failed attempts triggers a 30-second cooldown)</li>
+    <li>Session timeout is enforced (configurable by admin, default 30 minutes of inactivity)</li>
+    <li>Database backups are available to admin users only and contain all system data</li>
   </ul>
 </div>
 
-<!-- 5. Data Retention -->
+<!-- 6. Admin Access & Impersonation -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
-  <h2 class="text-ak-gold font-bold mb-3">5. Data Retention</h2>
+  <h2 class="text-ak-gold font-bold mb-3">6. Admin Access & Impersonation</h2>
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
-    <li>Active auction data is retained for the duration of the auction period</li>
+    <li>System administrators can view all user accounts, activity logs, and system data</li>
+    <li>Admins may impersonate regular users to assist with support issues. Impersonation sessions are limited to 1 hour</li>
+    <li>All actions performed during impersonation are logged with the admin's identity in the activity log</li>
+    <li>Admins cannot impersonate other admins</li>
+    <li>Impersonated users are notified via the "Return to Admin" banner in the top bar</li>
+  </ul>
+</div>
+
+<!-- 7. Data Retention -->
+<div class="bg-ak-card border border-ak-border rounded-xl p-7">
+  <h2 class="text-ak-gold font-bold mb-3">7. Data Retention</h2>
+  <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
+    <li>Active auction data (vehicles, fees, payment statuses) is retained for the duration of the auction</li>
     <li>Member records are retained until manually deleted by the operator</li>
+    <li>Activity logs are retained for a minimum of 30 days. Admins may clear older logs</li>
+    <li>Login history records are kept per user (last 50 attempts) and auto-cleaned</li>
+    <li>Password reset tokens expire after 1 hour and are deleted after use</li>
+    <li>Expired sessions are automatically cleaned up based on the configured timeout</li>
   </ul>
 </div>
 
-<!-- 6. Your Rights -->
+<!-- 8. Your Rights & Data Deletion -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
-  <h2 class="text-ak-gold font-bold mb-3">6. Your Rights</h2>
+  <h2 class="text-ak-gold font-bold mb-3">8. Your Rights & Data Deletion</h2>
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
-    <li>Auction operators can delete member records at any time from the Members tab</li>
-    <li>Contact Mirai Global Solutions for data inquiries</li>
+    <li><b>Account deletion</b> — You can permanently delete your account and all associated data (auctions, members, vehicles, fees, activity logs) from the Profile page. This action is immediate and irreversible</li>
+    <li><b>Member deletion</b> — Operators can delete member records at any time from the Members tab</li>
+    <li><b>Data export</b> — PDF settlement statements and ZIP downloads are available for record-keeping before deletion</li>
+    <li><b>Database backups</b> — Admins can download complete SQL backups at any time</li>
   </ul>
 </div>
 
-<!-- 7. Contact -->
+<!-- 9. Cookies -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
-  <h2 class="text-ak-gold font-bold mb-3">7. Contact</h2>
+  <h2 class="text-ak-gold font-bold mb-3">9. Cookies</h2>
+  <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
+    <li>A single session cookie (PHPSESSID) is used to maintain login state</li>
+    <li>The session cookie is set with HttpOnly and SameSite=Strict flags</li>
+    <li>No third-party cookies, tracking cookies, or advertising cookies are used</li>
+    <li>Sessions expire after 30 minutes of inactivity (configurable by admin)</li>
+  </ul>
+</div>
+
+<!-- 10. Contact -->
+<div class="bg-ak-card border border-ak-border rounded-xl p-7">
+  <h2 class="text-ak-gold font-bold mb-3">10. Contact</h2>
   <p class="text-ak-text2 text-sm leading-relaxed">
     Mirai Global Solutions<br>
     Email: <a href="mailto:admin@miraiglobal.com" class="text-ak-gold hover:underline">admin@miraiglobal.com</a>
