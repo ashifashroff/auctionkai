@@ -30,16 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user) {
                 $token = bin2hex(random_bytes(32));
+                $tokenHash = hash('sha256', $token);
                 $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
                 // Delete any existing tokens for this email
                 $db->prepare("DELETE FROM password_resets WHERE email = ?")->execute([$email]);
 
-                // Insert new token
+                // Insert hashed token (not plaintext)
                 $stmt = $db->prepare("INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)");
-                $stmt->execute([$email, $token, $expiresAt]);
+                $stmt->execute([$email, $tokenHash, $expiresAt]);
 
-                $resetLink = "http://localhostreset_password.php?token=" . $token;
+                $resetLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http')
+                    . '://' . $_SERVER['HTTP_HOST']
+                    . '/auth/reset_password.php?token=' . $token;
             } else {
                 // Don't reveal whether email exists — but for now show a generic message
                 $error = 'If that email exists in our system, a reset link has been generated.';

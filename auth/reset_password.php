@@ -16,8 +16,9 @@ $tok = $_SESSION['tok'];
 
 // Validate token
 if ($token !== '') {
+    $tokenHash = hash('sha256', $token);
     $stmt = $db->prepare("SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()");
-    $stmt->execute([$token]);
+    $stmt->execute([$tokenHash]);
     $reset = $stmt->fetch();
     if ($reset) {
         $validToken = true;
@@ -48,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
             $stmt = $db->prepare("UPDATE users SET password = ? WHERE email = ?");
             $stmt->execute([$hash, $tokenEmail]);
 
-            // Delete used token
-            $db->prepare("DELETE FROM password_resets WHERE token = ?")->execute([$token]);
+            // Delete used token (by hash)
+            $db->prepare("DELETE FROM password_resets WHERE token = ?")->execute([$tokenHash]);
 
             header('Location: login.php?reset=1');
             exit;
