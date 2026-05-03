@@ -8,7 +8,7 @@ ini_set('session.cookie_samesite', 'Strict');
 session_start();
 
 if (empty($_SESSION['user_id'])) {
-    header('Location: auth/login.php');
+    header('Location: ../auth/login.php');
     exit;
 }
 
@@ -23,7 +23,7 @@ $stmt->execute([$auctionId, $userId]);
 $auction = $stmt->fetch();
 
 if (!$auction) {
-    header('Location: index.php');
+    header('Location: ../index.php');
     exit;
 }
 
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (($_SESSION['auction_id'] ?? 0) == $auctionId) {
         unset($_SESSION['auction_id']);
     }
-    header('Location: index.php?tab=dashboard');
+    header('Location: ../index.php?tab=dashboard');
     exit;
     }
 }
@@ -75,8 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>AuctionKai — Delete Auction</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.5">
-<?php include 'css/tailwind-config.php'; ?>
+<link rel="stylesheet" href="../css/style.css?v=3.5">
+<?php include __DIR__ . '/../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="hidden" name="confirm" value="yes">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
         <div class="flex gap-3">
-          <a href="index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
+          <a href="../index.php?tab=dashboard&auction_id=<?= $auctionId ?>" class="btn btn-dark flex-1 text-center">← Cancel & Go Back</a>
           <button class="btn flex-1 text-center" type="submit" style="background:var(--red);color:#fff" onclick="return confirm('Are you absolutely sure? This will permanently delete this auction and all its vehicles.')">🗑 Confirm Delete</button>
         </div>
       </form>
