@@ -1541,7 +1541,7 @@ function filterSfMembers() {
   const filtered = membersData.filter(m => m.name.toLowerCase().includes(query));
   if (filtered.length === 0 || query === '') { dropdown.style.display = 'none'; return; }
   dropdown.innerHTML = filtered.map(m => `
-    <div class="member-option" onclick="sfSelectMember(${m.id}, '${m.name.replace(/'/g,"\\'")}')">
+    <div class="member-dropdown-item" onclick="sfSelectMember(${m.id}, '${m.name.replace(/'/g,"\\'")}')">
       ${m.name}
     </div>
   `).join('');
