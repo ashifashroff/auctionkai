@@ -18,16 +18,17 @@ if (!in_array($perPage, $allowedPerPage)) {
 }
 $search = trim($_GET['search'] ?? '');
 
-// Build search condition
+// Build search condition (sanitize LIKE wildcards)
 $searchWhere = '';
 $searchParams = [];
-if ($search !== '') {
+if ($search !== '' && mb_strlen($search) >= 2) {
+    $search = substr($search, 0, 100);
+    $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search) . '%';
     $searchWhere = "AND (
         m.name LIKE ? OR
         m.phone LIKE ? OR
         m.email LIKE ?
     )";
-    $like = '%' . $search . '%';
     $searchParams = [$like, $like, $like];
 }
 

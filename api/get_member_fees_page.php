@@ -9,6 +9,14 @@ $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = max(5, min(100, (int)($_GET['per_page'] ?? 10)));
 $search = trim($_GET['search'] ?? '');
 
+// Sanitize LIKE search: escape wildcards, limit length, enforce minimum
+if ($search !== '') {
+    $search = substr($search, 0, 100); // Max 100 chars
+    $searchLike = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search) . '%';
+} else {
+    $searchLike = '';
+}
+
 if (!$auctionId) {
     echo json_encode(['success' => false, 'message' => 'Missing auction ID']);
     exit;
@@ -28,12 +36,11 @@ $offset = ($page - 1) * $perPage;
 $where = ["mf.auction_id = ?"];
 $params = [$auctionId];
 
-if ($search !== '') {
+if ($search !== '' && mb_strlen($search) >= 2) {
     $where[] = "(m.name LIKE ? OR mf.fee_name LIKE ? OR mf.notes LIKE ?)";
-    $like = "%{$search}%";
-    $params[] = $like;
-    $params[] = $like;
-    $params[] = $like;
+    $params[] = $searchLike;
+    $params[] = $searchLike;
+    $params[] = $searchLike;
 }
 
 $whereSQL = implode(' AND ', $where);

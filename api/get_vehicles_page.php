@@ -19,6 +19,21 @@ if (!in_array($perPage, $allowedPerPage)) {
 }
 $search = trim($_GET['search'] ?? '');
 
+// Sanitize LIKE search
+$searchWhere = '';
+$searchParams = [];
+if ($search !== '' && mb_strlen($search) >= 2) {
+    $search = substr($search, 0, 100);
+    $like = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search) . '%';
+    $searchWhere = "AND (
+        v.lot LIKE ? OR
+        v.make LIKE ? OR
+        v.model LIKE ? OR
+        m.name LIKE ?
+    )";
+    $searchParams = [$like, $like, $like, $like];
+}
+
 if (!$auctionId) {
     echo json_encode(['success' => false]);
     exit;
@@ -32,20 +47,6 @@ $stmt->execute([$auctionId, $userId]);
 if (!$stmt->fetch()) {
     echo json_encode(['success' => false]);
     exit;
-}
-
-// Build search condition
-$searchWhere = '';
-$searchParams = [];
-if ($search !== '') {
-    $searchWhere = "AND (
-        v.lot LIKE ? OR
-        v.make LIKE ? OR
-        v.model LIKE ? OR
-        m.name LIKE ?
-    )";
-    $like = '%' . $search . '%';
-    $searchParams = [$like, $like, $like, $like];
 }
 
 // Count total
