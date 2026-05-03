@@ -246,11 +246,13 @@ CREATE TABLE IF NOT EXISTS activity_log (
   entity_id INT UNSIGNED DEFAULT NULL,
   description TEXT DEFAULT NULL,
   ip_address VARCHAR(45) DEFAULT NULL,
+  impersonated_by INT UNSIGNED DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_log_user_id (`user_id`),
   INDEX idx_log_action (`action`),
   INDEX idx_log_created (`created_at`),
-  INDEX idx_log_entity (`entity_type`, `entity_id`)
+  INDEX idx_log_entity (`entity_type`, `entity_id`),
+  INDEX idx_log_impersonated (`impersonated_by`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ── For existing installs ─────────────────────
@@ -262,6 +264,7 @@ CREATE TABLE IF NOT EXISTS activity_log (
   entity_id INT UNSIGNED DEFAULT NULL,
   description TEXT DEFAULT NULL,
   ip_address VARCHAR(45) DEFAULT NULL,
+  impersonated_by INT UNSIGNED DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

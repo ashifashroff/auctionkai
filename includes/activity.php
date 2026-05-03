@@ -16,10 +16,19 @@ function logActivity(
             ?? '';
         $ip = trim(explode(',', $ip)[0]);
 
+        // Mark impersonated actions
+        $impersonatedBy = null;
+        if (!empty($_SESSION['original_admin_id'])) {
+            $impersonatedBy = (int)$_SESSION['original_admin_id'];
+            if (!str_starts_with($description, '[IMP]')) {
+                $description = '[IMP by admin #' . $impersonatedBy . '] ' . $description;
+            }
+        }
+
         $stmt = $db->prepare("
             INSERT INTO activity_log
-            (user_id, action, entity_type, entity_id, description, ip_address)
-            VALUES (?, ?, ?, ?, ?, ?)
+            (user_id, action, entity_type, entity_id, description, ip_address, impersonated_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         ");
         $stmt->execute([
             $userId,
@@ -28,6 +37,7 @@ function logActivity(
             $entityId ?: null,
             $description ?: null,
             $ip ?: null,
+            $impersonatedBy,
         ]);
     } catch (Exception $e) {
         error_log('Activity log error: ' . $e->getMessage());

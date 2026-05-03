@@ -9,6 +9,22 @@ if (empty($_SESSION['user_id'])) {
     exit;
 }
 
+// Impersonation expiry: max 1 hour
+if (!empty($_SESSION['original_admin_id']) && !empty($_SESSION['impersonate_started'])) {
+    if ((time() - (int)$_SESSION['impersonate_started']) > 3600) {
+        // Expired — restore admin session
+        $adminId = $_SESSION['original_admin_id'];
+        $adminName = $_SESSION['original_admin_name'] ?? '';
+        unset($_SESSION['original_admin_id'], $_SESSION['original_admin_name'], $_SESSION['impersonate_started']);
+        $_SESSION['user_id'] = $adminId;
+        $_SESSION['user_name'] = $adminName;
+        $_SESSION['user_role'] = 'admin';
+        $_SESSION['admin_error'] = 'Impersonation session expired (max 1 hour). Returned to admin.';
+        header('Location: admin/index.php?tab=users');
+        exit;
+    }
+}
+
 $userId = (int)$_SESSION['user_id'];
 
 // ── Session Timeout Check ─────────────────────

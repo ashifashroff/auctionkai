@@ -306,10 +306,15 @@ $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
       <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
     </a>
     <?php if (!empty($_SESSION['original_admin_id'])): ?>
+      <?php
+        $impStart = (int)($_SESSION['impersonate_started'] ?? 0);
+        $impRemaining = max(0, 3600 - (time() - $impStart));
+        $impMins = floor($impRemaining / 60);
+      ?>
       <form method="POST" action="admin/index.php" style="display:inline" data-parsley-validate>
         <input type="hidden" name="action" value="return_to_admin">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
-        <button type="submit" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-ak-gold/20 text-ak-gold border border-ak-gold/30 hover:bg-ak-gold/30 transition-colors">← Return to Admin Panel</button>
+        <button type="submit" class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-ak-gold/20 text-ak-gold border border-ak-gold/30 hover:bg-ak-gold/30 transition-colors">← Return to Admin (<?= $impMins ?>m left)</button>
       </form>
     <?php endif; ?>
     <?php if ($userRole === 'admin'): ?>

@@ -55,8 +55,15 @@ try {
             $target->execute([$targetId]);
             $t = $target->fetch();
             if ($t && (int)$t['id'] !== $userId) {
+                // Prevent admin-to-admin impersonation
+                if ($t['role'] === 'admin') {
+                    $_SESSION['admin_error'] = 'Cannot impersonate other admins.';
+                    header('Location: index.php?tab=users');
+                    exit;
+                }
                 $_SESSION['original_admin_id']   = $userId;
                 $_SESSION['original_admin_name'] = $userName;
+                $_SESSION['impersonate_started'] = time(); // Track start time
                 $_SESSION['user_id']             = (int)$t['id'];
                 $_SESSION['user_name']           = $t['name'];
                 $_SESSION['user_role']           = $t['role'];
