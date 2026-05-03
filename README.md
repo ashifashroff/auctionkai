@@ -224,7 +224,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 **v3.1** — Activity logging, profile activity history, admin log viewer.
 
-**v3.0** — Multi-provider email (PHPMailer), CSRF on all APIs, paginated vehicles + members, AJAX admin, security hardening.
+**v3.0** — Multi-provider email support, CSRF on all APIs, paginated vehicles + members, AJAX admin, security hardening.
 
 **v2.6** — Admin panel with user management. Disable/enable user accounts. Role management. User stats dashboard.
 
