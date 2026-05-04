@@ -56,6 +56,10 @@ switch ($action) {
         if (empty($currentPassword)) { echo json_encode(['success' => false, 'message' => 'Current password is required']); exit; }
         if (empty($newPassword)) { echo json_encode(['success' => false, 'message' => 'New password is required']); exit; }
         if (strlen($newPassword) < 8) { echo json_encode(['success' => false, 'message' => 'New password must be at least 8 characters']); exit; }
+        if (!preg_match('/[A-Z]/', $newPassword) || !preg_match('/[a-z]/', $newPassword) || !preg_match('/[0-9]/', $newPassword)) {
+            echo json_encode(['success' => false, 'message' => 'Password must contain uppercase, lowercase, and numbers']);
+            exit;
+        }
 
         // Verify current password
         $stmt = $db->prepare("SELECT password FROM users WHERE id = ?");

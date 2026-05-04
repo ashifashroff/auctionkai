@@ -129,7 +129,7 @@ function parseOS(string $ua): string {
 
         <div class="mb-4">
           <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-required-message="New password is required" data-parsley-minlength="8" data-parsley-minlength-message="Password must be at least 8 characters">
+          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-required-message="New password is required" data-parsley-minlength="8" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
           <div class="strength-bar-wrap" id="prof-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="prof-strength-label"></div>
         </div>
