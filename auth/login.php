@@ -221,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters">
+          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
           <div class="strength-bar-wrap" id="reg-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="reg-strength-label"></div>
         </div>
