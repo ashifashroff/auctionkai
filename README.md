@@ -98,6 +98,13 @@ auctionkai/
 │   ├── actions.php             ← Handle admin POST actions
 │   ├── health.php              ← System health dashboard
 │   └── download_backup.php     ← Secure backup download
+├── models/
+│   ├── AuctionModel.php
+│   ├── MemberModel.php
+│   ├── VehicleModel.php
+│   ├── SettingsModel.php
+│   ├── PaymentModel.php
+│   └── MemberFeesModel.php
 ├── api/
 │   ├── add_vehicle.php
 │   ├── delete_vehicle.php
@@ -138,6 +145,7 @@ auctionkai/
 │   ├── settings.php
 │   ├── activity.php
 │   ├── maintenance_check.php
+│   ├── models.php
 │   ├── branding.php
 │   └── footer.php
 ├── js/
