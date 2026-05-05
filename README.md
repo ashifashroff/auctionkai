@@ -98,15 +98,15 @@ auctionkai/
 ├── admin/
 │   ├── index.php               ← User management + Email Settings + Backups
 │   ├── actions.php             ← Handle admin POST actions
-│   ├── health.php              ← System health dashboard
+│   ├── health.php              ← System health dashboard + Error log viewer
 │   └── download_backup.php     ← Secure backup download
 ├── models/
-│   ├── AuctionModel.php
-│   ├── MemberModel.php
-│   ├── VehicleModel.php
-│   ├── SettingsModel.php
-│   ├── PaymentModel.php
-│   └── MemberFeesModel.php
+│   ├── Auction.php
+│   ├── Member.php
+│   ├── Vehicle.php
+│   ├── Settings.php
+│   ├── Payment.php
+│   └── MemberFees.php
 ├── api/
 │   ├── add_vehicle.php
 │   ├── delete_vehicle.php
@@ -116,6 +116,7 @@ auctionkai/
 │   ├── update_member.php
 │   ├── check_lot.php
 │   ├── get_vehicles_page.php
+│   ├── get_members_page.php
 │   ├── send_email.php
 │   ├── import_members_csv.php
 │   ├── csv_template.php
@@ -123,11 +124,14 @@ auctionkai/
 │   ├── delete_account.php
 │   ├── update_payment.php
 │   ├── log_statement.php
-│   ├── generate_link.php     ← Link generator
-│   ├── error_logs.php        ← Error log API
-│   ├── download_pdf_zip.php
+│   ├── generate_link.php         ← Shareable link generator
+│   ├── error_logs.php            ← Error log API (admin)
+│   ├── admin_actions.php         ← Admin user management
+│   ├── db_backup.php             ← Database backup download
+│   ├── download_pdf_zip.php      ← Bulk PDF ZIP download
 │   ├── get_member_fees_page.php
-│   └── member_fees.php         ← Special fees CRUD
+│   ├── member_fees.php           ← Special fees CRUD
+│   └── activity_log.php          ← Activity log API
 ├── auth/
 │   ├── login.php
 │   ├── logout.php
@@ -141,35 +145,44 @@ auctionkai/
 │   ├── summary.css
 │   └── tailwind-config.php
 ├── includes/
-│   ├── auth_check.php
-│   ├── admin_check.php
-│   ├── db.php
-│   ├── helpers.php
-│   ├── mailer.php
-│   ├── settings.php
-│   ├── activity.php
-│   ├── error_handler.php      ← Custom error handler + DB logging
-│   ├── maintenance_check.php
-│   ├── models.php
-│   ├── branding.php
-│   └── footer.php
+│   ├── api_bootstrap.php        ← Shared API bootstrap (session, auth, CSRF, headers)
+│   ├── auth_check.php           ← Session auth for pages
+│   ├── admin_check.php          ← Admin role verification
+│   ├── db.php                   ← PDO connection + error handler init
+│   ├── helpers.php              ← Formatting, calcStatement, WhatsApp, PDF HTML builders
+│   ├── mailer.php               ← PHPMailer with PDF attachment support
+│   ├── settings.php             ← User settings CRUD
+│   ├── activity.php             ← Activity logging + icons/colors
+│   ├── error_handler.php        ← Custom error handler + DB logging
+│   ├── maintenance_check.php    ← Maintenance mode check
+│   ├── models.php               ← Model loader
+│   ├── branding.php             ← Dynamic branding loader
+│   └── footer.php               ← Shared footer with version badge
 ├── js/
-│   ├── common.js          ← Toast, shortcuts, session, shared utils
-│   ├── vehicles.js        ← Vehicle CRUD, pagination, search
-│   ├── members.js         ← Member CRUD, pagination, CSV import
-│   ├── statements.js      ← Email, WhatsApp, links, payment status
-│   └── fees.js            ← Special fees CRUD
+│   ├── common.js                ← Toast, keyboard shortcuts, session timeout, password strength
+│   ├── vehicles.js              ← Vehicle CRUD, pagination, search, inline edit
+│   ├── members.js               ← Member CRUD, pagination, CSV import
+│   ├── statements.js            ← Email, WhatsApp, links, payment status
+│   └── fees.js                  ← Special fees CRUD
 ├── scripts/
-│   └── backup.php              ← Cron backup script
-├── vendor/                     ← PHPMailer (gitignored)
+│   └── cleanup_expired.php      ← Cron: clean expired auctions + statement links
+├── vendor/                      ← PHPMailer + Dompdf (gitignored)
 ├── .htaccess
 ├── .gitignore
+├── .env.example
+├── composer.json                ← PHPMailer ^6 + Dompdf ^3
 ├── config.php
 ├── schema.sql
-├── index.php
+├── migrations.sql
+├── api.php                      ← Legacy AJAX handler (members, auctions)
+├── index.php                    ← Main app (dashboard, members, vehicles, fees, statements)
 ├── profile.php
 ├── pdf.php
-├── statement.php              ← Public shareable statement view
+├── statement.php                ← Public shareable statement view (PIN protected)
+├── 403.php
+├── 404.php
+├── 500.php
+├── 503.php
 ├── auction_summary.php
 ├── help.php
 ├── about.php
