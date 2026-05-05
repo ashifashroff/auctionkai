@@ -220,7 +220,7 @@ async function copyStatementLink(url, memberId) {
 async function markAllUnpaidAsPaid() {
   const unpaidCards = document.querySelectorAll('.statement-card[data-payment="unpaid"]');
   if (!unpaidCards.length) { showToast('No unpaid members found', 'info'); return; }
-  if (!confirm(`Mark ${unpaidCards.length} unpaid member(s) as paid?`)) return;
+  if (!await akConfirm(`Mark ${unpaidCards.length} unpaid member(s) as paid?`, {title:'Bulk Update', icon:'✓', confirmText:'Mark as Paid', style:'primary'})) return;
 
   let success = 0, failed = 0;
   for (const card of unpaidCards) {

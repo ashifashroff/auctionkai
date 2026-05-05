@@ -273,6 +273,9 @@ $tab      = $_GET['tab'] ?? 'dashboard';
 $tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'special_fees'=>['icon'=>'💴','label'=>'Fees'],'statements'=>['icon'=>'📄','label'=>'Statements']];
 $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
 
+// Count members in this auction only
+$membersInAuction = count(array_unique(array_column($vehicles, 'member_id')));
+
 // Count unpaid members for dashboard
 $totalUnpaid = 0;
 foreach ($members as $m) {
@@ -286,8 +289,9 @@ foreach ($members as $m) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AuctionKai — Settlement System</title>
+<title><?= h($brand['brand_name'] ?? 'AuctionKai') ?> — <?= h($brand['brand_tagline'] ?? 'Settlement System') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=3.5">
@@ -308,17 +312,7 @@ foreach ($members as $m) {
     <div class="text-ak-muted text-[11px]"><?= h($brand['brand_tagline']) ?></div>
   </div>
   <?php if ($auction): ?>
-  <div class="flex items-center gap-2 flex-1 justify-center">
-    <form onsubmit="return submitSaveAuction(event)" style='display:contents' data-parsley-validate>
-      <div class="flex items-center gap-2 flex-wrap">
-        <input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name">
-        <input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled>
-        <div class="flex items-center gap-1"><span class="text-ak-muted text-[11px]">Commission</span><input class="inp font-mono w-16" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"><span class="text-ak-muted text-[11px]">¥/member</span></div>
-        <button class="btn btn-dark btn-sm" type="submit">Save</button>
-        <a class="btn btn-sm" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
-      </div>
-    </form>
-  </div>
+  <button onclick="document.getElementById('auctionEditPanel').classList.toggle('hidden')" class="btn btn-dark btn-sm text-[11px] shrink-0">✎ Edit Auction</button>
   <?php endif; ?>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
     <a href="profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
@@ -379,8 +373,18 @@ if ($maintenanceOn && $userRole === 'admin'):
     <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
   </div>
   <?php if ($auction): ?>
-  <div class="text-ak-muted text-xs mt-2">
-    <b class="text-ak-text"><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member · <span class="<?= $daysLeft <= 3 ? 'text-yellow-400 font-semibold' : 'text-ak-text2' ?>">Expires: <?= h($auction['expires_at'] ?? 'N/A') ?></span>
+  <div id="auctionEditPanel" class="hidden bg-ak-bg2 border border-ak-border rounded-xl p-5 mt-3 animate-slide-down">
+    <form onsubmit="return submitSaveAuction(event)" data-parsley-validate>
+      <div class="flex items-center gap-2 flex-wrap">
+        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Auction Name</label><input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
+        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Date</label><input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
+        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Commission ¥/member</label><input class="inp font-mono w-20" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
+        <div class="flex items-end gap-2 pt-4">
+          <button class="btn btn-gold btn-sm" type="submit">💾 Save</button>
+          <a class="btn btn-sm" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
+        </div>
+      </div>
+    </form>
   </div>
   <?php endif; ?>
 </div>
@@ -402,7 +406,7 @@ if ($maintenanceOn && $userRole === 'admin'):
     <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 rounded-t-lg <?= $tab === $key ? 'tab-btn-active' : 'text-ak-muted border-transparent hover:text-ak-text2 hover:bg-ak-infield/50' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
   <div class="ml-auto text-xs text-ak-muted flex gap-4">
-    <span><b class="text-ak-text"><?= count($members) ?></b> members</span>
+    <span><b class="text-ak-text"><?= $membersInAuction ?></b> sellers</span>
     <span><b class="text-ak-green"><?= $totalSold ?></b> sold / <b class="text-ak-text"><?= count($vehicles) ?></b> total</span>
   </div>
 </div>
@@ -1020,7 +1024,11 @@ foreach ($members as $m) {
   </div>
   <?php endforeach; ?>
   <?php if (!$hasSales): ?>
-  <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sold vehicles recorded for this auction yet.</div>
+  <div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border md:col-span-2 animate-fade-in-up">
+    <div class="text-4xl mb-3">📄</div>
+    <div class="font-semibold text-ak-text mb-2">No Statements Yet</div>
+    <div class="text-sm">Add vehicles and mark them as sold to generate settlement statements.</div>
+  </div>
   <?php endif; ?>
 <?php endif; ?>
 </div>
