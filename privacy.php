@@ -50,8 +50,9 @@ require_once 'includes/helpers.php';
     <li><b>Account data</b> — username, email address, hashed password</li>
     <li><b>Member data</b> — names, phone numbers, and email addresses entered by auction house operators</li>
     <li><b>Transaction data</b> — vehicle details, sale prices, fees, special fees, and payment statuses entered by operators</li>
-    <li><b>Activity data</b> — login history, actions performed (vehicle adds, edits, deletions, PDF generation, email sending, payment status changes), IP addresses, and timestamps</li>
+    <li><b>Activity data</b> — login history, actions performed (vehicle adds, edits, deletions, PDF generation, email sending, WhatsApp sharing, payment status changes), IP addresses, and timestamps</li>
     <li><b>Session data</b> — session tokens stored as cookies for authentication</li>
+    <li><b>Statement link data</b> — unique tokens, PINs (derived from member phone numbers), view counts, and expiry dates for shareable statement links</li>
   </ul>
 </div>
 
@@ -62,9 +63,11 @@ require_once 'includes/helpers.php';
     <li>To generate settlement statements and PDF documents for auction members</li>
     <li>To calculate fees, deductions, additions, and net payouts</li>
     <li>To track payment statuses (Unpaid, Partial, Paid) and paid timestamps</li>
-    <li>To send email notifications (password reset links, settlement statements) via the system's configured email provider</li>
+    <li>To send email notifications (password reset links, settlement statements with PDF attachments) via the system\'s configured email provider</li>
+    <li>To create shareable statement links protected by a PIN for member access to their online statement</li>
+    <li>To generate pre-filled WhatsApp messages for sharing settlement details with members</li>
     <li>To maintain an audit trail of all actions for accountability and security</li>
-    <li>To detect and prevent unauthorized access (brute-force protection, rate limiting)</li>
+    <li>To detect and prevent unauthorized access (brute-force protection, rate limiting, session management)</li>
   </ul>
 </div>
 
@@ -85,11 +88,16 @@ require_once 'includes/helpers.php';
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
     <li>All data is stored in a MySQL database on your self-hosted server</li>
     <li>AuctionKai does not transmit personal data to any third-party analytics or tracking services</li>
+    <li>Email delivery is handled by the SMTP provider configured by the operator. Email content (including PDF attachments) passes through this provider</li>
+    <li>WhatsApp sharing sends a pre-filled message through WhatsApp\'s service (wa.me). When you click the WhatsApp button, settlement details are sent to WhatsApp/Meta servers. We do not control or store WhatsApp messages after they are sent</li>
     <li>Passwords are hashed using bcrypt — they are never stored in plaintext</li>
     <li>Password reset tokens are stored as SHA-256 hashes — even database access cannot reveal usable tokens</li>
     <li>All database queries use PDO prepared statements — protection against SQL injection</li>
     <li>CSRF tokens protect all forms and API endpoints from cross-origin attacks</li>
     <li>Login is rate-limited (5 failed attempts triggers a 30-second cooldown)</li>
+    <li>Shareable statement links are protected by a PIN with a maximum of 5 attempts, after which access is temporarily blocked</li>
+    <li>Statement links expire automatically after 14 days and cannot be accessed after expiry</li>
+    <li>Session IDs are regenerated after PIN verification to prevent session fixation attacks</li>
     <li>Session timeout is enforced (configurable by admin, default 30 minutes of inactivity)</li>
     <li>Database backups are available to admin users only and contain all system data</li>
   </ul>
@@ -114,6 +122,8 @@ require_once 'includes/helpers.php';
     <li>Active auction data (vehicles, fees, payment statuses) is retained for the duration of the auction</li>
     <li>Member records are retained until manually deleted by the operator</li>
     <li>Activity logs are retained for a minimum of 30 days. Admins may clear older logs</li>
+    <li>Shareable statement links expire automatically after 14 days and their data is cleaned up on next page load</li>
+    <li>Resolved error logs older than 30 days can be cleaned up by the system administrator</li>
     <li>Login history records are kept per user (last 50 attempts) and auto-cleaned</li>
     <li>Password reset tokens expire after 1 hour and are deleted after use</li>
     <li>Expired sessions are automatically cleaned up based on the configured timeout</li>
@@ -147,7 +157,7 @@ require_once 'includes/helpers.php';
   <h2 class="text-ak-gold font-bold mb-3">10. Contact</h2>
   <p class="text-ak-text2 text-sm leading-relaxed">
     Mirai Global Solutions<br>
-    Email: <a href="mailto:admin@miraiglobal.com" class="text-ak-gold hover:underline">admin@miraiglobal.com</a>
+    Email: <a href="mailto:admin@miraiglobaltrading.com" class="text-ak-gold hover:underline">admin@miraiglobaltrading.com</a>
   </p>
 </div>
 

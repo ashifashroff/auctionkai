@@ -69,6 +69,7 @@ $sections = [
           <li><b>Other Fee</b> — any additional deduction</li>
         </ul>',
       '<b>Toggling Sold / Unsold</b> — Click the "✓ SOLD" or "✗ UNSOLD" button on any vehicle row. When sold, the nagare field disables and sold-price fields enable. When unsold, it flips.',
+      '<b>Inline editing</b> — Double-click on the Lot #, Vehicle, or Sold Price cell in the vehicle table to edit it directly. Press Enter to save or Escape to cancel.',
     ],
   ],
   [
@@ -89,8 +90,13 @@ $sections = [
       '<b>Generating a PDF for one member</b> — Click the "↓ PDF" button on any member\'s statement card in the Statements tab.',
       '<b>Printing all PDFs at once</b> — Click "↓ Print All PDFs" at the top of the Statements tab.',
       '<b>Downloading all PDFs as ZIP</b> — Click "📦 Download ZIP" to get all member statements in one ZIP file.',
-      '<b>Sending email to a member</b> — Click the "✉ Send Email" button. This opens your default email client with a pre-filled subject and settlement summary.',
+      '<b>Sending email to a member</b> — Click the "✉ Send Email" button. The PDF is automatically attached to the email.',
       '<b>Payment status</b> — Click the status button (Unpaid/Partial/Paid) on any member\'s card to update it. Paid members get a PAID stamp on their PDF.',
+      '<b>Filtering by payment status</b> — Use the dropdown next to the search box to filter by Paid, Unpaid, or Partial.',
+      '<b>Mark all unpaid as paid</b> — Click "✓ Mark Unpaid as Paid" to bulk-update all unpaid members at once.',
+      '<b>WhatsApp sharing</b> — Click the "💬 WhatsApp" button to open WhatsApp with a pre-filled settlement message including full fee breakdown and emojis. Works on both desktop (WhatsApp Web) and mobile.',
+      '<b>Shareable statement link</b> — Click "🔗 Share Link" to generate a unique URL for the member. They can view their statement online, protected by a PIN (last 4 digits of their phone number). Links are valid for 14 days.',
+      '<b>Statement history</b> — Click the ▾ arrow on any member\'s card to see a log of all actions (PDF generated, email sent, WhatsApp opened).',
     ],
   ],
   [
@@ -98,6 +104,14 @@ $sections = [
     'items' => [
       '<b>How commission fee works</b> — Commission is a flat fee per member (not per vehicle, not a percentage). Default is ¥3,300. It is deducted once from each member who has at least one sold vehicle. Change it per auction from the top bar.',
       '<b>Per-vehicle fees vs per-member commission</b> — Listing Fee, Sold Fee, and Nagare Fee are charged per vehicle. Commission is charged once per member regardless of how many vehicles they sold. Special fees are charged once per member per auction.',
+    ],
+  ],
+  [
+    'title' => '📱 Mobile & Tips',
+    'items' => [
+      '<b>Mobile navigation</b> — On mobile devices, a bottom navigation bar appears with icons for Dashboard, Members, Vehicles, Fees, and Statements. Tap to switch tabs instantly.',
+      '<b>WhatsApp on mobile</b> — The WhatsApp button opens the WhatsApp app directly on mobile. On desktop, it opens WhatsApp Web.',
+      '<b>Shareable links on mobile</b> — Members can open their statement link on any device. The PIN page is mobile-friendly with large number inputs.',
     ],
   ],
 ];

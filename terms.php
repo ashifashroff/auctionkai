@@ -75,6 +75,7 @@ require_once 'includes/helpers.php';
   <ul class="text-ak-text2 text-sm leading-relaxed space-y-2 list-disc list-inside">
     <li>Password reset emails are sent to the email address on file when requested via the "Forgot Password" page. Reset links expire after 1 hour</li>
     <li>You may send settlement statement emails to members through the system using the email provider configured by the administrator</li>
+    <li>Settlement emails may include a PDF attachment of the member\'s statement when the PDF generation library is available</li>
     <li>You are responsible for the content of emails sent through the system</li>
     <li>Email sending is rate-limited (10 per minute per user) to prevent abuse</li>
     <li>The system uses the email credentials configured in the Admin Panel. You are responsible for keeping those credentials secure</li>
@@ -127,6 +128,9 @@ require_once 'includes/helpers.php';
     <li>PAID, PARTIAL, or UNPAID stamps appear on PDFs based on the payment status set by the operator</li>
     <li>PDF content is the operator's responsibility. Verify accuracy before sharing with members</li>
     <li>Bulk ZIP downloads contain individual PDF statements for all members with sold vehicles</li>
+    <li>Settlement statements can be shared via WhatsApp with a pre-formatted message including the fee breakdown. Messages are sent through WhatsApp\'s own service — we do not store or transmit WhatsApp messages</li>
+    <li>Shareable statement links can be generated for each member. Links are protected by a PIN (last 4 digits of the member\'s registered phone number) and expire after 14 days</li>
+    <li>The member\'s phone number is used as the PIN basis. Ensure phone numbers are accurate before generating links</li>
   </ul>
 </div>
 
@@ -156,7 +160,7 @@ require_once 'includes/helpers.php';
   <h2 class="text-ak-gold font-bold mb-3">11. Contact</h2>
   <p class="text-ak-text2 text-sm leading-relaxed">
     Mirai Global Solutions<br>
-    Email: <a href="mailto:admin@miraiglobal.com" class="text-ak-gold hover:underline">admin@miraiglobal.com</a>
+    Email: <a href="mailto:admin@miraiglobaltrading.com" class="text-ak-gold hover:underline">admin@miraiglobaltrading.com</a>
   </p>
 </div>
 
