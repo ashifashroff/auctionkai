@@ -49,3 +49,4 @@ composer.lock
 *.backup
 *.tmp
 *~
+/vendor/
