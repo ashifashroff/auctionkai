@@ -353,14 +353,14 @@ if ($maintenanceOn && $userRole === 'admin'):
         $badgeClass = $daysLeft <= 0 ? 'bg-ak-red/20 text-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-ak-green/20 text-ak-green');
         $badgeText = $daysLeft <= 0 ? 'Expired' : ($daysLeft . 'd left');
         ?>
-        <span class="text-[10px] px-1.5 py-0.5 rounded <?= $badgeClass ?>"><?= $badgeText ?></span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-bg/20 text-ak-bg' : $badgeClass ?>"><?= $badgeText ?></span>
       </a>
     <?php endforeach; ?>
     <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
   </div>
   <?php if ($auction): ?>
   <div class="text-ak-muted text-xs mt-2">
-    <b class="text-ak-text"><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
+    <b class="text-ak-text"><?= h($auction['name']) ?></b> · <?= h($auction['date']) ?> · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member · <span class="<?= $daysLeft <= 3 ? 'text-yellow-400 font-semibold' : 'text-ak-text2' ?>">Expires: <?= h($auction['expires_at'] ?? 'N/A') ?></span>
   </div>
   <?php endif; ?>
 </div>
