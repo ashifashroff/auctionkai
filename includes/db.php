@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/error_handler.php';
 
 function db(): PDO {
     static $pdo = null;
@@ -15,12 +16,16 @@ function db(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]);
     } catch (PDOException $e) {
+        error_log('[AuctionKai][critical] DB connection failed: ' . $e->getMessage());
         http_response_code(500);
         echo '<h1>Database Error</h1>';
         echo '<p>Could not connect to the database. Please check config.php settings.</p>';
         echo '<!-- ' . htmlspecialchars($e->getMessage()) . ' -->';
         exit;
     }
+
+    // Initialize error handler with DB connection
+    initErrorHandler($pdo);
 
     return $pdo;
 }

@@ -410,3 +410,43 @@ CREATE TABLE IF NOT EXISTS statement_links (
   expires_at DATETIME NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Error Logs ────────────────────────────────
+CREATE TABLE IF NOT EXISTS error_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  severity ENUM('error','warning','notice','critical') NOT NULL DEFAULT 'error',
+  message TEXT NOT NULL,
+  file VARCHAR(500) DEFAULT NULL,
+  line INT UNSIGNED DEFAULT NULL,
+  url VARCHAR(500) DEFAULT NULL,
+  request_method VARCHAR(10) DEFAULT NULL,
+  user_id INT UNSIGNED DEFAULT NULL,
+  stack_trace TEXT DEFAULT NULL,
+  context JSON DEFAULT NULL,
+  is_resolved TINYINT(1) DEFAULT 0,
+  resolved_at TIMESTAMP NULL DEFAULT NULL,
+  resolved_by INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_errlog_severity (`severity`),
+  INDEX idx_errlog_resolved (`is_resolved`),
+  INDEX idx_errlog_created (`created_at`),
+  INDEX idx_errlog_file (`file`(191))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS error_logs (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  severity ENUM('error','warning','notice','critical') NOT NULL DEFAULT 'error',
+  message TEXT NOT NULL,
+  file VARCHAR(500) DEFAULT NULL,
+  line INT UNSIGNED DEFAULT NULL,
+  url VARCHAR(500) DEFAULT NULL,
+  request_method VARCHAR(10) DEFAULT NULL,
+  user_id INT UNSIGNED DEFAULT NULL,
+  stack_trace TEXT DEFAULT NULL,
+  context JSON DEFAULT NULL,
+  is_resolved TINYINT(1) DEFAULT 0,
+  resolved_at TIMESTAMP NULL DEFAULT NULL,
+  resolved_by INT UNSIGNED DEFAULT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

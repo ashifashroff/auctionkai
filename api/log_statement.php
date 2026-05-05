@@ -46,6 +46,6 @@ try {
     echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
-    error_log('Statement log error: ' . $e->getMessage());
+    logError($db, 'error', 'Statement log error: ' . $e->getMessage(), __FILE__, __LINE__);
     echo json_encode(['success' => false, 'message' => 'Database error']);
 }

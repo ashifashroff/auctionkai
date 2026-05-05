@@ -67,6 +67,6 @@ try {
     echo json_encode(['success' => true, 'status' => $status, 'message' => 'Payment status updated']);
 
 } catch (Exception $e) {
-    error_log('Payment update error: ' . $e->getMessage());
+    logError($db, 'error', 'Payment update error: ' . $e->getMessage(), __FILE__, __LINE__);
     echo json_encode(['success' => false, 'message' => 'Database error']);
 }

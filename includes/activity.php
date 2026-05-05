@@ -40,7 +40,7 @@ function logActivity(
             $impersonatedBy,
         ]);
     } catch (Exception $e) {
-        error_log('Activity log error: ' . $e->getMessage());
+        logError($db, 'error', 'Activity log error: ' . $e->getMessage(), __FILE__, __LINE__);
     }
 }
 

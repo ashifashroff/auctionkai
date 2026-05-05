@@ -55,6 +55,8 @@ Or register a new account. Usernames and emails must be unique.
 
 **📋 Activity Log** — tracks all important actions automatically. Actions logged: login/logout, auction create/update/delete, member add/update/remove, vehicle add/update/delete/toggle, PDF generate, email send, backup download, admin actions, password changes, special fee add/edit/delete, payment status changes. Admin panel shows full log for all users with pagination and filtering. Profile page shows user's own last 20 actions. Old logs can be cleared by admin (min 30 days). Never crashes the app — errors caught silently.
 
+**🚨 Error Logging** — PHP errors, warnings, and exceptions logged to database automatically. Custom error handler catches all E_ERROR, E_WARNING, E_NOTICE and uncaught exceptions. Fatal errors caught via shutdown handler. Admin health check page shows error log viewer with severity filtering (critical/error/warning/notice), resolve individual or bulk, cleanup old resolved errors. Error count shown on health dashboard. Stack traces and request context captured.
+
 **📖 Help & Guide** — built-in accordion-style help page covering getting started, managing members, vehicles, special fees, statements, and fee settings.
 
 **🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
@@ -122,6 +124,7 @@ auctionkai/
 │   ├── update_payment.php
 │   ├── log_statement.php
 │   ├── generate_link.php     ← Link generator
+│   ├── error_logs.php        ← Error log API
 │   ├── download_pdf_zip.php
 │   ├── get_member_fees_page.php
 │   └── member_fees.php         ← Special fees CRUD
@@ -145,6 +148,7 @@ auctionkai/
 │   ├── mailer.php
 │   ├── settings.php
 │   ├── activity.php
+│   ├── error_handler.php      ← Custom error handler + DB logging
 │   ├── maintenance_check.php
 │   ├── models.php
 │   ├── branding.php
@@ -224,7 +228,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.6** — WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history. Shareable statement links (14-day expiry). PIN protection (last 4 digits of phone). Beautiful online statement view page. Print/PDF button on shared page. View counter tracking. WhatsApp integration includes share link. Auto-cleanup of expired links.
+**v3.6** — WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history. Shareable statement links (14-day expiry). PIN protection (last 4 digits of phone). Beautiful online statement view page. Print/PDF button on shared page. View counter tracking. WhatsApp integration includes share link. Auto-cleanup of expired links. Proper error logging — PHP errors/warnings/exceptions logged to database. Custom error handler with shutdown handler for fatals. Admin error log viewer with severity filtering, resolve, and cleanup.
 
 **v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency.
 

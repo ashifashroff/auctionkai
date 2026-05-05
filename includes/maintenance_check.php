@@ -61,6 +61,6 @@ function checkMaintenanceMode(PDO $db, string $userRole): void {
         <?php
         exit;
     } catch (Exception $e) {
-        error_log('Maintenance check error: ' . $e->getMessage());
+        logError($db, 'error', 'Maintenance check error: ' . $e->getMessage(), __FILE__, __LINE__);
     }
 }

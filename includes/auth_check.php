@@ -81,5 +81,5 @@ try {
         $_SESSION['last_activity'] = time();
     }
 } catch (Exception $e) {
-    error_log('Session timeout check error: ' . $e->getMessage());
+    logError($db, 'error', 'Session timeout check error: ' . $e->getMessage(), __FILE__, __LINE__);
 }

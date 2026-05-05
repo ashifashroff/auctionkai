@@ -153,6 +153,7 @@ try {
 
 } catch (Exception $e) {
  error_log('Generate link error: ' . $e->getMessage());
+ logError($db, 'error', 'Generate link error: ' . $e->getMessage(), __FILE__, __LINE__);
  echo json_encode([
  'success' => false,
  'message' => 'Database error'

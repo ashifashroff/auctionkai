@@ -120,6 +120,6 @@ try {
     echo json_encode(['success' => true, 'message' => 'Account deleted successfully']);
 
 } catch (Exception $e) {
-    error_log('Account deletion error: ' . $e->getMessage());
+    logError($db, 'error', 'Account deletion error: ' . $e->getMessage(), __FILE__, __LINE__);
     echo json_encode(['success' => false, 'message' => 'An error occurred. Please try again.']);
 }

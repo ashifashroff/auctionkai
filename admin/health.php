@@ -77,6 +77,7 @@ try {
     $appStats['vehicles'] = $db->query("SELECT COUNT(*) FROM vehicles")->fetchColumn();
     $appStats['logs'] = $db->query("SELECT COUNT(*) FROM activity_log")->fetchColumn();
     $appStats['payments'] = $db->query("SELECT COUNT(*) FROM payment_status WHERE status='paid'")->fetchColumn();
+    $appStats['errors'] = $db->query("SELECT COUNT(*) FROM error_logs WHERE is_resolved = 0")->fetchColumn() ?: 0;
 } catch (Exception $e) {
     $appStats = [];
 }
@@ -124,12 +125,12 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
     <div class="text-4xl"><?= $allGood ? '✅' : '⚠️' ?></div>
     <div>
       <div class="font-bold text-lg <?= $allGood ? 'text-ak-green' : 'text-ak-red' ?>"><?= $allGood ? 'All Systems Operational' : 'Attention Required' ?></div>
-      <div class="text-ak-muted text-sm">AuctionKai v3.3 · PHP <?= $phpVersion ?> · MySQL <?= $dbInfo['version'] ?? 'N/A' ?></div>
+      <div class="text-ak-muted text-sm">AuctionKai v3.6 · PHP <?= $phpVersion ?> · MySQL <?= $dbInfo['version'] ?? 'N/A' ?></div>
     </div>
   </div>
 
   <!-- App Stats Row -->
-  <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+  <div class="grid grid-cols-3 md:grid-cols-7 gap-3 mb-6">
     <?php
     $statCards = [
       ['label' => 'Users', 'value' => $appStats['users'] ?? '?', 'icon' => '👤'],
@@ -137,6 +138,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
       ['label' => 'Members', 'value' => $appStats['members'] ?? '?', 'icon' => '👥'],
       ['label' => 'Vehicles', 'value' => $appStats['vehicles'] ?? '?', 'icon' => '🚗'],
       ['label' => 'Paid', 'value' => $appStats['payments'] ?? '?', 'icon' => '✓'],
+      ['label' => 'Errors', 'value' => $appStats['errors'] ?? '?', 'icon' => '🚨'],
       ['label' => 'Log Entries', 'value' => $appStats['logs'] ?? '?', 'icon' => '📋'],
     ];
     foreach ($statCards as $card):
@@ -275,6 +277,26 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
     </div>
   </div>
 
+  <!-- Error Logs -->
+  <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden mb-6">
+    <div class="px-5 py-3 border-b border-ak-border bg-ak-infield flex justify-between items-center">
+      <h3 class="font-bold text-ak-text">🚨 Error Logs</h3>
+      <div class="flex gap-2">
+        <button onclick="loadErrorLogs('all')" class="btn btn-dark btn-sm text-[11px]" id="err-filter-all">All</button>
+        <button onclick="loadErrorLogs('critical')" class="btn btn-dark btn-sm text-[11px]" id="err-filter-critical">🔴 Critical</button>
+        <button onclick="loadErrorLogs('error')" class="btn btn-dark btn-sm text-[11px]" id="err-filter-error">🟠 Error</button>
+        <button onclick="loadErrorLogs('warning')" class="btn btn-dark btn-sm text-[11px]" id="err-filter-warning">🟡 Warning</button>
+        <button onclick="loadErrorLogs('notice')" class="btn btn-dark btn-sm text-[11px]" id="err-filter-notice">🔵 Notice</button>
+        <button onclick="resolveAllErrors()" class="btn btn-gold btn-sm text-[11px]">✓ Resolve All</button>
+        <button onclick="deleteOldErrors()" class="btn btn-dark btn-sm text-[11px]">🧹 Clean Old</button>
+      </div>
+    </div>
+    <div id="error-logs-container" class="p-5">
+      <div class="text-ak-muted text-sm text-center py-8">Loading error logs...</div>
+    </div>
+    <div id="error-logs-pagination" class="px-5 py-3 border-t border-ak-border flex justify-between items-center text-xs text-ak-muted"></div>
+  </div>
+
   <!-- Quick Actions -->
   <div class="bg-ak-card rounded-xl border border-ak-border p-5">
     <h3 class="font-bold text-ak-text mb-4">⚡ Quick Actions</h3>
@@ -290,5 +312,124 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 
 <?php require_once '../includes/footer.php'; ?>
 <script src="../js/app.js?v=3.5"></script>
+<script>
+// ── Error Logs ──────────────────────────────
+let errCurrentPage = 1;
+let errCurrentFilter = 'all';
+
+async function loadErrorLogs(severity = 'all', page = 1) {
+  errCurrentPage = page;
+  errCurrentFilter = severity;
+  const container = document.getElementById('error-logs-container');
+  const pagination = document.getElementById('error-logs-pagination');
+  container.innerHTML = '<div class="text-ak-muted text-sm text-center py-8">Loading...</div>';
+
+  let url = '../api/error_logs.php?action=list&page=' + page + '&per_page=20';
+  if (severity !== 'all') url += '&severity=' + severity + '&resolved=0';
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!data.success) { container.innerHTML = '<div class="text-ak-red text-sm">Failed to load</div>'; return; }
+
+    // Summary badges
+    const summary = data.summary || [];
+    const sevColors = { critical: 'bg-ak-red/15 text-ak-red', error: 'bg-orange-500/15 text-orange-400', warning: 'bg-yellow-500/15 text-yellow-500', notice: 'bg-blue-500/15 text-blue-400' };
+    let summaryHTML = '<div class="flex gap-3 mb-4 flex-wrap">';
+    for (const s of summary) {
+      if (severity !== 'all' && s.severity !== severity) continue;
+      summaryHTML += `<span class="text-xs px-2.5 py-1 rounded-full font-bold ${sevColors[s.severity] || 'bg-ak-border text-ak-muted'}">${s.severity}: ${s.unresolved} unresolved / ${s.total} total</span>`;
+    }
+    summaryHTML += '</div>';
+
+    if (!data.data.length) {
+      container.innerHTML = summaryHTML + '<div class="text-ak-green text-sm text-center py-8">✅ No errors found</div>';
+      pagination.innerHTML = '';
+      return;
+    }
+
+    let html = summaryHTML + '<div class="space-y-2">';
+    for (const err of data.data) {
+      const resolvedBadge = err.is_resolved ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-ak-green/15 text-ak-green font-bold">✓ Resolved</span>' : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-ak-red/15 text-ak-red font-bold">Unresolved</span>';
+      const sevBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${sevColors[err.severity] || ''}">${err.severity}</span>`;
+      const timeAgo = new Date(err.created_at).toLocaleString('ja-JP');
+      const shortFile = err.file ? err.file.replace(/.*\//, '') : '';
+      html += `
+        <div class="border border-ak-border/50 rounded-lg p-3 ${err.is_resolved ? 'opacity-50' : ''}">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">${sevBadge}${resolvedBadge}<span class="text-[10px] text-ak-muted font-mono">#${err.id}</span></div>
+              <div class="text-sm text-ak-text break-all">${err.message.replace(/</g,'&lt;')}</div>
+              <div class="text-[11px] text-ak-muted mt-1">${shortFile ? shortFile + ':' + (err.line || '?') : ''} ${err.url ? '· ' + err.url.replace(/</g,'&lt;') : ''}</div>
+            </div>
+            <div class="flex gap-2 items-start shrink-0">
+              <span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">${timeAgo}</span>
+              ${!err.is_resolved ? `<button onclick="resolveError(${err.id})" class="text-[11px] px-2 py-0.5 rounded bg-ak-green/15 text-ak-green hover:bg-ak-green/30 font-bold cursor-pointer">Resolve</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+
+    // Pagination
+    const totalPages = Math.ceil(data.total / data.per_page);
+    let pagHTML = `<span>${data.total} error(s) · Page ${data.page} of ${totalPages}</span>`;
+    if (totalPages > 1) {
+      pagHTML += '<div class="flex gap-2">';
+      if (data.page > 1) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${data.page-1})" class="btn btn-dark btn-sm text-[11px]">← Prev</button>`;
+      if (data.page < totalPages) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${data.page+1})" class="btn btn-dark btn-sm text-[11px]">Next →</button>`;
+      pagHTML += '</div>';
+    }
+    pagination.innerHTML = pagHTML;
+
+  } catch (e) {
+    container.innerHTML = '<div class="text-ak-red text-sm">Connection error</div>';
+  }
+}
+
+async function resolveError(id) {
+  try {
+    const res = await fetch('../api/error_logs.php', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'resolve', id})
+    });
+    const data = await res.json();
+    if (data.success) loadErrorLogs(errCurrentFilter, errCurrentPage);
+    else showToast(data.message || 'Failed', 'error');
+  } catch { showToast('Connection error', 'error'); }
+}
+
+async function resolveAllErrors() {
+  if (!confirm('Resolve all unresolved errors?')) return;
+  try {
+    const body = {action: 'resolve_all'};
+    if (errCurrentFilter !== 'all') body.severity = errCurrentFilter;
+    const res = await fetch('../api/error_logs.php', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (data.success) { showToast('All errors resolved', 'success'); loadErrorLogs(errCurrentFilter, errCurrentPage); }
+    else showToast(data.message || 'Failed', 'error');
+  } catch { showToast('Connection error', 'error'); }
+}
+
+async function deleteOldErrors() {
+  if (!confirm('Delete all resolved errors older than 30 days?')) return;
+  try {
+    const res = await fetch('../api/error_logs.php', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'delete_old', days: 30})
+    });
+    const data = await res.json();
+    if (data.success) { showToast(`Deleted ${data.deleted} old errors`, 'success'); loadErrorLogs(errCurrentFilter, errCurrentPage); }
+    else showToast(data.message || 'Failed', 'error');
+  } catch { showToast('Connection error', 'error'); }
+}
+
+// Load on page ready
+loadErrorLogs('all');
+</script>
 </body>
 </html>

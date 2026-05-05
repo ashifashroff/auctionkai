@@ -108,6 +108,6 @@ try {
     echo json_encode(['success' => false, 'message' => 'Unknown action']);
 
 } catch (Exception $e) {
-    error_log('Member fees error: ' . $e->getMessage());
+    logError($db, 'error', 'Member fees error: ' . $e->getMessage(), __FILE__, __LINE__);
     echo json_encode(['success' => false, 'message' => 'Database error']);
 }
