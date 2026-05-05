@@ -38,7 +38,7 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-gold/30 rounded-xl p-8 text-center">
   <div class="text-4xl font-bold text-ak-gold tracking-tight mb-2">⚡ AuctionKai</div>
   <div class="text-ak-muted text-sm mb-3">Settlement Management System</div>
-  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.6</span>
+  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.7</span>
   <p class="text-ak-text2 text-sm leading-relaxed mt-5 max-w-2xl mx-auto">
     AuctionKai is a purpose-built settlement management system for Japanese vehicle auction operators.
     Designed to replace manual paper-based accounting, AuctionKai allows auction house owners to manage
@@ -76,7 +76,7 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold text-lg mb-4">📋 Version History</h2>
   <div class="space-y-3">
-    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.6</span><span class="text-ak-text2 text-sm">WhatsApp statement sharing, shareable links with PIN protection, online statement view, view counter, auto-cleanup</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.7</span><span class="text-ak-text2 text-sm">WhatsApp statement sharing, shareable links with PIN protection, online statement view, view counter, auto-cleanup</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.4</span><span class="text-ak-text2 text-sm">Login history, session timeout, GDPR deletion, payment status, health check, maintenance mode, branding, backups, statement history, ZIP download, special fees</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.3</span><span class="text-ak-text2 text-sm">Login history tracking, failed attempt highlighting, auto-cleanup</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.2</span><span class="text-ak-text2 text-sm">Bulk member CSV import, activity log system, admin log viewer</span></div>

@@ -232,6 +232,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
+**v3.7** — Dashboard stats: Total Net Payout card, Unpaid count with quick link, Recent Activity feed. Statement email with PDF attachment (Dompdf). Bulk "Mark Unpaid as Paid" action on statements tab. Inline vehicle editing (double-click table cells). Mobile bottom navigation bar. PDF attachment in settlement emails when Dompdf installed.
+
 **v3.6** — WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history. Shareable statement links (14-day expiry). PIN protection (last 4 digits of phone). Beautiful online statement view page. Print/PDF button on shared page. View counter tracking. WhatsApp integration includes share link. Auto-cleanup of expired links. Proper error logging — PHP errors/warnings/exceptions logged to database. Custom error handler with shutdown handler for fatals. Admin error log viewer with severity filtering, resolve, and cleanup. JS split into modules (common, vehicles, members, statements, fees).
 
 **v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency.

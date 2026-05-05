@@ -272,6 +272,15 @@ if ($activeAuctionId) {
 $tab      = $_GET['tab'] ?? 'dashboard';
 $tabs     = ['dashboard'=>['icon'=>'📊','label'=>'Dashboard'],'members'=>['icon'=>'👥','label'=>'Members'],'vehicles'=>['icon'=>'🚗','label'=>'Vehicles'],'special_fees'=>['icon'=>'💴','label'=>'Fees'],'statements'=>['icon'=>'📄','label'=>'Statements']];
 $totalSold= count(array_filter($vehicles, fn($v) => $v['sold']));
+
+// Count unpaid members for dashboard
+$totalUnpaid = 0;
+foreach ($members as $m) {
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
+    if ($s['count'] === 0) continue;
+    $ps = $paymentStatuses[$m['id']] ?? null;
+    if (($ps['status'] ?? 'unpaid') === 'unpaid') $totalUnpaid++;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -442,6 +451,39 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Net Payout</div>
     <div class="text-2xl font-bold text-ak-gold mt-2 font-mono"><?= fmt($totalNet) ?></div>
   </div>
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.25s">
+    <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Unpaid</div>
+    <div class="text-2xl font-bold text-ak-red mt-2 font-mono"><?= $totalUnpaid ?></div>
+    <a href="?tab=statements" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View Statements →</a>
+  </div>
+</div>
+
+<!-- Recent Activity -->
+<?php
+$recentLogs = $db->prepare("SELECT a.*, u.name as user_name FROM activity_log a LEFT JOIN users u ON a.user_id = u.id WHERE a.user_id = ? ORDER BY a.created_at DESC LIMIT 5");
+$recentLogs->execute([$userId]);
+$recentLogs = $recentLogs->fetchAll();
+?>
+<div class="bg-ak-card border border-ak-border rounded-xl p-5 mb-6 animate-fade-in-up" style="animation-delay:.3s">
+  <div class="flex justify-between items-center mb-4">
+    <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted">Recent Activity</div>
+    <a href="profile.php" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View All →</a>
+  </div>
+  <?php if (empty($recentLogs)): ?>
+    <div class="text-ak-muted text-center py-6 text-sm">No recent activity.</div>
+  <?php else: ?>
+  <div class="flex flex-col gap-2">
+    <?php foreach ($recentLogs as $log): ?>
+    <div class="flex items-center gap-3 bg-ak-bg rounded-lg px-3 py-2.5 text-sm">
+      <span class="text-lg"><?= getActivityIcon($log['action']) ?></span>
+      <div class="flex-1 min-w-0">
+        <div class="text-ak-text truncate"><?= h($log['description'] ?? $log['action']) ?></div>
+        <div class="text-ak-muted text-[10px] font-mono"><?= date('M j, H:i', strtotime($log['created_at'])) ?></div>
+      </div>
+    </div>
+    <?php endforeach; ?>
+  </div>
+  <?php endif; ?>
 </div>
 
 <!-- Member Ranking -->
@@ -781,6 +823,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <option value="unpaid">✗ Unpaid</option>
     <option value="partial">◑ Partial</option>
   </select>
+  <button onclick="markAllUnpaidAsPaid()" class="btn btn-gold btn-sm text-[11px]" title="Mark all Unpaid members as Paid">✓ Mark Unpaid as Paid</button>
 </div>
 
 <?php
@@ -1120,6 +1163,18 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 <?php require_once 'includes/footer.php'; ?>
+
+<!-- ─── Mobile Bottom Navigation ─── -->
+<div class="fixed bottom-0 left-0 right-0 bg-ak-bg2 border-t border-ak-border md:hidden z-50 safe-bottom">
+  <div class="flex justify-around items-center h-14">
+    <?php foreach ($tabs as $tabKey => $tabInfo): ?>
+    <a href="?tab=<?= $tabKey ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>" class="flex flex-col items-center justify-center gap-0.5 text-[10px] font-bold py-1 px-2 <?= $tab === $tabKey ? 'text-ak-gold' : 'text-ak-muted' ?>">
+      <span class="text-lg"><?= $tabInfo['icon'] ?></span>
+      <span><?= $tabInfo['label'] ?></span>
+    </a>
+    <?php endforeach; ?>
+  </div>
+</div>
 <!-- Toast Container -->
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 

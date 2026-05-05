@@ -215,3 +215,28 @@ async function copyStatementLink(url, memberId) {
     if (input) { input.select(); document.execCommand('copy'); showToast('Link copied!', 'success', 2000); }
   }
 }
+
+// ── Bulk: Mark All Unpaid as Paid ─────────────
+async function markAllUnpaidAsPaid() {
+  const unpaidCards = document.querySelectorAll('.statement-card[data-payment="unpaid"]');
+  if (!unpaidCards.length) { showToast('No unpaid members found', 'info'); return; }
+  if (!confirm(`Mark ${unpaidCards.length} unpaid member(s) as paid?`)) return;
+
+  let success = 0, failed = 0;
+  for (const card of unpaidCards) {
+    const memberId = card.querySelector('[id^="pay-btn-"]')?.id?.replace('pay-btn-', '');
+    if (!memberId) { failed++; continue; }
+    try {
+      const res = await fetch('api/update_payment.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _tok: CSRF_TOKEN, auction_id: activeAuctionId, member_id: parseInt(memberId), status: 'paid', paid_amount: 0 })
+      });
+      const data = await res.json();
+      if (data.success) success++; else failed++;
+    } catch { failed++; }
+  }
+  showToast(`✓ ${success} marked as paid${failed ? `, ${failed} failed` : ''}`, success ? 'success' : 'error');
+  setTimeout(() => location.reload(), 1500);
+}
+JSEEOF

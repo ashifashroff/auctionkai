@@ -411,10 +411,10 @@ const VehiclesPager = {
       const vTotal = v.sold == 1 ? parseFloat(v.sold_price) + vTax + parseFloat(v.recycle_fee||0) - parseFloat(v.listing_fee||0) - parseFloat(v.sold_fee||0) - parseFloat(v.nagare_fee||0) : 0;
 
       return `<tr id="vehicle-row-${v.id}" style="border-bottom:1px solid #131F2E">
-        <td><span class="lot">${this.esc(v.lot || '—')}</span></td>
+        <td><span class="lot" data-field="lot">${this.esc(v.lot || '—')}</span></td>
         <td style="color:var(--ak-text2)">${this.esc(v.member_name || '?')}</td>
-        <td style="color:var(--ak-text2)">${this.esc(v.make + ' ' + v.model)}</td>
-        <td style="text-align:right;font-family:var(--mono);color:${soldClass}">${price}</td>
+        <td style="color:var(--ak-text2)" data-field="make">${this.esc(v.make + ' ' + v.model)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${soldClass}" data-field="sold_price">${price}</td>
         <td style="text-align:right;font-family:monospace;color:var(--ak-text2);font-size:12px">${v.sold && parseFloat(v.recycle_fee||0)>0 ? '¥'+Math.round(parseFloat(v.recycle_fee)).toLocaleString() : '—'}</td>
         <td style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.listing_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.listing_fee)).toLocaleString() : '—'}</td>
         <td style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.sold_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.sold_fee)).toLocaleString() : '—'}</td>
@@ -514,3 +514,69 @@ const VehiclesPager = {
     return d.innerHTML;
   }
 };
+
+// ── Inline Edit (double-click on vehicle table cells) ──
+document.addEventListener('dblclick', function(e) {
+  const td = e.target.closest('td[data-field]');
+  if (!td) return;
+  const row = td.closest('tr');
+  if (!row || !row.id) return;
+  const vehicleId = row.id.replace('vehicle-row-', '');
+  if (!vehicleId) return;
+  const field = td.dataset.field;
+  const currentValue = td.textContent.trim();
+
+  // Don't re-trigger if already editing
+  if (td.querySelector('input')) return;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = currentValue;
+  input.className = 'inp text-xs w-full';
+  input.style.minWidth = '60px';
+
+  td.textContent = '';
+  td.appendChild(input);
+  input.focus();
+  input.select();
+
+  const save = async () => {
+    const newValue = input.value.trim();
+    td.textContent = newValue || currentValue;
+
+    if (newValue && newValue !== currentValue) {
+      try {
+        const payload = { id: parseInt(vehicleId), _tok: CSRF_TOKEN };
+        payload[field] = field === 'sold_price' || field === 'lot' ? (field === 'lot' ? newValue : parseFloat(newValue) || 0) : newValue;
+        // Map data-field to API field names
+        const fieldMap = { make: 'make', model: 'model', lot: 'lot', sold_price: 'soldPrice' };
+        const apiPayload = { id: parseInt(vehicleId), _tok: CSRF_TOKEN };
+        apiPayload[fieldMap[field] || field] = payload[field];
+
+        const res = await fetch('api/update_vehicle.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(apiPayload)
+        });
+        const data = await res.json();
+        if (data.error) {
+          showToast(data.error, 'error');
+          td.textContent = currentValue;
+        } else {
+          showToast('Updated', 'success', 1500);
+          if (typeof VehiclesPager !== 'undefined') VehiclesPager.reload();
+        }
+      } catch {
+        showToast('Update failed', 'error');
+        td.textContent = currentValue;
+      }
+    }
+  };
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+    if (ev.key === 'Escape') { td.textContent = currentValue; }
+  });
+});
+JSEEOF

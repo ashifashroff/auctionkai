@@ -103,8 +103,15 @@ if ($s['count'] === 0) {
 }
 
 $htmlBody = buildEmailBody($member, $auction, $s, $fees);
+
+// Build PDF HTML for attachment
+$pdfHtml = '';
+if (class_exists('Dompdf\Dompdf')) {
+    $pdfHtml = buildPdfHtml($member, $auction, $s, $fees, $brand);
+}
+
 $result = sendSettlementEmail(
-    $member, $auction, $htmlBody, $db
+    $member, $auction, $htmlBody, $db, $pdfHtml, true
 );
 
 // Log email to statement_history

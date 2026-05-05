@@ -125,7 +125,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
     <div class="text-4xl"><?= $allGood ? '✅' : '⚠️' ?></div>
     <div>
       <div class="font-bold text-lg <?= $allGood ? 'text-ak-green' : 'text-ak-red' ?>"><?= $allGood ? 'All Systems Operational' : 'Attention Required' ?></div>
-      <div class="text-ak-muted text-sm">AuctionKai v3.6 · PHP <?= $phpVersion ?> · MySQL <?= $dbInfo['version'] ?? 'N/A' ?></div>
+      <div class="text-ak-muted text-sm">AuctionKai v3.7 · PHP <?= $phpVersion ?> · MySQL <?= $dbInfo['version'] ?? 'N/A' ?></div>
     </div>
   </div>
 

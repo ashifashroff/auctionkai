@@ -109,7 +109,9 @@ function sendSettlementEmail(
     array $member,
     array $auction,
     string $htmlBody,
-    PDO $db
+    PDO $db,
+    string $pdfHtml = '',
+    bool $attachPdf = true
 ): array {
     require_once __DIR__ . '/branding.php';
     $brand = loadBranding($db);
@@ -209,6 +211,21 @@ function sendSettlementEmail(
         $mail->Subject = '精算書 / Settlement Statement — ' . ($brand['brand_name'] ?? 'AuctionKai') . ' · ' . $auction['name'] . ' (' . $auction['date'] . ')';
         $mail->Body = $htmlBody;
         $mail->AltBody = strip_tags($htmlBody);
+
+        // Attach PDF if Dompdf is available and HTML provided
+        if ($attachPdf && !empty($pdfHtml) && class_exists('Dompdf\Dompdf')) {
+            try {
+                $dompdf = new \Dompdf\Dompdf();
+                $dompdf->loadHtml($pdfHtml);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                $pdfContent = $dompdf->output();
+                $filename = 'Settlement_' . preg_replace('/[^a-zA-Z0-9]/', '_', $auction['name'] ?? 'statement') . '_' . preg_replace('/[^a-zA-Z0-9]/', '_', $member['name'] ?? 'member') . '.pdf';
+                $mail->addStringAttachment($pdfContent, $filename, 'base64', 'application/pdf');
+            } catch (Exception $pdfEx) {
+                // PDF generation failed \u2014 still send email without attachment
+            }
+        }
 
         $mail->send();
 

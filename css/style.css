@@ -389,3 +389,11 @@ body.light-mode .pagination-wrap { border-color: #D4C9B8; }
 body.light-mode .page-btn { background: #F4F1EC; border-color: #D4C9B8; color: #7A6A54; }
 body.light-mode .page-btn.active { background: #A07828; color: #fff; border-color: #A07828; }
 body.light-mode .vehicles-search-input { background: #F9F7F4; border-color: #D4C9B8; color: #1A1209; }
+
+/* ── Mobile Bottom Navigation ── */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (max-width: 767px) {
+  body { padding-bottom: 60px; }
+}
