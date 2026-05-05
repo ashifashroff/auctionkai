@@ -104,6 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $date = trim($_POST['date'] ?? '');
         if ($name !== '' && $date !== '') {
+            if ($date > date('Y-m-d')) {
+                // Future dates not allowed
+                header('Location: index.php?tab=dashboard');
+                exit;
+            }
             $expiresAt = date('Y-m-d', strtotime($date . ' +14 days'));
             $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, expires_at) VALUES (?,?,?,?)");
             $stmt->execute([$userId, $name, $date, $expiresAt]);
@@ -370,7 +375,7 @@ if ($maintenanceOn && $userRole === 'admin'):
   <form onsubmit="return submitAddAuction(event)" data-parsley-validate class="max-w-md">
     <div class="add-row ar-auction mb-0" style="grid-template-columns:1fr 1fr auto">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" data-parsley-required="true"></div>
-      <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true"></div>
+      <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true" max="<?= date('Y-m-d') ?>"></div>
       <div class="flex items-end pt-[22px]"><button class="btn btn-gold" type="submit">+ Create</button></div>
     </div>
   </form>
