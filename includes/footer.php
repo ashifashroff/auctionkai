@@ -23,7 +23,7 @@ $year = date('Y');
     <div>
       <div class="text-ak-gold font-bold text-lg">⚡ <?= h($brandName) ?></div>
       <div class="text-ak-muted text-xs mt-1"><?= h($brandTagline) ?></div>
-      <div class="mt-2"><span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded font-mono">v3.5</span></div>
+      <div class="mt-2"><span class="text-[10px] bg-ak-border text-ak-muted px-2 py-0.5 rounded font-mono">v3.6</span></div>
     </div>
     <!-- Column 2 — System -->
     <div>

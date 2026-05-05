@@ -224,7 +224,9 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency. WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history. Shareable statement links (14-day expiry). PIN protection (last 4 digits of phone). Beautiful online statement view page. Print/PDF button on shared page. View counter tracking. WhatsApp integration includes share link. Auto-cleanup of expired links.
+**v3.6** — WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history. Shareable statement links (14-day expiry). PIN protection (last 4 digits of phone). Beautiful online statement view page. Print/PDF button on shared page. View counter tracking. WhatsApp integration includes share link. Auto-cleanup of expired links.
+
+**v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency.
 
 **v3.4** — Login history tracking, session timeout with admin controls, GDPR account deletion, payment status tracking with PDF stamp, system health check page, maintenance mode, custom branding with color picker, scheduled backups with cron support, statement history tracking, bulk PDF ZIP download, special fees tab per member per auction with presets.
 
