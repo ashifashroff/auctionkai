@@ -1680,3 +1680,23 @@ async function sfDeleteFee(feeId, memberId, auctionId) {
 
 // Modal backdrop close
 document.getElementById('editFeeModal')?.addEventListener('click', function(e) { if (e.target === this) closeEditFeeModal(); });
+
+// ── WhatsApp Statement Sender ─────────────────
+async function openWhatsApp(url, memberId, auctionId, netPayout) {
+  window.open(url, '_blank');
+  try {
+    await fetch('api/log_statement.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        _tok: CSRF_TOKEN,
+        auction_id: auctionId,
+        member_id: memberId,
+        action: 'whatsapp',
+        net_payout: netPayout
+      })
+    });
+  } catch {}
+  showToast('💬 Opening WhatsApp...', 'info', 2000);
+}
+JSEEOF

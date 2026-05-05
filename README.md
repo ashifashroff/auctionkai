@@ -47,7 +47,7 @@ Or register a new account. Usernames and emails must be unique.
 
 **Special Fees** — add custom per-member fees for each auction. Supports deductions (car wash, bank charges, storage, repairs, inspection, key duplicate) and additions (bonus payments). Quick preset chips for common fees. Fees appear in settlement statements and PDF documents. Server-rendered table with member name, fee name, type badge, amount, and date. Summary row shows total deductions and additions. Delete fees individually with animated row removal. All fee changes logged to activity log.
 
-**Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Special fees included in deductions/additions. Download individual or all-statement PDFs. Email drafts via mailto link. Payment status tracking (Unpaid / Partial / Paid) with one-click update. Paid timestamp recorded automatically. PAID/PARTIAL stamp on PDF statements.
+**Statements** — only members with sold vehicles appear. Full breakdown from gross sales down to net payout. Special fees included in deductions/additions. Download individual or all-statement PDFs. Email drafts via mailto link. WhatsApp button — one click opens WhatsApp with full settlement statement pre-filled. Full fee breakdown in WhatsApp-friendly text format with emojis. Auto-formats Japanese phone numbers (+81 prefix). Disabled state shown when member has no phone number. WhatsApp actions tracked in statement history. Works on desktop (WhatsApp Web) and mobile (WhatsApp app). Payment status tracking (Unpaid / Partial / Paid) with one-click update. Paid timestamp recorded automatically. PAID/PARTIAL stamp on PDF statements.
 
 **PDF** — print-ready A4 settlement statements with Japanese headers. Sold and unsold vehicles shown in separate tables. Fee breakdown with all deductions including special fees (bold). Net payout in bold. PAID/PARTIAL watermark stamp. White background, print-friendly layout. Bulk ZIP download — all member statements in one ZIP file.
 
@@ -222,7 +222,7 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 
 ## Changelog
 
-**v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency.
+**v3.5** — Special fees tab redesign matching vehicle tab style (grid layout, member search dropdown, quick preset chips, server-rendered table with summary row). PDF fixes: branding variable scope, header duplication, PAID stamp positioning, special fees bold. Delete auction fix (unclosed braces + cleanup of member_fees/payment_status). Member dropdown styling consistency. WhatsApp statement sharing. Full breakdown message with emojis. Phone number auto-formatting for Japan. WhatsApp actions in statement history.
 
 **v3.4** — Login history tracking, session timeout with admin controls, GDPR account deletion, payment status tracking with PDF stamp, system health check page, maintenance mode, custom branding with color picker, scheduled backups with cron support, statement history tracking, bulk PDF ZIP download, special fees tab per member per auction with presets.
 

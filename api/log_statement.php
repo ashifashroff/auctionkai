@@ -19,7 +19,7 @@ $memberId = (int)($data['member_id'] ?? 0);
 $action = $data['action'] ?? 'pdf';
 $netPayout = (float)($data['net_payout'] ?? 0);
 
-if (!$auctionId || !$memberId || !in_array($action, ['pdf', 'email'])) {
+if (!$auctionId || !$memberId || !in_array($action, ['pdf', 'email', 'whatsapp'])) {
     echo json_encode(['success' => false, 'message' => 'Invalid parameters']);
     exit;
 }
@@ -41,7 +41,7 @@ try {
     $memberName->execute([$memberId]);
     $name = $memberName->fetchColumn() ?? 'Unknown';
 
-    logActivity($db, $userId, $action === 'pdf' ? 'pdf.generate' : 'email.send', 'member', $memberId, ucfirst($action) . " statement for: {$name}");
+    logActivity($db, $userId, match($action) { 'pdf' => 'pdf.generate', 'email' => 'email.send', 'whatsapp' => 'whatsapp.send', default => 'statement.action' }, 'member', $memberId, ucfirst($action) . " statement for: {$name}");
 
     echo json_encode(['success' => true]);
 

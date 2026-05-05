@@ -329,7 +329,7 @@ CREATE TABLE IF NOT EXISTS statement_history (
   auction_id INT UNSIGNED NOT NULL,
   member_id INT UNSIGNED NOT NULL,
   user_id INT UNSIGNED NOT NULL,
-  action ENUM('pdf','email') NOT NULL,
+  action ENUM('pdf','email','whatsapp') NOT NULL,
   net_payout DECIMAL(12,0) DEFAULT 0,
   ip_address VARCHAR(45) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -345,7 +345,7 @@ CREATE TABLE IF NOT EXISTS statement_history (
   auction_id INT UNSIGNED NOT NULL,
   member_id INT UNSIGNED NOT NULL,
   user_id INT UNSIGNED NOT NULL,
-  action ENUM('pdf','email') NOT NULL,
+  action ENUM('pdf','email','whatsapp') NOT NULL,
   net_payout DECIMAL(12,0) DEFAULT 0,
   ip_address VARCHAR(45) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
