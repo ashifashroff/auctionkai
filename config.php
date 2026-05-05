@@ -16,3 +16,4 @@ define('DB_NAME', $_ENV['DB_NAME'] ?? 'auctionkai');
 define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_CHARSET', $_ENV['DB_CHARSET'] ?? 'utf8mb4');
+define('APP_URL', $_ENV['APP_URL'] ?? '');

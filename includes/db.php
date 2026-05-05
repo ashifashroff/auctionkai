@@ -20,7 +20,7 @@ function db(): PDO {
         http_response_code(500);
         echo '<h1>Database Error</h1>';
         echo '<p>Could not connect to the database. Please check config.php settings.</p>';
-        echo '<!-- ' . htmlspecialchars($e->getMessage()) . ' -->';
+        echo '<!-- DB connection error -->';
         exit;
     }
 

@@ -916,7 +916,7 @@ foreach ($members as $m) {
             $slStmt->execute([(int)$m['id'], (int)$activeAuctionId]);
             $existingLink = $slStmt->fetchColumn();
           } catch (Exception $e) {}
-          $shareUrl = $existingLink ? (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']) . '/statement.php?token=' . $existingLink : '';
+          $shareUrl = $existingLink ? appUrl() . '/statement.php?token=' . $existingLink : '';
           $waMessage = buildWhatsAppMessage($m, $auction, $s, $memberSpecialFees, $brand['brand_name'] ?? 'AuctionKai', $shareUrl);
           $waUrl = buildWhatsAppUrl($m['phone'] ?? '', $waMessage);
         ?>

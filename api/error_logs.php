@@ -1,13 +1,12 @@
 <?php
-require_once '../includes/auth_check.php';
-require_once '../includes/db.php';
+require_once __DIR__ . '/../includes/api_bootstrap.php';
 require_once '../includes/activity.php';
 require_once '../includes/error_handler.php';
 
 header('Content-Type: application/json');
 
 // Admin-only
-if (($currentUser['role'] ?? '') !== 'admin') {
+if (($_SESSION['user_role'] ?? '') !== 'admin') {
     echo json_encode(['success' => false, 'message' => 'Admin access required']);
     exit;
 }

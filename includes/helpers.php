@@ -190,3 +190,16 @@ function buildPdfHtml(array $member, array $auction, array $s, array $fees, arra
     </body></html>';
 }
 HELPER_EOF
+function appUrl(): string {
+    if (defined('APP_URL') && !empty(APP_URL)) {
+        return rtrim(APP_URL, '/');
+    }
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+    $host = $_SERVER['SERVER_NAME'] ?? '';
+    if (empty($host) || !preg_match('/^[a-zA-Z0-9.\-]+$/', $host)) {
+        $host = 'localhost';
+    }
+    $path = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+    return ($https ? 'https' : 'http') . '://' . $host . ($path !== '/' ? $path : '');
+}
+HELPER_EOF

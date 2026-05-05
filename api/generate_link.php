@@ -1,6 +1,5 @@
 <?php
-require_once '../includes/auth_check.php';
-require_once '../includes/db.php';
+require_once __DIR__ . '/../includes/api_bootstrap.php';
 require_once '../includes/activity.php';
 
 header('Content-Type: application/json');
@@ -78,15 +77,7 @@ try {
 
  if ($existing) {
  // Return existing valid link
- $baseUrl = 
- (isset($_SERVER['HTTPS']) 
- && $_SERVER['HTTPS'] !== 'off' 
- ? 'https' : 'http')
- . '://' .$_SERVER['HTTP_HOST']
- . dirname(
- dirname($_SERVER['PHP_SELF'])
- )
- . '/statement.php';
+ $baseUrl = appUrl() . '/statement.php';
 
  echo json_encode([
  'success' => true,
@@ -121,15 +112,7 @@ try {
  ]);
 
  // Build full URL
- $baseUrl = 
- (isset($_SERVER['HTTPS']) 
- && $_SERVER['HTTPS'] !== 'off' 
- ? 'https' : 'http')
- . '://' . $_SERVER['HTTP_HOST']
- . dirname(
- dirname($_SERVER['PHP_SELF'])
- )
- . '/statement.php';
+ $baseUrl = appUrl() . '/statement.php';
 
  $fullUrl = $baseUrl . '?token=' . $token;
 

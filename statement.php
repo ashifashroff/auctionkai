@@ -1,4 +1,7 @@
 <?php
+header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
+header("X-Frame-Options: DENY");
+header("X-Content-Type-Options: nosniff");
 require_once 'includes/db.php';
 require_once 'includes/helpers.php';
 require_once 'includes/branding.php';
@@ -106,13 +109,16 @@ if (strtotime($link['expires_at']) < time()) {
 $pinVerified = false;
 $pinError = '';
 $pinAttemptKey = 'pin_attempts_' . md5($token);
+$ipPinKey = 'pin_ip_' . md5($token . '_' . trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]));
 $maxAttempts = 5;
 
-if (!isset($_SESSION)) session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
+// Regenerate session ID after successful PIN to prevent fixation
+$pinJustVerified = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
 
- $attempts = (int)($_SESSION[$pinAttemptKey] ?? 0);
+ $attempts = (int)($_SESSION[$pinAttemptKey] ?? 0) + (int)($_SESSION[$ipPinKey] ?? 0);
 
  if ($attempts >= $maxAttempts) {
  $pinError = 'Too many incorrect attempts. Please try again later.';
@@ -121,7 +127,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
  if ($enteredPin === $link['pin']) {
  $pinVerified = true;
  $_SESSION[$pinAttemptKey] = 0;
+ $_SESSION[$ipPinKey] = 0;
  $_SESSION['verified_token_' . md5($token)] = true;
+ $pinJustVerified = true;
+ session_regenerate_id(true);
 
  // Update view count
  $db->prepare("
@@ -133,6 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
 
  } else {
  $_SESSION[$pinAttemptKey] = $attempts + 1;
+ $_SESSION[$ipPinKey] = ($_SESSION[$ipPinKey] ?? 0) + 1;
  $remaining = $maxAttempts - ($attempts + 1);
  $pinError = "Incorrect PIN. {$remaining} attempt(s) remaining.";
  }
