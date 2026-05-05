@@ -311,7 +311,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 </div>
 
 <?php require_once '../includes/footer.php'; ?>
-<script src="../js/app.js?v=3.5"></script>
+<script src="../js/common.js?v=3.6"></script>
 <script>
 // ── Error Logs ──────────────────────────────
 let errCurrentPage = 1;

@@ -250,7 +250,8 @@ function parseOS(string $ua): string {
 <?php require_once 'includes/footer.php'; ?>
 <!-- Toast Container -->
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
-<script src="js/app.js?v=3.5"></script>
+<script src="js/common.js?v=3.6"></script>
+<script src="js/members.js?v=3.6"></script>
 <script>const CSRF_TOKEN = '<?= h($tok ?? $_SESSION["tok"] ?? "") ?>';</script>
 <script>
 <?php if (!empty($error)): ?>
