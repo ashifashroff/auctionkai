@@ -1699,4 +1699,71 @@ async function openWhatsApp(url, memberId, auctionId, netPayout) {
   } catch {}
   showToast('💬 Opening WhatsApp...', 'info', 2000);
 }
+
+// ── Statement Link Generator ──────────────────
+async function generateStatementLink(memberId, auctionId, btnEl) {
+  const originalText = btnEl.innerHTML;
+  btnEl.innerHTML = '⏳ Generating...';
+  btnEl.disabled = true;
+  const resultDiv = document.getElementById(`link-result-${memberId}`);
+  try {
+    const res = await fetch('api/generate_link.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({member_id: memberId, auction_id: auctionId})
+    });
+    const data = await res.json();
+    if (data.success) {
+      btnEl.innerHTML = '🔗 Share Link';
+      btnEl.disabled = false;
+      const expiry = new Date(data.expires_at).toLocaleDateString('ja-JP', {year:'numeric',month:'2-digit',day:'2-digit'});
+      if (resultDiv) {
+        resultDiv.className = 'mt-3 p-4 rounded-xl border border-ak-border bg-ak-infield';
+        resultDiv.innerHTML = `
+          <div class="flex items-start justify-between gap-3 flex-wrap mb-3">
+            <div>
+              <div class="text-[10px] uppercase tracking-wider text-ak-muted mb-1">${data.is_new ? '✓ New link generated' : '🔗 Existing valid link'}</div>
+              <div class="text-xs text-ak-muted">🔐 PIN: <span class="font-mono font-bold text-ak-gold text-sm tracking-[4px]">${data.pin}</span> <span class="text-ak-muted/60 ml-1">(last 4 digits of phone)</span></div>
+              <div class="text-xs text-ak-muted mt-1">⏱ Expires: ${expiry} · 👁 ${data.views} view(s)</div>
+            </div>
+          </div>
+          <div class="flex gap-2 items-center">
+            <input type="text" readonly value="${data.url}" class="inp text-xs font-mono flex-1 text-ak-text2 cursor-pointer" onclick="this.select()" id="link-url-${memberId}">
+            <button onclick="copyStatementLink('${data.url}', ${memberId})" class="btn btn-gold btn-sm shrink-0" id="copy-btn-${memberId}">Copy</button>
+            <a href="${data.url}" target="_blank" class="btn btn-dark btn-sm shrink-0 text-center">Preview</a>
+          </div>
+          <div class="mt-2 text-[11px] text-ak-muted/60">Share this link with the member. They need their PIN to view it.</div>
+        `;
+        resultDiv.classList.remove('hidden');
+      }
+      showToast(data.is_new ? '🔗 Statement link generated!' : '🔗 Link retrieved', 'success', 3000);
+    } else {
+      showToast(data.message || 'Failed to generate link', 'error');
+      btnEl.innerHTML = originalText;
+      btnEl.disabled = false;
+    }
+  } catch {
+    showToast('Connection error. Please try again.', 'error');
+    btnEl.innerHTML = originalText;
+    btnEl.disabled = false;
+  }
+}
+
+async function copyStatementLink(url, memberId) {
+  try {
+    await navigator.clipboard.writeText(url);
+    const btn = document.getElementById(`copy-btn-${memberId}`);
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copied!';
+      btn.style.background = '#4CAF82';
+      btn.style.color = '#0A1420';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 2000);
+    }
+    showToast('Link copied to clipboard!', 'success', 2000);
+  } catch {
+    const input = document.getElementById(`link-url-${memberId}`);
+    if (input) { input.select(); document.execCommand('copy'); showToast('Link copied!', 'success', 2000); }
+  }
+}
 JSEEOF

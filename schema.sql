@@ -378,3 +378,35 @@ CREATE TABLE IF NOT EXISTS member_fees (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `chk_fee_amount` CHECK (`amount` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── Statement Links ───────────────────────────
+CREATE TABLE IF NOT EXISTS statement_links (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(64) NOT NULL UNIQUE,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  pin VARCHAR(4) NOT NULL,
+  views INT UNSIGNED DEFAULT 0,
+  last_viewed TIMESTAMP NULL DEFAULT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_stmtlink_token (`token`),
+  INDEX idx_stmtlink_member (`member_id`),
+  INDEX idx_stmtlink_auction (`auction_id`),
+  INDEX idx_stmtlink_expires (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ── For existing installs ─────────────────────
+CREATE TABLE IF NOT EXISTS statement_links (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  token VARCHAR(64) NOT NULL UNIQUE,
+  auction_id INT UNSIGNED NOT NULL,
+  member_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  pin VARCHAR(4) NOT NULL,
+  views INT UNSIGNED DEFAULT 0,
+  last_viewed TIMESTAMP NULL DEFAULT NULL,
+  expires_at DATETIME NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
