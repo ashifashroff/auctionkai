@@ -397,3 +397,58 @@ body.light-mode .vehicles-search-input { background: #F9F7F4; border-color: #D4C
 @media (max-width: 767px) {
   body { padding-bottom: 60px; }
 }
+
+/* ── Custom Confirm Modal ── */
+.confirm-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .15s;
+}
+.confirm-overlay.open { opacity: 1; }
+.confirm-box {
+  background: #111E2D; border: 1px solid #1E3A5F; border-radius: 16px;
+  padding: 28px; max-width: 380px; width: 90%; box-shadow: 0 24px 64px rgba(0,0,0,.6);
+  transform: scale(.95); transition: transform .15s;
+}
+.confirm-overlay.open .confirm-box { transform: scale(1); }
+.confirm-icon { font-size: 32px; margin-bottom: 12px; }
+.confirm-title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+.confirm-msg { color: #6A88A0; font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+.confirm-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.confirm-cancel {
+  background: #1E3A5F; color: #A8C4D8; border: 1px solid #1E3A5F;
+  border-radius: 8px; padding: 8px 20px; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.confirm-cancel:hover { background: #2A4A6F; }
+.confirm-danger {
+  background: #CC7777; color: #0A1420; border: 1px solid #CC7777;
+  border-radius: 8px; padding: 8px 20px; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.confirm-danger:hover { background: #DD8888; }
+.confirm-primary {
+  background: #D4A84B; color: #0A1420; border: 1px solid #D4A84B;
+  border-radius: 8px; padding: 8px 20px; font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.confirm-primary:hover { opacity: .9; }
+
+/* ── Skeleton Loading ── */
+.skeleton { background: linear-gradient(90deg, #111E2D 25%, #1A2E40 50%, #111E2D 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skeleton-row td { padding: 14px 16px; }
+.skeleton-bar { height: 14px; border-radius: 4px; }
+
+/* ── Tab active highlight ── */
+.tab-btn-active { background: rgba(212,168,75,.15) !important; color: #D4A84B !important; border-bottom: 2px solid #D4A84B; }
+
+/* ── Link copy flash ── */
+.link-copy-flash { border-color: #D4A84B !important; box-shadow: 0 0 0 2px rgba(212,168,75,.3); transition: all .2s; }
+
+/* ── Tab fade-in ── */
+.tab-content { animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Search clear button ── */
+.search-clear { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #6A88A0; cursor: pointer; font-size: 16px; line-height: 1; display: none; }
+.search-clear:hover { color: #CC7777; }
+.search-wrap { position: relative; }
+.search-wrap:has(input:not(:placeholder-shown)) .search-clear { display: block; }

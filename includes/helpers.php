@@ -189,7 +189,6 @@ function buildPdfHtml(array $member, array $auction, array $s, array $fees, arra
         <div class="footer">' . h($auction['name']) . ' · ' . h($auction['date']) . ' · ' . h($brand['brand_footer_text'] ?? 'Mirai Global Solutions') . '</div>
     </body></html>';
 }
-HELPER_EOF
 function appUrl(): string {
     if (defined('APP_URL') && !empty(APP_URL)) {
         return rtrim(APP_URL, '/');
@@ -202,4 +201,3 @@ function appUrl(): string {
     $path = dirname($_SERVER['SCRIPT_NAME'] ?? '');
     return ($https ? 'https' : 'http') . '://' . $host . ($path !== '/' ? $path : '');
 }
-HELPER_EOF

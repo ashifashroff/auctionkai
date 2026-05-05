@@ -262,9 +262,9 @@ function toggleSold(id, btn) {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'toggle_sold', id:id, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);btn.disabled=false;return;}
+    if(d.error){showToast(d.error, 'error');btn.disabled=false;return;}
     if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
-  }).catch(()=>{alert('Error');btn.disabled=false;});
+  }).catch(()=>{showToast('Connection error', 'error');btn.disabled=false;});
 }
 
 // ─── VEHICLE TABLE SEARCH ──────────────────────────
@@ -288,12 +288,12 @@ function deleteVehicle(vehicleId, btn) {
   })
   .then(r => r.json())
   .then(data => {
-    if (data.error) { alert(data.error); btn.disabled = false; btn.textContent = '×'; return; }
+    if (data.error) { showToast(data.error, 'error'); btn.disabled = false; btn.textContent = '×'; return; }
     const row = document.querySelector(`tr[data-vid="${vehicleId}"]`);
     if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => {if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}}, 300); }
     else if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
   })
-  .catch(() => { alert('Network error.'); btn.disabled = false; btn.textContent = '×'; });
+  .catch(() => { showToast('Network error', 'error'); btn.disabled = false; btn.textContent = '×'; });
 }
 
 // ── Vehicles Pagination ───────────────────────
@@ -379,7 +379,7 @@ const VehiclesPager = {
     if (!tbody) return;
     let rows = '';
     for (let i = 0; i < 5; i++) {
-      rows += '<tr class="skeleton-row"><td colspan="11">&nbsp;</td></tr>';
+      rows += '<tr class="skeleton-row"><td colspan="11"><div class="skeleton skeleton-bar" style="width:80%"></div></td></tr>';
     }
     tbody.innerHTML = rows;
   },

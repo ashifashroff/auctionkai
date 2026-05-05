@@ -10,9 +10,9 @@ function submitAddAuction(e) {
     method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
-    if(d.error){alert(d.error);btn.disabled=false;btn.textContent='+ Create';return;}
+    if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Create';return;}
     window.location.href = 'index.php?auction_id=' + d.auction_id + '&tab=dashboard';
-  }).catch(()=>{alert('Error');btn.disabled=false;btn.textContent='+ Create';});
+  }).catch(()=>{showToast('Connection error', 'error');btn.disabled=false;btn.textContent='+ Create';});
   return false;
 }
 
@@ -288,7 +288,7 @@ const MembersPager = {
 
     const container = document.getElementById('members-list-container');
     if (container) {
-      container.innerHTML = '<div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border">Loading…</div>';
+      container.innerHTML = Array(4).fill(0).map(() => '<div class="bg-ak-card rounded-xl p-4 border border-ak-border flex items-center gap-4"><div class="skeleton w-10 h-10 rounded-full"></div><div class="flex-1"><div class="skeleton skeleton-bar" style="width:50%;height:16px;margin-bottom:8px"></div><div class="skeleton skeleton-bar" style="width:30%;height:12px"></div></div></div>').join('');
     }
 
     try {

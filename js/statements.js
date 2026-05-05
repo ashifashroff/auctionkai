@@ -98,7 +98,7 @@ async function setPaymentStatus(memberId, auctionId, status, netPayout) {
     if (data.success) {
       const classes = {
         paid: 'bg-ak-green/15 text-ak-green border-ak-green/30',
-        partial: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+        partial: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
         unpaid: 'bg-ak-red/10 text-ak-red border-ak-red/20'
       };
       const icons = { paid: '✓ Paid', partial: '◑ Partial', unpaid: '✗ Unpaid' };
@@ -212,7 +212,7 @@ async function copyStatementLink(url, memberId) {
     showToast('Link copied to clipboard!', 'success', 2000);
   } catch {
     const input = document.getElementById(`link-url-${memberId}`);
-    if (input) { input.select(); document.execCommand('copy'); showToast('Link copied!', 'success', 2000); }
+    if (input) { input.classList.add('link-copy-flash'); setTimeout(() => input.classList.remove('link-copy-flash'), 1500); input.select(); document.execCommand('copy'); showToast('Link copied!', 'success', 2000); }
   }
 }
 

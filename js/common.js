@@ -299,3 +299,35 @@ if (editModal) {
   });
   observer.observe(editModal, { attributes: true, attributeFilter: ['style'] });
 }
+
+// ── Custom Confirm Modal ────────────────────
+function akConfirm(message, {title = 'Confirm', icon = '⚠️', confirmText = 'Confirm', cancelText = 'Cancel', style = 'danger'} = {}) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-box">
+        <div class="confirm-icon">${icon}</div>
+        <div class="confirm-title" style="color:var(--ak-text)">${title}</div>
+        <div class="confirm-msg">${message}</div>
+        <div class="confirm-btns">
+          <button class="confirm-cancel">${cancelText}</button>
+          <button class="confirm-${style}">${confirmText}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('open'));
+
+    const close = (val) => {
+      overlay.classList.remove('open');
+      setTimeout(() => overlay.remove(), 150);
+      resolve(val);
+    };
+
+    overlay.querySelector('.confirm-cancel').onclick = () => close(false);
+    overlay.querySelector(`.confirm-${style}`).onclick = () => close(true);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+    document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(false); document.removeEventListener('keydown', esc); } });
+  });
+}

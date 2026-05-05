@@ -354,7 +354,7 @@ if ($maintenanceOn && $userRole === 'admin'):
 ?>
 <div class="bg-yellow-500/20 border-b border-yellow-500/40 px-7 py-2 flex items-center justify-between gap-4">
   <div class="flex items-center gap-2">
-    <span class="text-yellow-400 font-bold animate-pulse">🚧</span>
+    <span class="text-amber-400 font-bold animate-pulse">🚧</span>
     <span class="text-yellow-400 text-sm font-semibold">Maintenance Mode is ACTIVE — Non-admin users cannot access the system</span>
   </div>
   <a href="admin/index.php?tab=maintenance" class="text-yellow-400 text-xs hover:underline font-medium">Manage →</a>
@@ -399,7 +399,7 @@ if ($maintenanceOn && $userRole === 'admin'):
 <!-- ─── TABS ────────────────────────────────────────── -->
 <div class="bg-ak-bg border-b border-ak-border px-7 flex items-center gap-1">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 rounded-t-lg <?= $tab === $key ? 'tab-btn-active' : 'text-ak-muted border-transparent hover:text-ak-text2 hover:bg-ak-infield/50' ?>" href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
   <div class="ml-auto text-xs text-ak-muted flex gap-4">
     <span><b class="text-ak-text"><?= count($members) ?></b> members</span>
@@ -411,9 +411,11 @@ if ($maintenanceOn && $userRole === 'admin'):
 <div class="p-7 max-w-[1400px] mx-auto animate-fade-in">
 
 <?php if (!$auction): ?>
-  <div class="text-center py-24">
-    <h2 class="text-2xl font-bold text-ak-muted mb-3">No Auctions Yet</h2>
-    <p class="text-ak-muted2">Click <strong class="text-ak-gold">"+ New Auction"</strong> above to create your first auction.</p>
+  <div class="text-center py-24 animate-fade-in-up">
+    <div class="text-6xl mb-6">🏷</div>
+    <h2 class="text-2xl font-bold text-ak-text mb-3">No Auctions Yet</h2>
+    <p class="text-ak-muted mb-6 max-w-md mx-auto">Create your first auction to start managing members, vehicles, and settlement statements.</p>
+    <button onclick="document.getElementById('addAuctionForm').classList.remove('hidden')" class="btn btn-gold btn-sm">+ Create Your First Auction</button>
   </div>
 
 <?php elseif ($tab === 'dashboard'): ?>
@@ -850,7 +852,7 @@ foreach ($members as $m) {
     <div class="text-2xl font-bold font-mono text-ak-green"><?= $totalPaid ?></div>
     <div class="text-ak-muted text-xs mt-1">✓ Paid</div>
   </div>
-  <div class="bg-ak-card rounded-xl p-4 border border-yellow-500/30 text-center">
+  <div class="bg-ak-card rounded-xl p-4 border border-amber-500/30 text-center">
     <div class="text-2xl font-bold font-mono text-yellow-400"><?= $totalPartial ?></div>
     <div class="text-ak-muted text-xs mt-1">◑ Partial</div>
   </div>
@@ -874,7 +876,7 @@ foreach ($members as $m) {
     $payStatus = $ps['status'] ?? 'unpaid';
     $payClass = match($payStatus) {
         'paid' => 'bg-ak-green/15 text-ak-green border-ak-green/30',
-        'partial' => 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+        'partial' => 'bg-amber-500/15 text-amber-400 border-amber-500/30',
         default => 'bg-ak-red/10 text-ak-red border-ak-red/20',
     };
     $payIcon = match($payStatus) {

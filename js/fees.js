@@ -195,7 +195,7 @@ async function submitAddSpecialFee(event) {
 
 // Delete special fee (same pattern as deleteVehicle in vehicle tab)
 async function sfDeleteFee(feeId, memberId, auctionId) {
-  if (!confirm('Delete this fee?')) return;
+  if (!await akConfirm('This fee will be permanently removed.', {title:'Delete Fee', icon:'🗑️', confirmText:'Delete'})) return;
   try {
     const res = await fetch('api/member_fees.php', {
       method: 'POST',
