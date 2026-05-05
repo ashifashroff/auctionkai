@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: index.php?tab=dashboard');
                 exit;
             }
-            $expiresAt = date('Y-m-d', strtotime($date . ' +14 days'));
+            $expiresAt = date('Y-m-d', strtotime('+14 days'));
             $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, expires_at) VALUES (?,?,?,?)");
             $stmt->execute([$userId, $name, $date, $expiresAt]);
             $newId = (int)$db->lastInsertId();
