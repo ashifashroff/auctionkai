@@ -442,7 +442,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <h2 class="text-lg font-bold mb-5">Dashboard — <?= h($auction['name']) ?></h2>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
+<div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Members</div>
     <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= $membersInAuction ?></div>
