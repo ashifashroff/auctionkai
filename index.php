@@ -436,31 +436,31 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <h2 class="text-lg font-bold mb-5">Dashboard — <?= h($auction['name']) ?></h2>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Members</div>
-    <div class="text-2xl font-bold text-ak-text mt-1 font-mono"><?= $membersInAuction ?></div>
+    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= $membersInAuction ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.05s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.05s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Vehicles</div>
-    <div class="text-2xl font-bold text-ak-text mt-1 font-mono"><?= count($vehicles) ?></div>
+    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= count($vehicles) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.1s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.1s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Sold</div>
-    <div class="text-2xl font-bold text-ak-green mt-1 font-mono"><?= $totalSold ?></div>
+    <div class="text-3xl font-bold text-ak-green mt-2 font-mono"><?= $totalSold ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.15s">
-    <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross</div>
-    <div class="text-lg font-bold text-ak-text2 mt-1 font-mono"><?= fmt($totalGross) ?></div>
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.15s">
+    <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross Sales</div>
+    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono"><?= fmt($totalGross) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.2s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.2s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Net Payout</div>
-    <div class="text-lg font-bold text-ak-gold mt-1 font-mono"><?= fmt($totalNet) ?></div>
+    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono"><?= fmt($totalNet) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.25s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.25s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Unpaid</div>
-    <div class="text-2xl font-bold text-ak-red mt-1 font-mono"><?= $totalUnpaid ?></div>
-    <a href="?tab=statements" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View →</a>
+    <div class="text-3xl font-bold text-ak-red mt-2 font-mono"><?= $totalUnpaid ?></div>
+    <a href="?tab=statements" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View Statements →</a>
   </div>
 </div>
 
