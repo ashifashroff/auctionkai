@@ -442,7 +442,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <h2 class="text-lg font-bold mb-5">Dashboard — <?= h($auction['name']) ?></h2>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-3 md:grid-cols-6 gap-4 mb-6">
+<div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Members</div>
     <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= $membersInAuction ?></div>
@@ -479,13 +479,13 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <div class="flex flex-col gap-2">
     <?php foreach ($memberRanking as $i => $mr): ?>
     <?php if ($mr['net'] <= 0 && $mr['gross'] <= 0) continue; ?>
-    <div class="flex items-center gap-4 bg-ak-bg rounded-lg px-4 py-3">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm <?= $i === 0 ? 'bg-ak-gold text-ak-bg' : 'bg-ak-border text-ak-muted' ?>"><?= $i + 1 ?></div>
+    <div class="flex items-center gap-3 bg-ak-bg rounded-lg px-4 py-3 flex-wrap">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 <?= $i === 0 ? 'bg-ak-gold text-ak-bg' : 'bg-ak-border text-ak-muted' ?>"><?= $i + 1 ?></div>
       <div class="flex-1 min-w-0">
         <div class="text-ak-text font-semibold"><?= h($mr['name']) ?></div>
-        <div class="text-ak-muted text-xs"><?= $mr['count'] ?> sold · <?= $mr['unsoldCount'] ?> unsold · Gross: <?= fmt($mr['gross']) ?></div>
+        <div class="text-ak-muted text-xs"><?= $mr['count'] ?> sold · <?= $mr['unsoldCount'] ?> unsold</div>
       </div>
-      <div class="text-ak-gold font-mono font-bold text-lg"><?= fmt($mr['net']) ?></div>
+      <div class="text-ak-gold font-mono font-bold"><?= fmt($mr['net']) ?></div>
     </div>
     <?php endforeach; ?>
   </div>
