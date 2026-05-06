@@ -494,7 +494,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <?php elseif ($tab === 'members'): ?>
 <h2 class="text-lg font-bold mb-5">Members / Sellers — <?= h($auction['name']) ?></h2>
-<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
+<div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up max-w-lg md:max-w-none">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
   <form onsubmit="return submitAddMember(event)" data-parsley-validate>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
