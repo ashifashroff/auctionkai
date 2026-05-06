@@ -81,6 +81,18 @@ function loadRecaptchaSettings(PDO $db): void {
     define('RECAPTCHA_ENABLED', $enabled === '1');
 }
 
+function getSetting(PDO $db, string $key, string $default = ''): string {
+    $stmt = $db->prepare('SELECT setting_value FROM settings WHERE setting_key = ?');
+    $stmt->execute([$key]);
+    $val = $stmt->fetchColumn();
+    return $val !== false ? (string)$val : $default;
+}
+
+function setSetting(PDO $db, string $key, string $value): void {
+    $stmt = $db->prepare('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?');
+    $stmt->execute([$key, $value, $value]);
+}
+
 /**
  * Get reCAPTCHA settings from DB (preferred) or .env fallback
  */
