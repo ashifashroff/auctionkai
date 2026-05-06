@@ -497,11 +497,11 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add New Member</div>
   <form onsubmit="return submitAddMember(event)" data-parsley-validate>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
-      <div class="col-span-2 md:col-span-1"><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
-      <div class="flex items-end pt-[22px]"><button class="btn btn-gold w-full md:w-auto" type="submit" id="addMemberBtn">+ Add</button></div>
+      <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
+      <div class="flex items-end pt-[22px]"><button class="btn btn-gold w-full sm:w-auto" type="submit" id="addMemberBtn">+ Add</button></div>
     </div>
   </form>
   <div id="addMemberMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
