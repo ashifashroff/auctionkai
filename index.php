@@ -315,6 +315,9 @@ foreach ($members as $m) {
   <button onclick="document.getElementById('auctionEditPanel').classList.toggle('hidden')" class="btn btn-dark btn-sm text-[11px] shrink-0">✎ Edit Auction</button>
   <?php endif; ?>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
+    <button class="hamburger-btn" id="hamburgerBtn" onclick="document.getElementById('hamburgerBtn').classList.toggle('open'); document.getElementById('mobileMenu').classList.toggle('open');">
+      <span></span><span></span><span></span>
+    </button>
     <a href="profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
       <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
       <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px] capitalize"><?= h($userRole) ?></div></div>
@@ -357,9 +360,9 @@ if ($maintenanceOn && $userRole === 'admin'):
 
 <!-- ─── AUCTION SELECTOR ────────────────────────────── -->
 <div class="bg-ak-bg border-b border-ak-border px-7 py-3">
-  <div class="flex gap-2 flex-wrap items-center">
+  <div class="auction-chips-wrap flex gap-2 items-center overflow-x-auto pb-1 scrollbar-thin scrollbar-ak">
     <?php foreach ($allAuctions as $a): ?>
-      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
+      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
         <?= h($a['name']) ?>
         <span class="text-[10px] opacity-70">📅 <?= h($a['date']) ?></span>
         <?php
@@ -371,6 +374,9 @@ if ($maintenanceOn && $userRole === 'admin'):
       </a>
     <?php endforeach; ?>
     <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
+  </div>
+  <div id="chipsScrollHint" class="hidden text-[10px] text-ak-muted mt-1 text-right">
+    ← scroll to see more auctions →
   </div>
   <?php if ($auction): ?>
   <div id="auctionEditPanel" class="hidden bg-ak-bg2 border border-ak-border rounded-xl p-5 mt-3 animate-slide-down">
@@ -1145,6 +1151,25 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
 <?php require_once 'includes/footer.php'; ?>
+
+<!-- ── Mobile Navigation Menu ── -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-panel">
+    <div class="flex justify-between items-center mb-6">
+      <div class="text-ak-gold font-bold">⚡ <?= h($brand['brand_name'] ?? 'AuctionKai') ?></div>
+      <button onclick="document.getElementById('hamburgerBtn').classList.remove('open'); document.getElementById('mobileMenu').classList.remove('open');" class="text-ak-muted hover:text-ak-text text-xl">✕</button>
+    </div>
+    <?php foreach ($tabs as $key => $t): ?>
+    <a href="?tab=<?= $key ?><?= $activeAuctionId ? '&auction_id='.$activeAuctionId : '' ?>" class="<?= $tab === $key ? 'active' : '' ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <?php endforeach; ?>
+    <div class="border-t border-ak-border my-4"></div>
+    <a href="profile.php" class="">👤 Profile</a>
+    <a href="help.php" class="">❓ Help</a>
+    <a href="about.php" class="">ℹ️ About</a>
+    <div class="border-t border-ak-border my-4"></div>
+    <a href="auth/logout.php" class="text-ak-red">🚪 Logout</a>
+  </div>
+</div>
 
 <!-- ─── Mobile Bottom Navigation ─── -->
 <div class="fixed bottom-0 left-0 right-0 bg-ak-bg2 border-t border-ak-border md:hidden z-50 safe-bottom">

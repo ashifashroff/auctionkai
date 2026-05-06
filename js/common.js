@@ -331,3 +331,25 @@ function akConfirm(message, {title = 'Confirm', icon = '⚠️', confirmText = '
     document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(false); document.removeEventListener('keydown', esc); } });
   });
 }
+
+// ── Chips scroll hint ────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const chipsWrap = document.querySelector('.auction-chips-wrap');
+  const hint = document.getElementById('chipsScrollHint');
+  if (chipsWrap && hint) {
+    if (chipsWrap.scrollWidth > chipsWrap.clientWidth) {
+      hint.classList.remove('hidden');
+    }
+    chipsWrap.addEventListener('scroll', () => {
+      hint.classList.toggle('hidden', chipsWrap.scrollLeft > 20);
+    });
+  }
+
+  // Close mobile menu on link click
+  document.querySelectorAll('.mobile-menu-panel a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.getElementById('hamburgerBtn')?.classList.remove('open');
+      document.getElementById('mobileMenu')?.classList.remove('open');
+    });
+  });
+});
