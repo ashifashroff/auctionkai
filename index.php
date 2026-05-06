@@ -500,8 +500,8 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
       <div><label class="lbl">Phone</label><input class="inp" name="phone" placeholder="090-xxxx-xxxx"></div>
-      <div><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
-      <div class="flex items-end pt-[22px] col-span-2 md:col-span-1"><button class="btn btn-gold w-full md:w-auto" type="submit" id="addMemberBtn">+ Add</button></div>
+      <div class="col-span-2 md:col-span-1"><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
+      <div class="flex items-end pt-[22px]"><button class="btn btn-gold w-full md:w-auto" type="submit" id="addMemberBtn">+ Add</button></div>
     </div>
   </form>
   <div id="addMemberMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
