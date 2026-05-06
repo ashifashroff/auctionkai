@@ -416,9 +416,9 @@ const VehiclesPager = {
         <td style="color:var(--ak-text2)" data-field="make">${this.esc(v.make + ' ' + v.model)}</td>
         <td style="text-align:right;font-family:var(--mono);color:${soldClass}" data-field="sold_price">${price}</td>
         <td style="text-align:right;font-family:monospace;color:var(--ak-text2);font-size:12px">${v.sold && parseFloat(v.recycle_fee||0)>0 ? '¥'+Math.round(parseFloat(v.recycle_fee)).toLocaleString() : '—'}</td>
-        <td style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.listing_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.listing_fee)).toLocaleString() : '—'}</td>
-        <td style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.sold_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.sold_fee)).toLocaleString() : '—'}</td>
-        <td style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${!v.sold && parseFloat(v.nagare_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.nagare_fee)).toLocaleString() : '—'}</td>
+        <td class="hide-md" style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.listing_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.listing_fee)).toLocaleString() : '—'}</td>
+        <td class="hide-md" style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${v.sold && parseFloat(v.sold_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.sold_fee)).toLocaleString() : '—'}</td>
+        <td class="hide-md" style="text-align:right;font-family:monospace;color:var(--ak-red);font-size:12px">${!v.sold && parseFloat(v.nagare_fee||0)>0 ? '−¥'+Math.round(parseFloat(v.nagare_fee)).toLocaleString() : '—'}</td>
         <td style="text-align:right;font-family:monospace;font-weight:700;color:${v.sold?'var(--ak-gold)':'var(--ak-muted)'}">${v.sold ? '¥'+Math.round(vTotal).toLocaleString() : '—'}</td>
         <td><button class="sb ${statusClass}" onclick="toggleSold(${v.id}, this)">${statusText}</button></td>
         <td style="white-space:nowrap"><div style="display:flex;gap:6px;align-items:center"><button onclick="openEditModal(${v.id})" class="btn btn-dark btn-sm">Edit</button><button onclick="deleteVehicle(${v.id})" class="btn-icon">×</button></div></td>
@@ -580,3 +580,23 @@ document.addEventListener('dblclick', function(e) {
   });
 });
 JSEEOF
+// ── Toggle all columns ───────────────────────
+function toggleAllColumns(btn) {
+  const hiddenCols = document.querySelectorAll('.hide-md');
+  const label = btn.querySelector('.toggle-col-label');
+  const isHidden = hiddenCols[0]?.offsetParent === null;
+  
+  hiddenCols.forEach(col => {
+    if (isHidden) {
+      col.style.display = '';
+      col.classList.remove('hide-md-active');
+    } else {
+      col.style.display = 'none';
+      col.classList.add('hide-md-active');
+    }
+  });
+  
+  if (label) {
+    label.textContent = isHidden ? 'Show less' : 'Show all columns';
+  }
+}

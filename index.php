@@ -303,7 +303,7 @@ foreach ($members as $m) {
 }
 </style>
 </head>
-<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="page-loading-bar" id="pageLoadingBar"></div><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
 <div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50 animate-slide-down topbar-inner">
@@ -566,7 +566,7 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Vehicle</div>
   <form id="addVehicleForm" onsubmit="return submitAddVehicle(event)" data-parsley-validate>
-    <div class="grid grid-cols-6 gap-2 add-vehicle-grid" id="addVehicleFields">
+    <div class="grid grid-cols-6 gap-2 add-vehicle-grid ar-vehicles-6" id="addVehicleFields">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
         <input class="inp" id="memberSearch" name="memberSearch" placeholder="Type to search member…" autocomplete="off" data-parsley-required="true" onfocus="showMemberResults()" oninput="filterMembers()">
@@ -611,6 +611,17 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 
 <!-- Vehicles Table -->
 <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden" id="vehicles-table-wrap">
+  <div class="flex justify-between items-center mb-3 px-4 pt-3">
+    <div class="text-[10px] uppercase tracking-wider text-ak-muted">
+      <span id="vehicles-count-badge">Loading…</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <button onclick="toggleAllColumns(this)" class="text-[11px] text-ak-muted hover:text-ak-gold transition-colors flex items-center gap-1">
+        <span>⊞</span>
+        <span class="toggle-col-label">Show all columns</span>
+      </button>
+    </div>
+  </div>
   <table class="vt vehicles-table-desktop" id="vehicles-table">
     <thead>
       <tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr>
@@ -849,7 +860,7 @@ foreach ($members as $m) {
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sales history available for this auction.</div>
 <?php else: ?>
-  <?php $hasSales = false; ?>
+  <?php $hasSales = false; $stmtRank = 1; ?>
   <?php foreach ($members as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
     if ($s['count'] === 0) continue;
@@ -867,7 +878,15 @@ foreach ($members as $m) {
         default => '✗ Unpaid',
     };
   ?>
-  <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-payment="<?= $payStatus ?>">
+  <?php
+  $stmtPayStatus = $paymentStatuses[$m['id']]['status'] ?? 'unpaid';
+  $stmtBorderClass = match($stmtPayStatus) {
+    'paid' => 'border-l-4 border-l-ak-green',
+    'partial' => 'border-l-4 border-l-amber-400',
+    default => 'border-l-4 border-l-ak-border'
+  };
+  ?>
+  <div class="bg-ak-card rounded-xl border border-ak-border <?= $stmtBorderClass ?> overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-payment="<?= $payStatus ?>">
     <div class="sh">
       <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
       <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>

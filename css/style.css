@@ -546,3 +546,116 @@ body.light-mode .vehicles-search-input { background: #F9F7F4; border-color: #D4C
  .hamburger-btn { display: none !important; }
  .mobile-menu { display: none !important; }
 }
+
+/* ── Page loading bar ──────────────────── */
+.page-loading-bar {
+ position: fixed;
+ top: 0;
+ left: 0;
+ height: 3px;
+ background: var(--ak-gold, #D4A84B);
+ z-index: 99999;
+ width: 0%;
+ transition: width 0.3s ease;
+ border-radius: 0 2px 2px 0;
+ box-shadow: 0 0 8px rgba(212,168,75,0.6);
+}
+.page-loading-bar.loading {
+ animation: loading-bar 1s ease forwards;
+}
+@keyframes loading-bar {
+ 0% { width: 0%; opacity: 1; }
+ 70% { width: 85%; opacity: 1; }
+ 100% { width: 85%; opacity: 1; }
+}
+.page-loading-bar.complete {
+ width: 100% !important;
+ opacity: 0;
+ transition: width 0.2s ease, opacity 0.3s ease 0.2s;
+}
+
+/* ── Responsive table columns ──────────── */
+@media (max-width: 1200px) {
+ .hide-md { display: none !important; }
+}
+@media (max-width: 900px) {
+ .hide-sm { display: none !important; }
+}
+
+/* ── Add vehicle form responsive ────── */
+@media (max-width: 1200px) {
+ .ar-vehicles-6 { grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (max-width: 768px) {
+ .ar-vehicles-6 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 480px) {
+ .ar-vehicles-6 { grid-template-columns: 1fr !important; }
+}
+
+/* ── Focus styles ──────────────────────── */
+:focus-visible {
+ outline: 2px solid #D4A84B;
+ outline-offset: 2px;
+ border-radius: 4px;
+}
+:focus:not(:focus-visible) {
+ outline: none;
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+ outline: none;
+ border-color: #D4A84B !important;
+ box-shadow: 0 0 0 3px rgba(212,168,75,0.15);
+}
+button:focus-visible,
+a:focus-visible {
+ outline: 2px solid #D4A84B;
+ outline-offset: 3px;
+}
+
+/* ── Print styles for index.php ────────── */
+@media print {
+ .topbar,
+ .auction-chips-wrap,
+ .tabs,
+ .page-loading-bar,
+ #mobileMenu,
+ #toast-container,
+ .btn,
+ .btn-email,
+ .sa,
+ #chipsScrollHint,
+ .hamburger-btn,
+ .mobile-menu,
+ .mobile-nav-bar,
+ .confirm-overlay {
+  display: none !important;
+ }
+ body {
+  background: #fff !important;
+  color: #111 !important;
+ }
+ .bg-ak-card {
+  background: #fff !important;
+  border: 1px solid #ddd !important;
+  box-shadow: none !important;
+ }
+ .np {
+  background: #D4A84B !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+ }
+ .np-l, .np-n {
+  color: #0A1420 !important;
+ }
+ .mb-5.overflow-hidden {
+  page-break-inside: avoid;
+  break-inside: avoid;
+ }
+ @page {
+  margin: 15mm;
+  size: A4;
+ }
+}

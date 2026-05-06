@@ -353,3 +353,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+// ── Page Loading Bar ──────────────────────────
+(function() {
+  const bar = document.getElementById('pageLoadingBar');
+  if (!bar) return;
+
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript') || href.startsWith('mailto') || href.startsWith('tel') || href.startsWith('https://wa.me') || link.target === '_blank') return;
+    bar.classList.add('loading');
+  });
+
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (form.dataset.ajax === 'true') return;
+    if (form.onsubmit) return;
+    bar.classList.add('loading');
+  });
+
+  window.addEventListener('load', () => {
+    bar.classList.add('complete');
+    setTimeout(() => {
+      bar.classList.remove('loading', 'complete');
+    }, 600);
+  });
+})();
