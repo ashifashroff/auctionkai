@@ -1,8 +1,9 @@
 <?php
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 require_once __DIR__ . '/../includes/constants.php';
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/db.php';
-require_once 'includes/settings.php';
+require_once __DIR__ . '/../includes/settings.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/helpers.php';
 ini_set('session.cookie_httponly', 1);
