@@ -2,6 +2,7 @@
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/db.php';
+require_once 'includes/settings.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/helpers.php';
 ini_set('session.cookie_httponly', 1);
@@ -137,13 +138,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         $error = 'Passwords do not match.';
     } elseif (empty($_POST['agree_terms'])) {
         $error = 'You must agree to the Terms & Conditions and Privacy Policy.';
-    } elseif (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY && empty($_POST['g-recaptcha-response'])) {
+    } elseif (recaptchaEnabled() && recaptchaSecretKey() && empty($_POST['g-recaptcha-response'])) {
         $error = 'Please complete the CAPTCHA verification.';
     } else {
         // Verify reCAPTCHA if configured
-        if (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY) {
+        if (recaptchaEnabled() && recaptchaSecretKey()) {
             $verify = file_get_contents('https://www.google.com/recaptcha/api/siteverify?' . http_build_query([
-                'secret' => RECAPTCHA_SECRET_KEY,
+                'secret' => recaptchaSecretKey(),
                 'response' => $_POST['g-recaptcha-response'] ?? '',
                 'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
             ]));
@@ -189,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <?php include __DIR__ . '/../css/tailwind-config.php'; ?>
-<?php if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY): ?>
+<?php if (recaptchaEnabled() && recaptchaSiteKey()): ?>
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
 </head>
@@ -262,9 +263,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
           </div>
         </div>
 
-        <?php if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY): ?>
+        <?php if (recaptchaEnabled() && recaptchaSiteKey()): ?>
         <div class="mb-5 flex justify-center">
-          <div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>
+          <div class="g-recaptcha" data-sitekey="<?= recaptchaSiteKey() ?>"></div>
         </div>
         <?php endif; ?>
 

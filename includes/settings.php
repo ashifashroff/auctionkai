@@ -53,3 +53,69 @@ function ensureSettingsTable(PDO $db): void {
         // Silently fail
     }
 }
+
+/**
+ * Load reCAPTCHA settings from DB and define constants
+ * Called after DB is available (in db.php or auth_check.php)
+ */
+function loadRecaptchaSettings(PDO $db): void {
+    if (defined('RECAPTCHA_SITE_KEY_LOADED')) return;
+    define('RECAPTCHA_SITE_KEY_LOADED', true);
+
+    $siteKey = getSetting($db, 'recaptcha_site_key', '');
+    $secretKey = getSetting($db, 'recaptcha_secret_key', '');
+    $enabled = getSetting($db, 'recaptcha_enabled', '0');
+
+    // Override .env values with DB values (DB takes priority)
+    if (!empty($siteKey) || !empty($secretKey)) {
+        // Redefine constants if not already defined, or override if from .env
+        if (defined('RECAPTCHA_SITE_KEY')) {
+            // Can't redefine constants, so we use a different approach
+            // We'll check DB directly in the auth/login.php instead
+        } else {
+            define('RECAPTCHA_SITE_KEY', $siteKey);
+            define('RECAPTCHA_SECRET_KEY', $secretKey);
+        }
+    }
+
+    define('RECAPTCHA_ENABLED', $enabled === '1');
+}
+
+/**
+ * Get reCAPTCHA settings from DB (preferred) or .env fallback
+ */
+function recaptchaSiteKey(): string {
+    static $val = null;
+    if ($val !== null) return $val;
+    try {
+        $db = db();
+        $val = getSetting($db, 'recaptcha_site_key', '');
+    } catch (Exception $e) {
+        $val = defined('RECAPTCHA_SITE_KEY') ? RECAPTCHA_SITE_KEY : '';
+    }
+    return $val;
+}
+
+function recaptchaSecretKey(): string {
+    static $val = null;
+    if ($val !== null) return $val;
+    try {
+        $db = db();
+        $val = getSetting($db, 'recaptcha_secret_key', '');
+    } catch (Exception $e) {
+        $val = defined('RECAPTCHA_SECRET_KEY') ? RECAPTCHA_SECRET_KEY : '';
+    }
+    return $val;
+}
+
+function recaptchaEnabled(): bool {
+    static $val = null;
+    if ($val !== null) return $val;
+    try {
+        $db = db();
+        $val = getSetting($db, 'recaptcha_enabled', '0') === '1';
+    } catch (Exception $e) {
+        $val = false;
+    }
+    return $val;
+}
