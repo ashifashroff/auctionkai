@@ -135,6 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         $error = 'Password must contain uppercase, lowercase, and numbers.';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
+    } elseif (empty($_POST['agree_terms'])) {
+        $error = 'You must agree to the Terms & Conditions and Privacy Policy.';
     } else {
         $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->execute([$username]);
@@ -229,6 +231,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
           <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true" data-parsley-required-message="Please confirm your password">
+        </div>
+
+        <div class="mb-5 flex items-start gap-2">
+          <input type="checkbox" name="agree_terms" id="agree_terms" value="1" class="mt-1 accent-[#D4A84B]" data-parsley-required="true" data-parsley-required-message="You must agree to the Terms & Privacy Policy">
+          <label for="agree_terms" class="text-xs text-ak-muted leading-relaxed">I agree to the <a href="terms.php" target="_blank" class="text-ak-gold hover:underline">Terms & Conditions</a> and <a href="privacy.php" target="_blank" class="text-ak-gold hover:underline">Privacy Policy</a></label>
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
