@@ -436,60 +436,32 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <h2 class="text-lg font-bold mb-5">Dashboard — <?= h($auction['name']) ?></h2>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up">
+<div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Members</div>
-    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= count($members) ?></div>
+    <div class="text-2xl font-bold text-ak-text mt-1 font-mono"><?= $membersInAuction ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.05s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.05s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Vehicles</div>
-    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= count($vehicles) ?></div>
+    <div class="text-2xl font-bold text-ak-text mt-1 font-mono"><?= count($vehicles) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.1s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.1s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Sold</div>
-    <div class="text-3xl font-bold text-ak-green mt-2 font-mono"><?= $totalSold ?></div>
+    <div class="text-2xl font-bold text-ak-green mt-1 font-mono"><?= $totalSold ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.15s">
-    <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross Sales</div>
-    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono"><?= fmt($totalGross) ?></div>
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.15s">
+    <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross</div>
+    <div class="text-lg font-bold text-ak-text2 mt-1 font-mono"><?= fmt($totalGross) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.2s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.2s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Net Payout</div>
-    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono"><?= fmt($totalNet) ?></div>
+    <div class="text-lg font-bold text-ak-gold mt-1 font-mono"><?= fmt($totalNet) ?></div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.25s">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-4 animate-fade-in-up" style="animation-delay:.25s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Unpaid</div>
-    <div class="text-2xl font-bold text-ak-red mt-2 font-mono"><?= $totalUnpaid ?></div>
-    <a href="?tab=statements" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View Statements →</a>
+    <div class="text-2xl font-bold text-ak-red mt-1 font-mono"><?= $totalUnpaid ?></div>
+    <a href="?tab=statements" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View →</a>
   </div>
-</div>
-
-<!-- Recent Activity -->
-<?php
-$recentLogs = $db->prepare("SELECT a.*, u.name as user_name FROM activity_log a LEFT JOIN users u ON a.user_id = u.id WHERE a.user_id = ? ORDER BY a.created_at DESC LIMIT 5");
-$recentLogs->execute([$userId]);
-$recentLogs = $recentLogs->fetchAll();
-?>
-<div class="bg-ak-card border border-ak-border rounded-xl p-5 mb-6 animate-fade-in-up" style="animation-delay:.3s">
-  <div class="flex justify-between items-center mb-4">
-    <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted">Recent Activity</div>
-    <a href="profile.php" class="text-[10px] text-ak-muted hover:text-ak-gold transition-colors">View All →</a>
-  </div>
-  <?php if (empty($recentLogs)): ?>
-    <div class="text-ak-muted text-center py-6 text-sm">No recent activity.</div>
-  <?php else: ?>
-  <div class="flex flex-col gap-2">
-    <?php foreach ($recentLogs as $log): ?>
-    <div class="flex items-center gap-3 bg-ak-bg rounded-lg px-3 py-2.5 text-sm">
-      <span class="text-lg"><?= getActivityIcon($log['action']) ?></span>
-      <div class="flex-1 min-w-0">
-        <div class="text-ak-text truncate"><?= h($log['description'] ?? $log['action']) ?></div>
-        <div class="text-ak-muted text-[10px] font-mono"><?= date('M j, H:i', strtotime($log['created_at'])) ?></div>
-      </div>
-    </div>
-    <?php endforeach; ?>
-  </div>
-  <?php endif; ?>
 </div>
 
 <!-- Member Ranking -->
