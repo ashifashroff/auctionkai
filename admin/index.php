@@ -70,13 +70,13 @@ $tab = $_GET['tab'] ?? 'users';
 $tabs = [
     'users'    => ['icon' => '👥', 'label' => 'Users'],
     'create'   => ['icon' => '➕', 'label' => 'Create User'],
-    'backup'   => ['icon' => '🗄', 'label' => 'Backup'],
     'activity' => ['icon' => '📋', 'label' => 'Activity Log'],
     'email'    => ['icon' => '📧', 'label' => 'Email Settings'],
     'session'  => ['icon' => '⏱', 'label' => 'Session'],
     'maintenance' => ['icon' => '🚧', 'label' => 'Maintenance'],
     'branding' => ['icon' => '🎨', 'label' => 'Branding'],
     'backups' => ['icon' => '💾', 'label' => 'Backups'],
+    'recaptcha' => ['icon' => '🛡', 'label' => 'reCAPTCHA'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
 ];
 ?>
@@ -231,30 +231,6 @@ $tabs = [
     <div class="mb-5"><label class="lbl">Role</label><select class="inp" name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
     <button class="btn btn-gold w-full" type="submit" id="createUserBtn">+ Create User</button>
   </form>
-</div>
-
-<?php elseif ($tab === 'backup'): ?>
-<h2 class="text-lg font-bold text-ak-gold mb-4">🗄 Database Backup</h2>
-
-<div class="bg-ak-card border border-ak-border rounded-xl p-6">
-  <div class="flex items-center justify-between gap-4 flex-wrap">
-    <div>
-      <div class="text-ak-text font-semibold text-sm mb-1">Full SQL Backup</div>
-      <div class="text-ak-muted text-xs leading-relaxed max-w-lg">Downloads a complete SQL dump of all tables including users, auctions, members, vehicles, settings and activity logs. Safe to import directly into phpMyAdmin.</div>
-    </div>
-    <a href="../api/db_backup.php" class="btn btn-gold" onclick="showBackupToast()">↓ Download Backup</a>
-  </div>
-
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-ak-border">
-    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Format</div><div class="text-ak-text2 text-sm">SQL (phpMyAdmin compatible)</div></div>
-    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Includes</div><div class="text-ak-text2 text-sm">Schema + All Data + Indexes</div></div>
-    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Filename</div><div class="text-ak-gold text-sm font-mono">auctionkai_backup_YYYY-MM-DD_HH-MM-SS.sql</div></div>
-    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Restore</div><div class="text-ak-text2 text-sm">phpMyAdmin → Import → Select file → Go</div></div>
-  </div>
-
-  <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-4 py-3 text-xs text-yellow-400">
-    ⚠ Store backups securely — they contain all user data and credentials. Never share backup files publicly.
-  </div>
 </div>
 
 <?php elseif ($tab === 'recaptcha'): ?>
@@ -526,7 +502,27 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 </div>
 
 <?php elseif ($tab === 'backups'): ?>
-<h2 class="text-lg font-bold text-ak-gold mb-4">💾 Scheduled Backups</h2>
+<h2 class="text-lg font-bold text-ak-gold mb-4">💾 Backups</h2>
+
+<!-- Manual Backup -->
+<div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-6">
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <div class="text-ak-text font-semibold text-sm mb-1">🗄 Manual SQL Backup</div>
+      <div class="text-ak-muted text-xs leading-relaxed max-w-lg">Downloads a complete SQL dump of all tables. Safe to import directly into phpMyAdmin.</div>
+    </div>
+    <a href="../api/db_backup.php" class="btn btn-gold" onclick="showBackupToast()">↓ Download Backup</a>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-ak-border">
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Format</div><div class="text-ak-text2 text-sm">SQL (phpMyAdmin compatible)</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Includes</div><div class="text-ak-text2 text-sm">Schema + All Data + Indexes</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Filename</div><div class="text-ak-gold text-sm font-mono">auctionkai_backup_YYYY-MM-DD_HH-MM-SS.sql</div></div>
+    <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Restore</div><div class="text-ak-text2 text-sm">phpMyAdmin → Import → Select file → Go</div></div>
+  </div>
+  <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-4 py-3 text-xs text-yellow-400">
+    ⚠ Store backups securely — they contain all user data and credentials. Never share backup files publicly.
+  </div>
+</div>
 
 <!-- Status Row -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">

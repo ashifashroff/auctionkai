@@ -61,6 +61,8 @@ Or register a new account. Usernames and emails must be unique.
 
 **🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
 
+**🛡 reCAPTCHA** — Google reCAPTCHA v2 on the registration form. Enable/disable and configure site key + secret key from Admin Panel → reCAPTCHA tab. Get your keys from google.com/recaptcha/admin.
+
 **⌨ Keyboard Shortcuts** — press `?` to see all shortcuts. Navigate tabs with `G` then `M/V/S/D`. Add vehicle with `N`, add member with `Shift+N`. Focus lot field with `L`. Search with `/`. Close modals with `Esc`.
 
 ---
@@ -96,7 +98,7 @@ No sold vehicles means ¥0 net payout.
 ```
 auctionkai/
 ├── admin/
-│   ├── index.php               ← User management + Email Settings + Backups
+│   ├── index.php               ← User management + Email Settings + Backups + reCAPTCHA
 │   ├── actions.php             ← Handle admin POST actions
 │   ├── health.php              ← System health dashboard + Error log viewer
 │   └── download_backup.php     ← Secure backup download
@@ -244,6 +246,8 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ---
 
 ## Changelog
+
+**v3.8** — reCAPTCHA v2 integration for registration form (admin-configurable site key, secret key, enable/disable toggle). Merged Backup tabs into single unified Backups tab (manual SQL download + scheduled/auto backups in one view). Fixed admin/health.php 500 error (missing `$db = db()` init and `error_handler.php` include). Fixed auth/login.php 500 error (incorrect relative path for `settings.php`, missing `error_handler.php` include). Added reCAPTCHA nav tab to admin panel.
 
 **v3.7** — Dashboard stats: Total Net Payout card, Unpaid count with quick link, Recent Activity feed. Statement email with PDF attachment (Dompdf). Bulk "Mark Unpaid as Paid" action on statements tab. Inline vehicle editing (double-click table cells). Mobile bottom navigation bar. PDF attachment in settlement emails when Dompdf installed.
 

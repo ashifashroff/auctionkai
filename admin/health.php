@@ -1,7 +1,11 @@
 <?php
+require_once __DIR__ . '/../includes/constants.php';
+require_once __DIR__ . '/../includes/error_handler.php';
 require_once __DIR__ . '/../includes/admin_check.php';
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/activity.php';
+
+$db = db();
 
 // ── Collect System Info ───────────────────────
 
