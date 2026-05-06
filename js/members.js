@@ -352,23 +352,24 @@ const MembersPager = {
       const netPayout = parseInt(m.net_payout || 0);
       const id = parseInt(m.id);
 
-      return `<div class="bg-ak-card rounded-xl p-4 border border-ak-border flex flex-wrap items-center gap-3 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
-        <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
-        <div class="flex-1 min-w-0 min-w-[120px]">
-          <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
-          <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' · ' : ''}${this.esc(email)}</div>
+      return `<div class="bg-ak-card rounded-xl p-4 border border-ak-border hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
+          <div class="flex-1 min-w-0">
+            <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
+            <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' · ' : ''}${this.esc(email)}</div>
+          </div>
+          <div class="text-ak-gold font-mono font-bold text-sm whitespace-nowrap">¥${netPayout.toLocaleString()}</div>
         </div>
-        <div class="text-center px-2">
-          <div class="text-ak-text font-bold text-lg">${vehicleCount}</div>
-          <div class="text-ak-muted text-[10px]">${soldCount} sold</div>
-        </div>
-        <div class="text-right px-2">
-          <div class="text-ak-gold font-mono font-bold text-sm">¥${netPayout.toLocaleString()}</div>
-          <div class="text-ak-muted text-[10px]">net payout</div>
-        </div>
-        <div class="flex gap-1.5 items-center w-full sm:w-auto sm:ml-auto">
-          <button class="btn btn-dark btn-sm flex-1 sm:flex-initial" onclick="openEditMemberModal(${id})">Edit</button>
-          <button class="btn btn-ghost btn-sm flex-1 sm:flex-initial" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')">Remove</button>
+        <div class="flex items-center justify-between mt-3 pt-3 border-t border-ak-border/50">
+          <div class="flex gap-4">
+            <div><span class="text-ak-text font-bold">${vehicleCount}</span> <span class="text-ak-muted text-[10px]">vehicles</span></div>
+            <div><span class="text-ak-text font-bold">${soldCount}</span> <span class="text-ak-muted text-[10px]">sold</span></div>
+          </div>
+          <div class="flex gap-1.5">
+            <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">Edit</button>
+            <button class="btn btn-ghost btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')">Remove</button>
+          </div>
         </div>
       </div>`;
     }).join('');
