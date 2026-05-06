@@ -17,3 +17,5 @@ define('DB_USER', $_ENV['DB_USER'] ?? 'root');
 define('DB_PASS', $_ENV['DB_PASS'] ?? '');
 define('DB_CHARSET', $_ENV['DB_CHARSET'] ?? 'utf8mb4');
 define('APP_URL', $_ENV['APP_URL'] ?? '');
+define('RECAPTCHA_SITE_KEY', $_ENV['RECAPTCHA_SITE_KEY'] ?? '');
+define('RECAPTCHA_SECRET_KEY', $_ENV['RECAPTCHA_SECRET_KEY'] ?? '');

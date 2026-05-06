@@ -137,18 +137,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
         $error = 'Passwords do not match.';
     } elseif (empty($_POST['agree_terms'])) {
         $error = 'You must agree to the Terms & Conditions and Privacy Policy.';
+    } elseif (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY && empty($_POST['g-recaptcha-response'])) {
+        $error = 'Please complete the CAPTCHA verification.';
     } else {
-        $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->execute([$username]);
-        if ($stmt->fetch()) {
-            $error = 'Username not available.';
-        } elseif ($email !== '') {
-            $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            if ($stmt->fetch()) {
-                $error = 'Email address already registered.';
+        // Verify reCAPTCHA if configured
+        if (defined('RECAPTCHA_SECRET_KEY') && RECAPTCHA_SECRET_KEY) {
+            $verify = file_get_contents('https://www.google.com/recaptcha/api/siteverify?' . http_build_query([
+                'secret' => RECAPTCHA_SECRET_KEY,
+                'response' => $_POST['g-recaptcha-response'] ?? '',
+                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
+            ]));
+            $recaptchaResult = json_decode($verify, true);
+            if (empty($recaptchaResult['success'])) {
+                $error = 'CAPTCHA verification failed. Please try again.';
             }
         }
+        // Check username/email uniqueness
+        if (empty($error)) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE username = ?");
+            $stmt->execute([$username]);
+            if ($stmt->fetch()) {
+                $error = 'Username not available.';
+            } elseif ($email !== '') {
+                $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+                $stmt->execute([$email]);
+                if ($stmt->fetch()) {
+                    $error = 'Email address already registered.';
+                }
+            }
+        }
+        // Create account
         if (empty($error)) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $db->prepare("INSERT INTO users (username, password, name, email, role) VALUES (?,?,?,?,?)");
@@ -171,6 +189,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
 <?php include __DIR__ . '/../css/tailwind-config.php'; ?>
+<?php if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY): ?>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<?php endif; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
@@ -240,6 +261,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
             <div id="terms-error"></div>
           </div>
         </div>
+
+        <?php if (defined('RECAPTCHA_SITE_KEY') && RECAPTCHA_SITE_KEY): ?>
+        <div class="mb-5 flex justify-center">
+          <div class="g-recaptcha" data-sitekey="<?= RECAPTCHA_SITE_KEY ?>"></div>
+        </div>
+        <?php endif; ?>
 
         <button class="btn btn-gold w-full" type="submit">Create Account</button>
       </form>
