@@ -1,27 +1,29 @@
-<div class="flex justify-between items-center mb-5 flex-wrap gap-3">
-  <h2 class="text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
-  <div class="flex gap-2">
-    <a class="btn btn-dark" href="pdf.php?all=1&v=3.0&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ Print All PDFs</a>
-    <a class="btn btn-dark" href="api/download_pdf_zip.php?auction_id=<?= (int)$activeAuctionId ?>" onclick="showToast('📦 Preparing ZIP download...','info',3000)">📦 Download ZIP</a>
-    <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark">📊 Auction Summary</a>
+<div class="flex justify-between items-start mb-5 flex-wrap gap-3">
+  <h2 class="text-base md:text-lg font-bold">Settlement Statements — <?= h($auction['name']) ?></h2>
+  <div class="flex flex-wrap gap-2">
+    <a class="btn btn-dark btn-sm text-[11px]" href="pdf.php?all=1&v=3.0&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDFs</a>
+    <a class="btn btn-dark btn-sm text-[11px]" href="api/download_pdf_zip.php?auction_id=<?= (int)$activeAuctionId ?>" onclick="showToast('📦 Preparing ZIP...','info',3000)">📦 ZIP</a>
+    <a href="auction_summary.php?auction_id=<?= (int)$activeAuctionId ?>" target="_blank" class="btn btn-dark btn-sm text-[11px]">📊 Summary</a>
   </div>
 </div>
 
 <!-- Search & Filter -->
-<div class="flex items-center gap-2 mb-4">
-  <div class="vehicles-search-wrap flex-1 min-w-[200px]">
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
+  <div class="vehicles-search-wrap flex-1">
     <div class="search-icon-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search by member name..." autocomplete="off">
+      <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search members..." autocomplete="off">
     </div>
   </div>
-  <select id="payment-filter" class="inp text-xs py-1.5 px-2 w-auto" onchange="filterStatements()">
-    <option value="all">All</option>
-    <option value="paid">✓ Paid</option>
-    <option value="unpaid">✗ Unpaid</option>
-    <option value="partial">◑ Partial</option>
-  </select>
-  <button onclick="markAllUnpaidAsPaid()" class="btn btn-gold btn-sm text-[11px]" title="Mark all Unpaid members as Paid">✓ Mark Unpaid as Paid</button>
+  <div class="flex items-center gap-2">
+    <select id="payment-filter" class="inp text-xs py-1.5 px-2 flex-1 sm:flex-none sm:w-auto" onchange="filterStatements()">
+      <option value="all">All</option>
+      <option value="paid">✓ Paid</option>
+      <option value="unpaid">✗ Unpaid</option>
+      <option value="partial">◑ Partial</option>
+    </select>
+    <button onclick="markAllUnpaidAsPaid()" class="btn btn-gold btn-sm text-[11px] whitespace-nowrap" title="Mark all Unpaid as Paid">✓ Pay All</button>
+  </div>
 </div>
 
 <?php
@@ -38,28 +40,36 @@ foreach ($members as $m) {
 }
 ?>
 
-<!-- Payment Summary -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-5">
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
+<!-- Total payout — full width on mobile -->
+<div class="bg-ak-card rounded-xl p-3 md:p-4 border border-ak-border mb-3 md:hidden">
+  <div class="flex justify-between items-center">
+    <span class="text-ak-muted text-xs">Total Net Payout</span>
+    <span class="font-bold font-mono text-ak-gold text-lg"><?= fmt($totalNetPayout) ?></span>
+  </div>
+</div>
+
+<!-- Stats row — 3 cols on mobile, 4 cols on desktop -->
+<div class="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-3 mb-5">
+  <div class="hidden md:block bg-ak-card rounded-xl p-4 border border-ak-border text-center">
     <div class="text-2xl font-bold font-mono text-ak-gold"><?= fmt($totalNetPayout) ?></div>
     <div class="text-ak-muted text-xs mt-1">Total Net Payout</div>
   </div>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-green/30 text-center">
-    <div class="text-2xl font-bold font-mono text-ak-green"><?= $totalPaid ?></div>
+  <div class="bg-ak-card rounded-xl p-3 md:p-4 border border-ak-green/30 text-center">
+    <div class="text-xl md:text-2xl font-bold font-mono text-ak-green"><?= $totalPaid ?></div>
     <div class="text-ak-muted text-xs mt-1">✓ Paid</div>
   </div>
-  <div class="bg-ak-card rounded-xl p-4 border border-amber-500/30 text-center">
-    <div class="text-2xl font-bold font-mono text-yellow-400"><?= $totalPartial ?></div>
+  <div class="bg-ak-card rounded-xl p-3 md:p-4 border border-amber-500/30 text-center">
+    <div class="text-xl md:text-2xl font-bold font-mono text-yellow-400"><?= $totalPartial ?></div>
     <div class="text-ak-muted text-xs mt-1">◑ Partial</div>
   </div>
-  <div class="bg-ak-card rounded-xl p-4 border border-ak-red/30 text-center">
-    <div class="text-2xl font-bold font-mono text-ak-red"><?= $totalUnpaid ?></div>
+  <div class="bg-ak-card rounded-xl p-3 md:p-4 border border-ak-red/30 text-center">
+    <div class="text-xl md:text-2xl font-bold font-mono text-ak-red"><?= $totalUnpaid ?></div>
     <div class="text-ak-muted text-xs mt-1">✗ Unpaid</div>
   </div>
 </div>
 
 <!-- Statements Grid (2 columns) -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="statements-container" style="min-height:400px">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5" id="statements-container" style="min-height:400px">
 <?php if (empty($members)): ?>
   <div class="bg-ak-card rounded-xl p-8 text-center text-ak-muted border border-ak-border md:col-span-2">No sales history available for this auction.</div>
 <?php else: ?>
@@ -90,52 +100,74 @@ foreach ($members as $m) {
   };
   ?>
   <div class="bg-ak-card rounded-xl border border-ak-border <?= $stmtBorderClass ?> overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>" data-payment="<?= $payStatus ?>">
-    <div class="sh">
-      <div><div class="sn2"><?= h($m['name']) ?></div><div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
-      <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>
-        <div class="text-ak-green text-[11px] mt-0.5">✓ Paid on <?= date('Y-m-d H:i', strtotime($ps['paid_at'])) ?></div>
-      <?php endif; ?>
-      </div>
-      <div class="sa flex flex-wrap gap-2">
-        <div class="relative" id="pay-wrap-<?= (int)$m['id'] ?>">
-          <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>">
-            <?= $payIcon ?>
-            <span class="text-[10px] opacity-60">▾</span>
-          </button>
-          <div id="pay-menu-<?= (int)$m['id'] ?>" class="hidden absolute right-0 top-full mt-1 bg-ak-card border border-ak-border rounded-xl shadow-2xl z-50 min-w-[200px] overflow-hidden">
-            <div class="px-3 py-2 border-b border-ak-border"><div class="text-ak-muted text-[10px] uppercase tracking-wider">Update Payment Status</div></div>
-            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'paid', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-ak-green hover:bg-ak-green/10 transition-colors flex items-center gap-2">✓ Mark as Paid</button>
-            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'partial', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-yellow-400 hover:bg-yellow-500/10 transition-colors flex items-center gap-2">◑ Mark as Partial</button>
-            <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'unpaid', 0)" class="w-full px-4 py-2.5 text-left text-sm text-ak-red hover:bg-ak-red/10 transition-colors flex items-center gap-2">✗ Mark as Unpaid</button>
-            <?php if ($ps && $ps['notes']): ?>
-            <div class="px-4 py-2 border-t border-ak-border text-ak-muted text-xs italic">Note: <?= h($ps['notes']) ?></div>
-            <?php endif; ?>
-          </div>
+    <div class="sh flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 md:p-5">
+      <!-- Member info row -->
+      <div class="flex items-start gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
+        <div class="min-w-0 flex-1">
+          <div class="sn2 text-base truncate"><?= h($m['name']) ?></div>
+          <div class="sm text-xs truncate"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
+          <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>
+          <div class="text-ak-green text-[11px] mt-0.5">✓ Paid on <?= date('Y-m-d H:i', strtotime($ps['paid_at'])) ?></div>
+          <?php endif; ?>
         </div>
-        <button onclick="sendStatementEmail(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="btn-email" id="email-btn-<?= (int)$m['id'] ?>">✉ Send Email</button>
-        <?php
-          $memberSpecialFees = $memberFeesAll[$m['id']] ?? [];
-          // Check for existing valid share link
-          $existingLink = null;
-          try {
-            $slStmt = $db->prepare("SELECT token FROM statement_links WHERE member_id=? AND auction_id=? AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1");
-            $slStmt->execute([(int)$m['id'], (int)$activeAuctionId]);
-            $existingLink = $slStmt->fetchColumn();
-          } catch (Exception $e) {}
-          $shareUrl = $existingLink ? appUrl() . '/statement.php?token=' . $existingLink : '';
-          $waMessage = buildWhatsAppMessage($m, $auction, $s, $memberSpecialFees, $brand['brand_name'] ?? 'AuctionKai', $shareUrl);
-          $waUrl = buildWhatsAppUrl($m['phone'] ?? '', $waMessage);
-        ?>
-        <?php if (!empty($m['phone'])): ?>
-        <button onclick="openWhatsApp('<?= h(addslashes($waUrl)) ?>', <?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= round($s['netPayout']) ?>)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all bg-[#075E54]/20 border-[#25D366]/40 text-[#25D366] hover:bg-[#075E54]/40 hover:border-[#25D366] cursor-pointer font-sans" title="Send via WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> WhatsApp</button>
-        <?php else: ?>
-        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border border-ak-border/30 text-ak-muted/50 cursor-not-allowed" title="No phone number for this member"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" class="opacity-40"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> WhatsApp</span>
-        <?php endif; ?>
-        <button onclick="generateStatementLink(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all bg-ak-infield border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold cursor-pointer font-sans" id="link-btn-<?= (int)$m['id'] ?>">🔗 Share Link</button>
-        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
-      <div id="link-result-<?= (int)$m['id'] ?>" class="hidden mt-3 p-3 rounded-xl border border-ak-border bg-ak-infield"></div>
+
+      <!-- Action buttons — stacked on mobile -->
+      <div class="sa flex flex-wrap gap-1.5 sm:gap-2 shrink-0">
+        <!-- Row 1: Payment + PDF -->
+        <div class="flex gap-1.5 w-full sm:w-auto">
+          <div class="relative flex-1 sm:flex-none" id="pay-wrap-<?= (int)$m['id'] ?>">
+            <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>">
+              <?= $payIcon ?>
+              <span class="text-[10px] opacity-60">▾</span>
+            </button>
+            <div id="pay-menu-<?= (int)$m['id'] ?>" class="hidden absolute right-0 top-full mt-1 bg-ak-card border border-ak-border rounded-xl shadow-2xl z-50 min-w-[200px] overflow-hidden">
+              <div class="px-3 py-2 border-b border-ak-border"><div class="text-ak-muted text-[10px] uppercase tracking-wider">Update Payment Status</div></div>
+              <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'paid', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-ak-green hover:bg-ak-green/10 transition-colors flex items-center gap-2">✓ Mark as Paid</button>
+              <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'partial', <?= $s['netPayout'] ?>)" class="w-full px-4 py-2.5 text-left text-sm text-yellow-400 hover:bg-yellow-500/10 transition-colors flex items-center gap-2">◑ Mark as Partial</button>
+              <button onclick="setPaymentStatus(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, 'unpaid', 0)" class="w-full px-4 py-2.5 text-left text-sm text-ak-red hover:bg-ak-red/10 transition-colors flex items-center gap-2">✗ Mark as Unpaid</button>
+              <?php if ($ps && $ps['notes']): ?>
+              <div class="px-4 py-2 border-t border-ak-border text-ak-muted text-xs italic">Note: <?= h($ps['notes']) ?></div>
+              <?php endif; ?>
+            </div>
+          </div>
+          <a class="btn btn-gold btn-sm flex-1 sm:flex-none text-center text-xs" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
+        </div>
+
+        <!-- Row 2: Email + WhatsApp + Share -->
+        <div class="flex gap-1.5 w-full sm:w-auto">
+          <button onclick="sendStatementEmail(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="btn-email flex-1 sm:flex-none text-center text-xs py-1.5" id="email-btn-<?= (int)$m['id'] ?>">✉ Email</button>
+
+          <?php
+            $memberSpecialFees = $memberFeesAll[$m['id']] ?? [];
+            $existingLink = null;
+            try {
+              $slStmt = $db->prepare("SELECT token FROM statement_links WHERE member_id=? AND auction_id=? AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1");
+              $slStmt->execute([(int)$m['id'], (int)$activeAuctionId]);
+              $existingLink = $slStmt->fetchColumn();
+            } catch (Exception $e) {}
+            $shareUrl = $existingLink ? appUrl() . '/statement.php?token=' . $existingLink : '';
+            $waMessage = buildWhatsAppMessage($m, $auction, $s, $memberSpecialFees, $brand['brand_name'] ?? 'AuctionKai', $shareUrl);
+            $waUrl = buildWhatsAppUrl($m['phone'] ?? '', $waMessage);
+          ?>
+          <?php if (!empty($m['phone'])): ?>
+          <button onclick="openWhatsApp('<?= h(addslashes($waUrl)) ?>', <?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= round($s['netPayout']) ?>)" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all bg-[#075E54]/20 border-[#25D366]/40 text-[#25D366] hover:bg-[#075E54]/40 cursor-pointer">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            WA
+          </button>
+          <?php else: ?>
+          <span class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border border-ak-border/30 text-ak-muted/50 cursor-not-allowed">WA</span>
+          <?php endif; ?>
+
+          <button onclick="generateStatementLink(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all bg-ak-infield border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold cursor-pointer" id="link-btn-<?= (int)$m['id'] ?>">🔗 Link</button>
+        </div>
+
+        <!-- Share link result -->
+        <div id="link-result-<?= (int)$m['id'] ?>" class="hidden w-full mt-1 p-3 rounded-xl border border-ak-border bg-ak-infield"></div>
+      </div>
     </div>
+
     <div class="sb2">
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
@@ -187,8 +219,8 @@ foreach ($members as $m) {
       if (!empty($memberHistory)):
       ?>
       <div class="border-t border-ak-border mt-0">
-        <button onclick="toggleStmtHistory(<?= (int)$m['id'] ?>)" class="w-full px-6 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-text2 hover:bg-ak-infield/50 transition-colors">
-          <span>📋 Statement History (<?= count($memberHistory) ?> records)</span>
+        <button onclick="toggleStmtHistory(<?= (int)$m['id'] ?>)" class="w-full px-4 md:px-6 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-text2 hover:bg-ak-infield/50 transition-colors">
+          <span>📋 History (<?= count($memberHistory) ?>)</span>
           <span id="stmt-history-arrow-<?= (int)$m['id'] ?>">▾</span>
         </button>
         <div id="stmt-history-<?= (int)$m['id'] ?>" class="hidden border-t border-ak-border/50">
@@ -209,11 +241,11 @@ foreach ($members as $m) {
             default => 'text-ak-text2'
           };
         ?>
-          <div class="flex items-center gap-3 px-6 py-2 text-xs border-b border-ak-border/30 last:border-0 hover:bg-ak-infield/30 transition-colors">
-            <span class="<?= $actionColor ?>"><?= $actionIcon ?></span>
-            <span class="text-ak-text2 font-medium"><?= $actionLabel ?></span>
-            <span class="text-ak-muted font-mono"><?= fmt($h['net_payout']) ?></span>
-            <span class="text-ak-muted ml-auto font-mono"><?= date('Y-m-d H:i', strtotime($h['created_at'])) ?></span>
+          <div class="flex items-center gap-2 px-4 py-2 text-xs border-b border-ak-border/30 last:border-0 hover:bg-ak-infield/30 transition-colors">
+            <span class="<?= $actionColor ?> shrink-0"><?= $actionIcon ?></span>
+            <span class="text-ak-text2 font-medium flex-1 min-w-0 truncate"><?= $actionLabel ?></span>
+            <span class="text-ak-green font-mono shrink-0 text-[11px]"><?= fmt($h['net_payout']) ?></span>
+            <span class="text-ak-muted font-mono shrink-0 text-[10px] hidden sm:inline"><?= date('Y-m-d H:i', strtotime($h['created_at'])) ?></span>
           </div>
         <?php endforeach; ?>
         </div>
@@ -250,4 +282,3 @@ function filterStatements() {
 }
 </script>
 <?php endif; ?>
-

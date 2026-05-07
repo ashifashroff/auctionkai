@@ -731,3 +731,57 @@ a:focus-visible {
  border-radius: 10px !important;
  }
 }
+
+/* ── Statements mobile ─────────────────── */
+@media (max-width: 640px) {
+  .sb2 {
+    grid-template-columns: 1fr !important;
+  }
+  .sl {
+    border-right: none !important;
+    border-bottom: 1px solid #1E3A5F !important;
+    padding-bottom: 16px !important;
+  }
+  .np {
+    flex-direction: column !important;
+    gap: 4px !important;
+    padding: 12px 16px !important;
+  }
+  .np-l {
+    font-size: 11px !important;
+  }
+  .np-n {
+    font-size: 22px !important;
+  }
+  .sh {
+    padding: 14px !important;
+  }
+  .ssl {
+    padding: 10px 14px 8px !important;
+    font-size: 9px !important;
+  }
+  .sl, .sr {
+    padding: 12px 14px !important;
+  }
+  .vr {
+    padding: 5px 0 !important;
+    font-size: 12px !important;
+  }
+  .vr-lot {
+    font-size: 10px !important;
+  }
+  .dr {
+    padding: 4px 0 !important;
+    font-size: 12px !important;
+  }
+  .dt {
+    padding: 6px 0 !important;
+    font-size: 12px !important;
+  }
+  .sg {
+    padding-top: 8px !important;
+  }
+  .sg-n {
+    font-size: 13px !important;
+  }
+}
