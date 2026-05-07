@@ -94,36 +94,36 @@ $tabs = [
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
 <!-- Topbar -->
-<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50">
+<div class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-3 flex items-center gap-3 md:gap-6 sticky top-0 z-50">
   <div class="shrink-0">
     <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded ml-1 font-mono">ADMIN</span></div>
     <div class="text-ak-muted text-[11px]">Administration Panel</div>
   </div>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
     <div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
-    <div><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px]">Admin</div></div>
-    <a href="health.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">🔍 Health</a>
-    <a href="../index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">← Back to App</a>
-    <a href="../auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield">Logout</a>
+    <div class="hidden md:block"><div class="text-ak-text text-sm font-semibold"><?= h($userName) ?></div><div class="text-ak-muted text-[10px]">Admin</div></div>
+    <a href="health.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-ak-infield hidden md:inline-block">🔍 Health</a>
+    <a href="../index.php" class="text-ak-muted text-xs hover:text-ak-gold transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-ak-infield">← App</a>
+    <a href="../auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-2 md:px-3 py-2 rounded-lg hover:bg-ak-infield hidden md:inline-block">Logout</a>
   </div>
 </div>
 
 <!-- Stats -->
-<div class="p-7 pb-0 max-w-[1400px] mx-auto">
+<div class="px-4 md:px-7 pb-0 max-w-[1400px] mx-auto">
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 text-center">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-3 md:p-5 text-center">
     <div class="text-ak-gold font-bold text-3xl font-mono"><?= $totalUsers ?></div>
     <div class="text-ak-muted text-xs mt-1 uppercase tracking-wider">Total Users</div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 text-center">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-3 md:p-5 text-center">
     <div class="text-ak-gold font-bold text-3xl font-mono"><?= $totalAuctions ?></div>
     <div class="text-ak-muted text-xs mt-1 uppercase tracking-wider">Total Auctions</div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 text-center">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-3 md:p-5 text-center">
     <div class="text-ak-gold font-bold text-3xl font-mono"><?= $totalMembers ?></div>
     <div class="text-ak-muted text-xs mt-1 uppercase tracking-wider">Total Members</div>
   </div>
-  <div class="bg-ak-card border border-ak-border rounded-xl p-5 text-center">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-3 md:p-5 text-center">
     <div class="text-ak-gold font-bold text-3xl font-mono"><?= $totalVehicles ?></div>
     <div class="text-ak-muted text-xs mt-1 uppercase tracking-wider">Total Vehicles</div>
   </div>
@@ -133,7 +133,7 @@ $tabs = [
 <!-- Tabs -->
 <div class="bg-ak-bg border-b border-ak-border px-4 md:px-7 flex items-center gap-1 overflow-x-auto">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <a class="px-3 md:px-5 py-3 text-xs md:text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
   <div class="ml-auto text-xs text-ak-muted flex gap-4">
     <span><b class="text-ak-text"><?= count($users) ?></b> total users</span>
@@ -142,32 +142,32 @@ $tabs = [
 
 <!-- Messages -->
 <?php if (!empty($_SESSION['admin_success'])): ?>
-<div class="px-4 md:px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
+<div class="px-4 md:px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
 <?php endif; ?>
 <?php if (!empty($_SESSION['admin_error'])): ?>
-<div class="px-4 md:px-7 pt-4"><div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_error']); unset($_SESSION['admin_error']); ?></div></div>
+<div class="px-4 md:px-7 pt-4"><div class="bg-ak-red/15 text-ak-red px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_error']); unset($_SESSION['admin_error']); ?></div></div>
 <?php endif; ?>
 
 <!-- Content -->
-<div class="p-7 max-w-[1400px] mx-auto animate-fade-in">
+<div class="px-4 md:px-7 py-4 md:py-7 max-w-[1400px] mx-auto animate-fade-in">
 
 <?php if ($tab === 'users'): ?>
 <h2 class="text-lg font-bold mb-5">All Registered Users</h2>
 <div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
-  <table class="w-full text-sm">
+  <div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]">
     <thead>
       <tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">
-        <th class="px-4 py-3 text-left"></th>
-        <th class="px-4 py-3 text-left">Username</th>
-        <th class="px-4 py-3 text-left">Full Name</th>
-        <th class="px-4 py-3 text-left">Email</th>
-        <th class="px-4 py-3 text-left">Role</th>
-        <th class="px-4 py-3 text-center">Auctions</th>
-        <th class="px-4 py-3 text-center">Members</th>
-        <th class="px-4 py-3 text-left">Status</th>
-        <th class="px-4 py-3 text-left">Joined</th>
-        <th class="px-4 py-3 text-left">Last Login</th>
-        <th class="px-4 py-3 text-center">Actions</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left"></th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Username</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Full Name</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Email</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Role</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-center">Auctions</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-center">Members</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Status</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Joined</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-left">Last Login</th>
+        <th class="px-3 md:px-4 py-2 md:py-3 text-center">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -179,20 +179,20 @@ $tabs = [
       $statusColors = ['active'=>'bg-ak-green/20 text-ak-green','suspended'=>'bg-yellow-500/20 text-yellow-400','restricted'=>'bg-ak-red/20 text-ak-red','disabled'=>'bg-ak-red/20 text-ak-red'];
     ?>
       <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">
-        <td class="px-4 py-3"><div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($u['name'], 0, 1)) ?></div></td>
-        <td class="px-4 py-3 font-mono text-ak-text2"><?= h($u['username']) ?></td>
-        <td class="px-4 py-3"><?= h($u['name']) ?></td>
-        <td class="px-4 py-3 text-ak-muted"><?= h($u['email']) ?></td>
-        <td class="px-4 py-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $u['role']==='admin'?'bg-ak-gold/20 text-ak-gold':'bg-blue-500/20 text-blue-400' ?>"><?= h($u['role']) ?></span></td>
-        <td class="px-4 py-3 text-center font-mono"><?= (int)$u['auction_count'] ?></td>
-        <td class="px-4 py-3 text-center font-mono"><?= (int)$u['member_count'] ?></td>
-        <td class="px-4 py-3">
+        <td class="px-3 md:px-4 py-2 md:py-3"><div class="w-8 h-8 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm"><?= mb_strtoupper(mb_substr($u['name'], 0, 1)) ?></div></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 font-mono text-ak-text2"><?= h($u['username']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3"><?= h($u['name']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted"><?= h($u['email']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3"><span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $u['role']==='admin'?'bg-ak-gold/20 text-ak-gold':'bg-blue-500/20 text-blue-400' ?>"><?= h($u['role']) ?></span></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-center font-mono"><?= (int)$u['auction_count'] ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-center font-mono"><?= (int)$u['member_count'] ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3">
           <span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $statusColors[$st]??$statusColors['active'] ?>"><?= h($st) ?></span>
           <?php if ($st==='suspended'&&!empty($u['suspended_until'])): ?><span class="text-[10px] text-ak-muted ml-1">until <?= h(date('M j, Y',strtotime($u['suspended_until']))) ?></span><?php endif; ?>
         </td>
-        <td class="px-4 py-3 text-ak-muted text-xs"><?= h(date('M j, Y',strtotime($u['created_at']))) ?></td>
-        <td class="px-4 py-3 text-ak-muted text-xs font-mono"><?= $u['last_login'] ? date('Y-m-d H:i', strtotime($u['last_login'])) : 'Never' ?></td>
-        <td class="px-4 py-3 text-center">
+        <td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs"><?= h(date('M j, Y',strtotime($u['created_at']))) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs font-mono"><?= $u['last_login'] ? date('Y-m-d H:i', strtotime($u['last_login'])) : 'Never' ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-center">
           <div class="flex gap-1.5 justify-center flex-wrap">
             <?php if (!$isSelf): ?>
               <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="login_as"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-dark btn-sm text-[11px]" type="submit">Login As</button></form>
@@ -216,12 +216,12 @@ $tabs = [
       </tr>
     <?php endforeach; ?>
     </tbody>
-  </table>
+  </table></div>
 </div>
 
 <?php elseif ($tab === 'create'): ?>
 <h2 class="text-lg font-bold mb-5">Create New User</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <form id="createUserForm" data-parsley-validate>
     <input type="hidden" name="action" value="create_user">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true"></div>
@@ -345,18 +345,18 @@ function loadActivityLog(page, filter) {
       content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No activity recorded yet.</div>';
       return;
     }
-    let html = '<div class="bg-ak-card border border-ak-border rounded-xl overflow-hidden"><table class="w-full text-sm"><thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-4 py-3 text-left">Time</th><th class="px-4 py-3 text-left">User</th><th class="px-4 py-3 text-left">Action</th><th class="px-4 py-3 text-left">Entity</th><th class="px-4 py-3 text-left">Description</th><th class="px-4 py-3 text-left">IP</th></tr></thead><tbody>';
+    let html = '<div class="bg-ak-card border border-ak-border rounded-xl overflow-hidden"><div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]"><thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-3 md:px-4 py-2 md:py-3 text-left">Time</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">User</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Action</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Entity</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Description</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">IP</th></tr></thead><tbody>';
     data.rows.forEach(r => {
       html += '<tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors ' + r.border + '">';
-      html += '<td class="px-4 py-3 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
-      html += '<td class="px-4 py-3"><div class="text-ak-text text-xs">' + (r.username || '') + '</div><div class="text-ak-muted text-[10px]">' + r.user_name + '</div></td>';
-      html += '<td class="px-4 py-3"><span class="inline-flex items-center gap-1.5 text-xs ' + r.color + '">' + r.icon + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + r.action + '</span></span></td>';
-      html += '<td class="px-4 py-3 text-ak-muted text-xs">' + r.entity + '</td>';
-      html += '<td class="px-4 py-3 text-ak-text2 text-xs">' + (r.description || '') + '</td>';
-      html += '<td class="px-4 py-3 text-ak-muted text-[11px] font-mono">' + (r.ip || '') + '</td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3"><div class="text-ak-text text-xs">' + (r.username || '') + '</div><div class="text-ak-muted text-[10px]">' + r.user_name + '</div></td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3"><span class="inline-flex items-center gap-1.5 text-xs ' + r.color + '">' + r.icon + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + r.action + '</span></span></td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs">' + r.entity + '</td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-text2 text-xs">' + (r.description || '') + '</td>';
+      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-[11px] font-mono">' + (r.ip || '') + '</td>';
       html += '</tr>';
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table></div></div>';
     content.innerHTML = html;
 
     if (data.lastPage > 1) {
@@ -459,7 +459,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 
 <?php elseif ($tab === 'session'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">⏱ Session Settings</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <div class="bg-ak-bg rounded-lg p-4 mb-5 text-ak-muted text-sm">💡 Users will be automatically logged out after the specified period of inactivity. A warning toast will appear before logout.</div>
   <form id="sessionSettingsForm" data-parsley-validate>
     <input type="hidden" name="action" value="save_session_settings">
@@ -487,7 +487,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 </div>
 <?php endif; ?>
 
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <form id="maintenanceSettingsForm" data-parsley-validate>
     <input type="hidden" name="action" value="save_maintenance_settings">
     <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-4">
@@ -505,7 +505,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <h2 class="text-lg font-bold text-ak-gold mb-4">💾 Backups</h2>
 
 <!-- Manual Backup -->
-<div class="bg-ak-card border border-ak-border rounded-xl p-6 mb-6">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-6 mb-6">
   <div class="flex items-center justify-between gap-4 flex-wrap">
     <div>
       <div class="text-ak-text font-semibold text-sm mb-1">🗄 Manual SQL Backup</div>
@@ -519,13 +519,13 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Filename</div><div class="text-ak-gold text-sm font-mono">auctionkai_backup_YYYY-MM-DD_HH-MM-SS.sql</div></div>
     <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Restore</div><div class="text-ak-text2 text-sm">phpMyAdmin → Import → Select file → Go</div></div>
   </div>
-  <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-4 py-3 text-xs text-yellow-400">
+  <div class="mt-5 pt-4 border-t border-ak-border bg-yellow-500/5 rounded-lg px-3 md:px-4 py-2 md:py-3 text-xs text-yellow-400">
     ⚠ Store backups securely — they contain all user data and credentials. Never share backup files publicly.
   </div>
 </div>
 
 <!-- Status Row -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-5">
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
     <div class="text-2xl font-bold font-mono text-ak-gold"><?= count($backupFiles) ?></div>
     <div class="text-ak-muted text-xs mt-1">Backup Files</div>
@@ -544,7 +544,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div class="grid grid-cols-1 gap-4 md:gap-6 mb-6">
 
 <!-- Settings Form -->
 <div class="bg-ak-card border border-ak-border rounded-xl p-6">
@@ -563,7 +563,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   </form>
 
   <!-- Cron Instructions -->
-  <div class="mt-5 bg-ak-infield rounded-lg p-4 font-mono text-xs text-ak-text2">
+  <div class="mt-5 bg-ak-infield rounded-lg p-3 md:p-4 font-mono text-[10px] md:text-xs text-ak-text2">
     <div class="text-ak-muted text-[10px] uppercase tracking-wider mb-2">Cron Job Command:</div>
     <div>crontab -e</div><br>
     <div class="text-ak-gold"># Daily at 2:00 AM:</div>
@@ -579,23 +579,23 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   <?php if (empty($backupFiles)): ?>
   <div class="p-6 text-center text-ak-muted text-sm">No backup files yet. Run a manual backup or set up a cron job.</div>
   <?php else: ?>
-  <div class="overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-4 py-3 text-left">Filename</th><th class="px-4 py-3 text-left">Size</th><th class="px-4 py-3 text-left">Created</th><th class="px-4 py-3 text-center">Actions</th></tr></thead>
+  <div class="overflow-x-auto -mx-4 md:mx-0">
+    <div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]">
+      <thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-3 md:px-4 py-2 md:py-3 text-left">Filename</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Size</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Created</th><th class="px-3 md:px-4 py-2 md:py-3 text-center">Actions</th></tr></thead>
       <tbody>
       <?php foreach ($backupFiles as $bf): ?>
       <tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">
-        <td class="px-4 py-3 font-mono text-xs text-ak-text2"><?= h($bf['name']) ?></td>
-        <td class="px-4 py-3 text-ak-muted text-xs"><?= h($bf['size_fmt']) ?></td>
-        <td class="px-4 py-3 text-ak-muted text-xs font-mono"><?= h($bf['date']) ?></td>
-        <td class="px-4 py-3 text-center">
+        <td class="px-3 md:px-4 py-2 md:py-3 font-mono text-xs text-ak-text2"><?= h($bf['name']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs"><?= h($bf['size_fmt']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs font-mono"><?= h($bf['date']) ?></td>
+        <td class="px-3 md:px-4 py-2 md:py-3 text-center">
           <a href="download_backup.php?file=<?= urlencode($bf['name']) ?>" class="btn btn-dark btn-sm text-[11px]">↓ Download</a>
           <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete this backup?')"><input type="hidden" name="action" value="delete_backup"><input type="hidden" name="filename" value="<?= h($bf['name']) ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">🗑</button></form>
         </td>
       </tr>
       <?php endforeach; ?>
       </tbody>
-    </table>
+    </table></div>
   </div>
   <?php endif; ?>
 </div>
@@ -628,7 +628,7 @@ async function runManualBackup(btn) {
 
 <?php elseif ($tab === 'branding'): ?>
 <h2 class="text-lg font-bold text-ak-gold mb-4">🎨 Branding & Identity</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <form id="brandingSettingsForm" data-parsley-validate>
     <input type="hidden" name="action" value="save_branding">
     <div class="mb-4"><label class="lbl">System Name</label><input class="inp" name="brand_name" value="<?= h($brand['brand_name'] ?? 'AuctionKai') ?>" placeholder="AuctionKai"></div>
@@ -680,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <?php elseif ($tab === 'settings'): ?>
 <h2 class="text-lg font-bold mb-5">Admin Settings</h2>
-<div class="bg-ak-card border border-ak-border rounded-xl p-7 max-w-lg mx-auto animate-fade-in-up">
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <form id="adminSettingsForm" data-parsley-validate>
     <input type="hidden" name="action" value="admin_settings">
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" value="<?= h($admin['username'] ?? '') ?>" data-parsley-required="true"></div>

@@ -901,3 +901,34 @@ select, .bg-ak-infield, .dropdown-bg {
 .border-ak-border\/50 { border-color: rgba(26,48,80,0.5); }
 .hover\:border-ak-border:hover { border-color: #2A5080; }
 input:focus, select:focus, textarea:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 1px var(--gold); }
+
+/* ── Admin panel mobile ──────────────── */
+@media (max-width: 768px) {
+  /* Admin topbar - hide text on mobile */
+  .admin-topbar .hide-mobile {
+    display: none !important;
+  }
+  /* Admin stat cards - smaller numbers */
+  .admin-stat-number {
+    font-size: 1.25rem !important;
+  }
+  /* Admin form grids stack */
+  .admin-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Admin user cards */
+  .admin-user-card {
+    padding: 12px !important;
+  }
+  .admin-user-card .flex.items-center.gap-3 {
+    flex-wrap: wrap;
+  }
+  .admin-user-card .ml-auto {
+    margin-left: 0 !important;
+    width: 100%;
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+}

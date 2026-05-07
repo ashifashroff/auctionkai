@@ -107,7 +107,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
 
 <!-- Topbar -->
-<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-4 sticky top-0 z-50">
+<div class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-3 flex items-center gap-3 md:gap-4 sticky top-0 z-50">
   <div>
     <div class="text-ak-gold font-bold text-lg">⚡ AuctionKai <span class="text-ak-muted text-sm font-normal">/ Admin / System Health</span></div>
   </div>
@@ -117,7 +117,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
   </div>
 </div>
 
-<div class="p-7 max-w-[1200px] mx-auto">
+<div class="px-4 md:px-7 py-4 md:py-7 max-w-[1200px] mx-auto">
 
   <h2 class="text-lg font-bold mb-6">🔍 System Health Check <span class="text-ak-muted text-sm font-normal ml-2"><?= date('Y-m-d H:i:s') ?></span></h2>
 
@@ -125,7 +125,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
   <?php
   $allGood = $dbInfo['status'] === 'connected' && version_compare($phpVersion, '8.0.0', '>=') && $diskPct < 90 && extension_loaded('pdo_mysql');
   ?>
-  <div class="rounded-xl p-5 mb-6 border flex items-center gap-4 <?= $allGood ? 'bg-ak-green/10 border-ak-green/30' : 'bg-ak-red/10 border-ak-red/30' ?>">
+  <div class="rounded-xl p-3 md:p-5 mb-6 border flex items-center gap-4 <?= $allGood ? 'bg-ak-green/10 border-ak-green/30' : 'bg-ak-red/10 border-ak-red/30' ?>">
     <div class="text-4xl"><?= $allGood ? '✅' : '⚠️' ?></div>
     <div>
       <div class="font-bold text-lg <?= $allGood ? 'text-ak-green' : 'text-ak-red' ?>"><?= $allGood ? 'All Systems Operational' : 'Attention Required' ?></div>
@@ -134,7 +134,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
   </div>
 
   <!-- App Stats Row -->
-  <div class="grid grid-cols-3 md:grid-cols-7 gap-3 mb-6">
+  <div class="grid grid-cols-2 md:grid-cols-7 gap-2 md:gap-3 mb-6">
     <?php
     $statCards = [
       ['label' => 'Users', 'value' => $appStats['users'] ?? '?', 'icon' => '👤'],
@@ -160,7 +160,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
     <!-- PHP Info -->
     <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">
       <div class="px-5 py-3 border-b border-ak-border bg-ak-infield"><h3 class="font-bold text-ak-text">🐘 PHP Environment</h3></div>
-      <div class="p-5 space-y-2 text-sm">
+      <div class="p-3 md:p-5 space-y-2 text-sm">
         <?php
         $phpRows = [
           ['PHP Version', $phpVersion, version_compare($phpVersion, '8.0.0', '>=')],
@@ -191,7 +191,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
           <span class="ml-2 text-xs px-2 py-0.5 rounded-full font-mono <?= $dbInfo['status'] === 'connected' ? 'bg-ak-green/15 text-ak-green' : 'bg-ak-red/15 text-ak-red' ?>"><?= $dbInfo['status'] === 'connected' ? '● Connected' : '● Error' ?></span>
         </h3>
       </div>
-      <div class="p-5 space-y-2 text-sm">
+      <div class="p-3 md:p-5 space-y-2 text-sm">
         <?php if ($dbInfo['status'] === 'connected'): ?>
           <?php
           $dbRows = [
@@ -229,7 +229,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
     <!-- Disk Space -->
     <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">
       <div class="px-5 py-3 border-b border-ak-border bg-ak-infield"><h3 class="font-bold text-ak-text">💾 Disk Space</h3></div>
-      <div class="p-5">
+      <div class="p-3 md:p-5">
         <div class="flex justify-between text-sm mb-2">
           <span class="text-ak-muted">Used: <b class="text-ak-text"><?= formatBytes($diskUsed) ?></b></span>
           <span class="text-ak-muted">Free: <b class="text-ak-text"><?= formatBytes($diskFree) ?></b></span>
@@ -295,14 +295,14 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
         <button onclick="deleteOldErrors()" class="btn btn-dark btn-sm text-[11px]">🧹 Clean Old</button>
       </div>
     </div>
-    <div id="error-logs-container" class="p-5">
+    <div id="error-logs-container" class="p-3 md:p-5">
       <div class="text-ak-muted text-sm text-center py-8">Loading error logs...</div>
     </div>
     <div id="error-logs-pagination" class="px-5 py-3 border-t border-ak-border flex justify-between items-center text-xs text-ak-muted"></div>
   </div>
 
   <!-- Quick Actions -->
-  <div class="bg-ak-card rounded-xl border border-ak-border p-5">
+  <div class="bg-ak-card rounded-xl border border-ak-border p-3 md:p-5">
     <h3 class="font-bold text-ak-text mb-4">⚡ Quick Actions</h3>
     <div class="flex gap-3 flex-wrap">
       <a href="../api/db_backup.php" class="btn btn-gold btn-sm">💾 Download Backup</a>
