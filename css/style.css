@@ -830,3 +830,74 @@ textarea:focus-visible {
   filter: brightness(0.9);
  }
 }
+
+/* ── Statement card payment status tinting ── */
+.statement-card[data-payment="paid"] { background: rgba(76, 175, 80, 0.03); }
+.statement-card[data-payment="partial"] { background: rgba(255, 193, 7, 0.03); }
+.statement-card[data-payment="unpaid"] { background: rgba(204, 119, 119, 0.02); }
+
+/* ── Card elevation system ──────────── */
+.bg-ak-card {
+ background: #0E1726;
+}
+.bg-ak-bg2, .modal-content, [role="dialog"] > div > .bg-ak-card {
+ background: #111E2D;
+}
+select, .bg-ak-infield, .dropdown-bg {
+ background: #152840;
+}
+
+/* ── Micro-interactions ─────────────── */
+.btn:hover {
+ transform: translateY(-1px);
+}
+.btn:active {
+ transform: translateY(0px);
+}
+.bg-ak-card:hover {
+ border-color: #2A5080;
+ transition: border-color 0.2s ease;
+}
+.auction-chips-wrap a:hover {
+ transform: scale(1.02);
+ transition: transform 0.15s ease;
+}
+.statement-card {
+ transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+/* ── Sold/Unsold color badges ────────── */
+.sy { background: rgba(76,175,80,0.15) !important; color: #4CAF50 !important; border-color: rgba(76,175,80,0.3) !important; }
+.sn { background: rgba(204,119,119,0.1) !important; color: #cc7777 !important; border-color: rgba(204,119,119,0.2) !important; }
+
+/* ── Auction progress bar ───────────── */
+.auction-progress { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.auction-progress-bar { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+
+/* ── Toast slide animation ───────────── */
+.toast{animation:toastIn .3s ease forwards}
+.toast.hiding{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
+
+/* ── Bottom tab active dot ──────────── */
+.fixed.bottom-0 a.text-ak-gold::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:var(--gold);margin:2px auto 0}
+
+/* ── Skeleton loading — universal ────── */
+.skeleton{background:linear-gradient(90deg,var(--card) 25%,#1a2d42 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skeleton-text{height:14px;margin-bottom:8px;border-radius:4px}
+.skeleton-text.w-3-4{width:75%}
+.skeleton-text.w-1-2{width:50%}
+.skeleton-card{height:120px;border-radius:12px;margin-bottom:12px}
+
+/* ── Danger/delete button ────────────── */
+.btn-danger{background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)}
+.btn-danger:hover{background:rgba(204,119,119,.25);border-color:rgba(204,119,119,.5)}
+
+/* ── Border hierarchy ────────────────── */
+.border-ak-border { border-color: #1A3050; }
+.border-ak-border\/30 { border-color: rgba(26,48,80,0.3); }
+.border-ak-border\/50 { border-color: rgba(26,48,80,0.5); }
+.hover\:border-ak-border:hover { border-color: #2A5080; }
+input:focus, select:focus, textarea:focus { border-color: var(--gold) !important; box-shadow: 0 0 0 1px var(--gold); }

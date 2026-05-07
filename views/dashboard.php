@@ -23,6 +23,9 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.1s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Sold</div>
     <div class="text-3xl font-bold text-ak-green mt-2 font-mono"><?= $totalSold ?></div>
+    <?php $soldPct = count($vehicles) > 0 ? round(($totalSold / count($vehicles)) * 100) : 0; ?>
+    <div class="mt-2 h-1.5 bg-ak-border rounded-full overflow-hidden"><div class="h-full bg-ak-green rounded-full transition-all" style="width:<?= $soldPct ?>%"></div></div>
+    <div class="text-[10px] text-ak-muted mt-1"><?= $soldPct ?>% sell rate</div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.15s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross</div>

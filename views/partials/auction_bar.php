@@ -2,15 +2,21 @@
 <div class="bg-ak-bg border-b border-ak-border px-4 md:px-7 py-2 md:py-3">
   <div class="auction-chips-wrap flex gap-2 items-center overflow-x-auto pb-1 scrollbar-thin scrollbar-ak">
     <?php foreach ($allAuctions as $a): ?>
-      <a class="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
-        <?= h($a['name']) ?>
-        <span class="text-[10px] opacity-70 hidden md:inline">📅 <?= h($a['date']) ?></span>
-        <?php
-        $daysLeft = (int)((strtotime($a['expires_at']) - time()) / 86400);
-        $badgeClass = $daysLeft <= 0 ? 'bg-ak-red/20 text-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-ak-green/20 text-ak-green');
-        $badgeText = $daysLeft <= 0 ? 'Expired' : ($daysLeft . 'd left');
-        ?>
-        <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-bg/20 text-ak-bg' : $badgeClass ?>"><?= $badgeText ?></span>
+      <a class="inline-flex flex-col items-start gap-0.5 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
+        <div class="flex items-center gap-2">
+          <?= h($a['name']) ?>
+          <span class="text-[10px] opacity-70 hidden md:inline">📅 <?= h($a['date']) ?></span>
+          <?php
+          $daysLeft = (int)((strtotime($a['expires_at']) - time()) / 86400);
+          $badgeClass = $daysLeft <= 0 ? 'bg-ak-red/20 text-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-ak-green/20 text-ak-green');
+          $badgeText = $daysLeft <= 0 ? 'Expired' : ($daysLeft . 'd left');
+          $totalDays = 14;
+          $progressPct = $daysLeft <= 0 ? 100 : max(0, min(100, (($totalDays - $daysLeft) / $totalDays) * 100));
+          $progressColor = $daysLeft <= 0 ? 'bg-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-400' : 'bg-ak-green');
+          ?>
+          <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-bg/20 text-ak-bg' : $badgeClass ?>"><?= $badgeText ?></span>
+        </div>
+        <div class="auction-progress w-full"><div class="auction-progress-bar <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-bg/40' : $progressColor ?>" style="width:<?= $progressPct ?>%"></div></div>
       </a>
     <?php endforeach; ?>
     <button class="px-3 py-1.5 md:px-3 md:py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>

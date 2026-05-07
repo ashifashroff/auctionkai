@@ -168,7 +168,7 @@ foreach ($members as $m) {
       </div>
     </div>
 
-    <div class="sb2">
+    <button class="w-full px-4 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-gold hover:bg-ak-infield/50 transition-colors sm:hidden" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.stmt-chevron').classList.toggle('rotate-180')"><span>📊 View Breakdown</span><span class="stmt-chevron transition-transform">▾</span></button><div class="sb2 hidden sm:grid">
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
         <?php foreach ($s['mv'] as $v): $vTax = round((float)$v['sold_price'] * 0.10); $vRecycle = (float)($v['recycle_fee'] ?? 0); ?>
@@ -257,9 +257,10 @@ foreach ($members as $m) {
   <?php endforeach; ?>
   <?php if (!$hasSales): ?>
   <div class="bg-ak-card rounded-xl p-12 text-center text-ak-muted border border-ak-border md:col-span-2 animate-fade-in-up">
-    <div class="text-4xl mb-3">📄</div>
-    <div class="font-semibold text-ak-text mb-2">No Statements Yet</div>
-    <div class="text-sm">Add vehicles and mark them as sold to generate settlement statements.</div>
+    <div class="text-5xl mb-4">📄</div>
+    <div class="font-semibold text-ak-text text-lg mb-2">No Statements Yet</div>
+    <div class="text-sm mb-5">Add vehicles and mark them as sold to generate settlement statements.</div>
+    <a href="?tab=vehicles" class="btn btn-gold">+ Add Vehicles</a>
   </div>
   <?php endif; ?>
 </div>

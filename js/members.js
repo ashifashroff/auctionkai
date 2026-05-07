@@ -357,23 +357,23 @@ const MembersPager = {
           <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
           <div class="min-w-0 flex-1">
             <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors truncate" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
-            <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' · ' : ''}${this.esc(email)}</div>
+            <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' \u00B7 ' : ''}${this.esc(email)}</div>
           </div>
         </div>
         <div class="flex items-center justify-between w-full sm:w-auto gap-3">
-          <div class="flex gap-3 items-center">
-            <div class="text-center">
-              <div class="font-mono font-bold text-ak-gold text-sm">¥${netPayout.toLocaleString()}</div>
+          <div class="flex items-center gap-4">
+            <div>
+              <div class="font-mono font-bold text-ak-gold text-lg">\u00A5${netPayout.toLocaleString()}</div>
               <div class="text-[10px] text-ak-muted">net payout</div>
             </div>
             <div class="text-center">
-              <div class="font-bold text-ak-text">${vehicleCount}</div>
+              <div class="font-bold text-ak-text2 text-sm">${vehicleCount}</div>
               <div class="text-[10px] text-ak-muted">${soldCount} sold</div>
             </div>
           </div>
           <div class="flex gap-1.5 shrink-0">
-            <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">✎</button>
-            <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">✕</button>
+            <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">\u270E</button>
+            <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\\\'")}')" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">\u2715</button>
           </div>
         </div>
       </div>`;

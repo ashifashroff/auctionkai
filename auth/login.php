@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
     </div>
 
     <!-- Card -->
-    <div class="bg-ak-card border border-ak-border rounded-xl p-8 animate-fade-in-up">
+    <div class="bg-ak-card border border-ak-border rounded-2xl p-6 md:p-8 animate-fade-in-up shadow-xl shadow-black/20">
 
       <?php if (isset($_GET['reset'])): ?>
         <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-5">Password reset successfully! You can now log in.</div>
