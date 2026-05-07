@@ -39,7 +39,7 @@ foreach ($members as $m) {
 ?>
 
 <!-- Payment Summary -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-5">
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
     <div class="text-2xl font-bold font-mono text-ak-gold"><?= fmt($totalNetPayout) ?></div>
     <div class="text-ak-muted text-xs mt-1">Total Net Payout</div>
@@ -96,7 +96,7 @@ foreach ($members as $m) {
         <div class="text-ak-green text-[11px] mt-0.5">✓ Paid on <?= date('Y-m-d H:i', strtotime($ps['paid_at'])) ?></div>
       <?php endif; ?>
       </div>
-      <div class="sa">
+      <div class="sa flex flex-wrap gap-2">
         <div class="relative" id="pay-wrap-<?= (int)$m['id'] ?>">
           <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>">
             <?= $payIcon ?>

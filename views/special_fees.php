@@ -4,7 +4,7 @@
 <div class="bg-ak-card rounded-xl p-5 mb-5 border border-ak-border animate-fade-in-up">
   <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Add Special Fee</div>
   <form id="addSpecialFeeForm" onsubmit="return submitAddSpecialFee(event)">
-    <div class="grid grid-cols-6 gap-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2">
       <div class="col-span-2 relative">
         <label class="lbl">Member *</label>
         <input class="inp" id="sf_memberSearch" placeholder="Type to search member…" autocomplete="off" required onfocus="showSfMemberResults()" oninput="filterSfMembers()">

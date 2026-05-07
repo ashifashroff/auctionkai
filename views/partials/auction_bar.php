@@ -1,10 +1,10 @@
 <!-- ─── AUCTION SELECTOR ────────────────────────────── -->
-<div class="bg-ak-bg border-b border-ak-border px-7 py-3">
+<div class="bg-ak-bg border-b border-ak-border px-4 md:px-7 py-2 md:py-3">
   <div class="auction-chips-wrap flex gap-2 items-center overflow-x-auto pb-1 scrollbar-thin scrollbar-ak">
     <?php foreach ($allAuctions as $a): ?>
-      <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
+      <a class="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-gold text-ak-bg animate-pulse-gold' : 'bg-ak-card text-ak-text2 hover:bg-ak-border' ?>" href="?auction_id=<?= (int)$a['id'] ?>&tab=<?= h($tab) ?>">
         <?= h($a['name']) ?>
-        <span class="text-[10px] opacity-70">📅 <?= h($a['date']) ?></span>
+        <span class="text-[10px] opacity-70 hidden md:inline">📅 <?= h($a['date']) ?></span>
         <?php
         $daysLeft = (int)((strtotime($a['expires_at']) - time()) / 86400);
         $badgeClass = $daysLeft <= 0 ? 'bg-ak-red/20 text-ak-red' : ($daysLeft <= 3 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-ak-green/20 text-ak-green');
@@ -13,7 +13,7 @@
         <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <?= (int)$a['id'] === $activeAuctionId ? 'bg-ak-bg/20 text-ak-bg' : $badgeClass ?>"><?= $badgeText ?></span>
       </a>
     <?php endforeach; ?>
-    <button class="px-3 py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
+    <button class="px-3 py-1.5 md:px-3 md:py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
   </div>
   <div id="chipsScrollHint" class="hidden text-[10px] text-ak-muted mt-1 text-right">
     ← scroll to see more auctions →
@@ -36,8 +36,8 @@
 </div>
 
 <!-- ─── ADD AUCTION FORM ─────────────────────────────── -->
-<div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-7 py-4 animate-slide-down">
-  <form onsubmit="return submitAddAuction(event)" data-parsley-validate class="max-w-md">
+<div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-4 animate-slide-down">
+  <form onsubmit="return submitAddAuction(event)" data-parsley-validate class="w-full md:max-w-md">
     <div class="add-row ar-auction mb-0" style="grid-template-columns:1fr 1fr auto">
       <div><label class="lbl">Auction Name *</label><input class="inp" name="name" placeholder="e.g. Tokyo Bay Auto Auction" data-parsley-required="true"></div>
       <div><label class="lbl">Auction Date *</label><input class="inp" type="date" name="date" data-parsley-required="true" max="<?= date('Y-m-d') ?>"></div>

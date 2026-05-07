@@ -352,23 +352,28 @@ const MembersPager = {
       const netPayout = parseInt(m.net_payout || 0);
       const id = parseInt(m.id);
 
-      return `<div class="bg-ak-card rounded-xl p-4 border border-ak-border hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
-        <div class="flex items-center gap-3">
+      return `<div class="bg-ak-card rounded-xl border border-ak-border p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+        <div class="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
           <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
-          <div class="flex-1 min-w-0">
-            <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
+          <div class="min-w-0 flex-1">
+            <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors truncate" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
             <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' · ' : ''}${this.esc(email)}</div>
           </div>
-          <div class="text-ak-gold font-mono font-bold text-sm whitespace-nowrap">¥${netPayout.toLocaleString()}</div>
         </div>
-        <div class="flex items-center justify-between mt-3 pt-3 border-t border-ak-border/50">
-          <div class="flex gap-4">
-            <div><span class="text-ak-text font-bold">${vehicleCount}</span> <span class="text-ak-muted text-[10px]">vehicles</span></div>
-            <div><span class="text-ak-text font-bold">${soldCount}</span> <span class="text-ak-muted text-[10px]">sold</span></div>
+        <div class="flex items-center justify-between w-full sm:w-auto gap-3">
+          <div class="flex gap-3 items-center">
+            <div class="text-center">
+              <div class="font-mono font-bold text-ak-gold text-sm">¥${netPayout.toLocaleString()}</div>
+              <div class="text-[10px] text-ak-muted">net payout</div>
+            </div>
+            <div class="text-center">
+              <div class="font-bold text-ak-text">${vehicleCount}</div>
+              <div class="text-[10px] text-ak-muted">${soldCount} sold</div>
+            </div>
           </div>
-          <div class="flex gap-1.5">
-            <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">Edit</button>
-            <button class="btn btn-ghost btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')">Remove</button>
+          <div class="flex gap-1.5 shrink-0">
+            <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">✎</button>
+            <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\'")}')" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">✕</button>
           </div>
         </div>
       </div>`;
