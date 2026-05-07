@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <link rel="stylesheet" href="../css/style.css">
 <?php include __DIR__ . '/../css/tailwind-config.php'; ?>
 <?php if (recaptchaEnabled() && recaptchaSiteKey()): ?>
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</div><script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
@@ -266,7 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <?php if (recaptchaEnabled() && recaptchaSiteKey()): ?>
         <div class="mb-5 flex justify-center">
-          <div class="g-recaptcha" data-sitekey="<?= recaptchaSiteKey() ?>"></div>
+          <div class="overflow-hidden max-w-full"><div class="g-recaptcha" data-sitekey="<?= recaptchaSiteKey() ?>"></div>
         </div>
         <?php endif; ?>
 
