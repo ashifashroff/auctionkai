@@ -131,7 +131,7 @@ $tabs = [
 </div>
 
 <!-- Tabs -->
-<div class="bg-ak-bg border-b border-ak-border px-7 flex items-center gap-1">
+<div class="bg-ak-bg border-b border-ak-border px-4 md:px-7 flex items-center gap-1 overflow-x-auto">
   <?php foreach ($tabs as $key => $t): ?>
     <a class="px-5 py-3 text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
   <?php endforeach; ?>
@@ -142,10 +142,10 @@ $tabs = [
 
 <!-- Messages -->
 <?php if (!empty($_SESSION['admin_success'])): ?>
-<div class="px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
+<div class="px-4 md:px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
 <?php endif; ?>
 <?php if (!empty($_SESSION['admin_error'])): ?>
-<div class="px-7 pt-4"><div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_error']); unset($_SESSION['admin_error']); ?></div></div>
+<div class="px-4 md:px-7 pt-4"><div class="bg-ak-red/15 text-ak-red px-4 py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_error']); unset($_SESSION['admin_error']); ?></div></div>
 <?php endif; ?>
 
 <!-- Content -->
@@ -394,7 +394,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <input type="hidden" name="action" value="save_email_settings"><input type="hidden" name="mail_provider" id="mail_provider_input" value="<?= h($settings['mail_provider'] ?? 'smtp') ?>">
 <div class="mb-6">
   <label class="lbl mb-3">Mail Provider</label>
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
     <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="servermail" onclick="selectProvider('servermail')"><div class="text-2xl mb-1">🖥</div><div class="text-sm font-semibold text-ak-text">Server Mail</div><div class="text-[10px] text-ak-muted">PHP mail()</div></div>
     <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="smtp" onclick="selectProvider('smtp')"><div class="text-2xl mb-1">📧</div><div class="text-sm font-semibold text-ak-text">Custom SMTP</div><div class="text-[10px] text-ak-muted">Any host</div></div>
     <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="gmail" onclick="selectProvider('gmail')"><div class="text-2xl mb-1">G</div><div class="text-sm font-semibold text-ak-text">Gmail SMTP</div><div class="text-[10px] text-ak-muted">App Password</div></div>

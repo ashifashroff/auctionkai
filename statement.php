@@ -164,7 +164,7 @@ if (!$pinVerified):
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;background:#0A1420;color:#E8DCC8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{background:#111E2D;border:1px solid #1E3A5F;border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)}
+.card{background:#111E2D;border:1px solid #1E3A5F;border-radius:20px;padding:28px 20px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5)}
 .brand{font-size:22px;font-weight:700;color:<?= $accentColor ?>;margin-bottom:4px}
 .auction-name{font-size:14px;color:#A8C4D8;margin-bottom:4px}
 .member-name{font-size:18px;font-weight:700;color:#F0E4C8;margin-bottom:32px}
@@ -275,7 +275,7 @@ $daysLeft = ceil((strtotime($link['expires_at']) - time()) / 86400);
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;background:#0A1420;color:#E8DCC8;min-height:100vh;font-size:13px;line-height:1.5}
-.topbar{background:#07101A;border-bottom:1px solid #1E3A5F;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
+.topbar{background:#07101A;border-bottom:1px solid #1E3A5F;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:100}
 .brand{font-size:18px;font-weight:700;color:<?= $accentColor ?>}
 .brand-sub{font-size:11px;color:#5A7A90;margin-top:2px;text-transform:uppercase;letter-spacing:1px}
 .btn-print{background:<?= $accentColor ?>;color:#0A1420;border:none;border-radius:8px;padding:9px 20px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px}

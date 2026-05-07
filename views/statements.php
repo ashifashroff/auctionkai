@@ -12,11 +12,11 @@
   <div class="vehicles-search-wrap flex-1">
     <div class="search-icon-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="statement-search" class="vehicles-search-input" placeholder="Search members..." autocomplete="off">
+      <input type="text" id="statement-search" aria-label="Search statements" class="vehicles-search-input" placeholder="Search members..." autocomplete="off">
     </div>
   </div>
   <div class="flex items-center gap-2">
-    <select id="payment-filter" class="inp text-xs py-1.5 px-2 flex-1 sm:flex-none sm:w-auto" onchange="filterStatements()">
+    <select id="payment-filter" aria-label="Filter by payment status" class="inp text-xs py-1.5 px-2 flex-1 sm:flex-none sm:w-auto" onchange="filterStatements()">
       <option value="all">All</option>
       <option value="paid">✓ Paid</option>
       <option value="unpaid">✗ Unpaid</option>
@@ -118,7 +118,7 @@ foreach ($members as $m) {
         <!-- Row 1: Payment + PDF -->
         <div class="flex gap-1.5 w-full sm:w-auto">
           <div class="relative flex-1 sm:flex-none" id="pay-wrap-<?= (int)$m['id'] ?>">
-            <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>">
+            <button onclick="togglePaymentMenu(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, <?= $s['netPayout'] ?>)" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all <?= $payClass ?>" id="pay-btn-<?= (int)$m['id'] ?>" aria-expanded="false" aria-haspopup="true">
               <?= $payIcon ?>
               <span class="text-[10px] opacity-60">▾</span>
             </button>

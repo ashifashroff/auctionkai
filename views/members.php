@@ -35,11 +35,11 @@
 <div class="vehicles-search-wrap">
   <div class="search-icon-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="member-search" class="vehicles-search-input" placeholder="Search members by name, phone, or email..." autocomplete="off">
+    <input type="text" id="member-search" aria-label="Search members" class="vehicles-search-input" placeholder="Search members by name, phone, or email..." autocomplete="off">
   </div>
   <div class="per-page-wrap">
     <span>Show</span>
-    <select class="per-page-select" id="member-per-page-select">
+    <select class="per-page-select" id="member-per-page-select" aria-label="Members per page">
       <option value="10">10</option>
       <option value="25" selected>25</option>
       <option value="50">50</option>

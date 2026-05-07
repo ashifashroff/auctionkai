@@ -278,22 +278,23 @@ function filterVehicles() {
 
 // ─── DELETE VEHICLE (AJAX) ─────────────────────────
 function deleteVehicle(vehicleId, btn) {
-  if (!confirm('Remove this vehicle?')) return;
-  btn.disabled = true;
-  btn.textContent = '…';
-  fetch('api/delete_vehicle.php', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ _tok: CSRF_TOKEN, id: vehicleId })
-  })
-  .then(r => r.json())
-  .then(data => {
-    if (data.error) { showToast(data.error, 'error'); btn.disabled = false; btn.textContent = '×'; return; }
-    const row = document.querySelector(`tr[data-vid="${vehicleId}"]`);
-    if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => {if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}}, 300); }
-    else if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
-  })
-  .catch(() => { showToast('Network error', 'error'); btn.disabled = false; btn.textContent = '×'; });
+  showConfirmModal('Remove Vehicle?', 'This vehicle will be permanently removed.', () => {
+    btn.disabled = true;
+    btn.textContent = '…';
+    fetch('api/delete_vehicle.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _tok: CSRF_TOKEN, id: vehicleId })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { showToast(data.error, 'error'); btn.disabled = false; btn.textContent = '×'; return; }
+      const row = document.querySelector(`tr[data-vid="${vehicleId}"]`);
+      if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => {if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}}, 300); }
+      else if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
+    })
+    .catch(() => { showToast('Network error', 'error'); btn.disabled = false; btn.textContent = '×'; });
+  });
 }
 
 // ── Vehicles Pagination ───────────────────────

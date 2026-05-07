@@ -21,7 +21,7 @@ $brand = loadBranding($db);
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
-<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50">
+<div class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-3 flex items-center gap-3 md:gap-6 sticky top-0 z-50">
   <div class="shrink-0">
     <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai</div>
     <div class="text-ak-muted text-[11px]">About</div>
@@ -32,7 +32,7 @@ $brand = loadBranding($db);
 </div>
 
 <!-- ─── CONTENT ─────────────────────────────────────── -->
-<div class="p-7 max-w-[900px] mx-auto space-y-6">
+<div class="px-4 md:px-7 py-4 md:py-7 max-w-[900px] mx-auto space-y-6">
 
 <!-- Section 1 — Hero -->
 <div class="bg-ak-card border border-ak-gold/30 rounded-xl p-8 text-center">

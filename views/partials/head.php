@@ -16,4 +16,4 @@
 }
 </style>
 </head>
-<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="page-loading-bar" id="pageLoadingBar"></div><div class="flex-1 flex flex-col">
+<body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-ak-gold focus:text-ak-bg focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-bold">Skip to content</a><div class="page-loading-bar" id="pageLoadingBar"></div><div class="flex-1 flex flex-col">

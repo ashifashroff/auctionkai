@@ -15,7 +15,7 @@
     <?php endforeach; ?>
     <button class="px-3 py-1.5 md:px-3 md:py-2 rounded-lg border border-dashed border-ak-border text-ak-muted text-xs hover:border-ak-gold hover:text-ak-gold transition-all duration-200" onclick="document.getElementById('addAuctionForm').classList.toggle('hidden')">+ New Auction</button>
   </div>
-  <div id="chipsScrollHint" class="hidden text-[10px] text-ak-muted mt-1 text-right">
+  <div id="chipsScrollHint" class="md:hidden text-[10px] text-ak-muted mt-1 text-right">
     ← scroll to see more auctions →
   </div>
   <?php if ($auction): ?>

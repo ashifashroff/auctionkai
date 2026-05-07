@@ -8,7 +8,7 @@
   <button onclick="document.getElementById('auctionEditPanel').classList.toggle('hidden')" class="btn btn-dark btn-sm text-[11px] shrink-0 hidden md:inline-flex">✎ Edit Auction</button>
   <?php endif; ?>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
-    <button class="hamburger-btn" id="hamburgerBtn" onclick="document.getElementById('hamburgerBtn').classList.toggle('open'); document.getElementById('mobileMenu').classList.toggle('open');">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu" aria-expanded="false" onclick="document.getElementById('hamburgerBtn').classList.toggle('open'); document.getElementById('mobileMenu').classList.toggle('open');">
       <span></span><span></span><span></span>
     </button>
     <a href="profile.php" class="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity">
@@ -30,6 +30,7 @@
     <?php if ($userRole === 'admin'): ?>
       <a href="admin/index.php" class="hidden md:inline-flex" style="background:#1A3A2A;color:#4CAF82;border:1px solid #2A5A3A;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;text-decoration:none">⚙ Admin</a>
     <?php endif; ?>
+    <button onclick="location.reload()" class="text-ak-muted hover:text-ak-gold transition-colors px-2 py-1 rounded md:hidden" aria-label="Refresh" title="Refresh">🔄</button>
     <button onclick="KeyboardShortcuts.openShortcutsModal()" class="theme-toggle hidden md:flex" title="Keyboard shortcuts (?)"><span>⌨</span><span class="hide-mobile">Shortcuts</span></button>
     <a href="auth/logout.php" class="text-ak-muted text-xs hover:text-ak-red transition-colors px-3 py-2 rounded-lg hover:bg-ak-infield hidden md:inline-block">Logout</a>
   </div>
@@ -52,7 +53,7 @@ if ($maintenanceOn && $userRole === 'admin'):
 <?php endif; ?>
 
 <!-- ─── MOBILE MENU ─────────────────────────────────── -->
-<div id="mobileMenu" class="mobile-menu">
+<div id="mobileMenu" role="dialog" aria-label="Mobile navigation" class="mobile-menu">
   <div class="p-4 flex flex-col gap-3">
     <a href="profile.php" class="flex items-center gap-3 text-ak-text font-semibold">
       <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>

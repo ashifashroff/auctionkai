@@ -21,7 +21,7 @@ $userRole = $_SESSION['user_role'] ?? 'user';
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
 
 <!-- ─── TOP BAR ─────────────────────────────────────── -->
-<div class="bg-ak-bg2 border-b border-ak-border px-7 py-3 flex items-center gap-6 sticky top-0 z-50">
+<div class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-3 flex items-center gap-3 md:gap-6 sticky top-0 z-50">
   <div class="shrink-0">
     <div class="text-ak-gold font-bold text-lg tracking-tight">⚡ AuctionKai</div>
     <div class="text-ak-muted text-[11px]">Help & Guide</div>
@@ -32,7 +32,7 @@ $userRole = $_SESSION['user_role'] ?? 'user';
 </div>
 
 <!-- ─── CONTENT ─────────────────────────────────────── -->
-<div class="p-7 max-w-[900px] mx-auto">
+<div class="px-4 md:px-7 py-4 md:py-7 max-w-[900px] mx-auto">
 
 <h1 class="text-2xl font-bold text-ak-gold mb-6">📖 Help & Guide</h1>
 

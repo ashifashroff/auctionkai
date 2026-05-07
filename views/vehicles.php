@@ -32,7 +32,7 @@
 <div class="vehicles-search-wrap">
   <div class="search-icon-wrap">
     <span class="search-icon">🔍</span>
-    <input type="text" id="vehicle-search" class="vehicles-search-input" placeholder="Search lot, make, model, member..." autocomplete="off">
+    <input type="text" id="vehicle-search" aria-label="Search vehicles" class="vehicles-search-input" placeholder="Search lot, make, model, member..." autocomplete="off">
   </div>
   <div class="per-page-wrap">
     <span>Show</span>

@@ -127,7 +127,7 @@
   </div>
 </div>
 <!-- Toast Container -->
-<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+<div id="toast-container" role="status" aria-live="polite" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 
 <!-- Keyboard Shortcuts Modal -->
 <div class="shortcuts-modal-overlay" id="shortcuts-modal-overlay">
@@ -181,3 +181,31 @@
 
 </body>
 </html>
+<!-- Confirm Modal (replaces browser confirm()) -->
+<div id="confirmModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+  <div class="absolute inset-0 bg-black/60" onclick="closeConfirmModal()"></div>
+  <div class="relative bg-ak-card border border-ak-border rounded-xl p-6 max-w-sm w-full animate-fade-in-up shadow-2xl">
+    <div id="confirmIcon" class="text-3xl mb-3">⚠️</div>
+    <h3 id="confirmTitle" class="text-ak-text font-bold text-lg mb-2">Are you sure?</h3>
+    <p id="confirmMessage" class="text-ak-muted text-sm mb-5">This action cannot be undone.</p>
+    <div class="flex gap-3">
+      <button onclick="closeConfirmModal()" class="btn btn-dark flex-1">Cancel</button>
+      <button id="confirmAction" class="btn flex-1" style="background:rgba(204,119,119,.2);color:var(--red);border:1px solid rgba(204,119,119,.3)">Confirm</button>
+    </div>
+  </div>
+</div>
+<script>
+function showConfirmModal(title, message, onConfirm, icon) {
+  const modal = document.getElementById('confirmModal');
+  document.getElementById('confirmTitle').textContent = title || 'Are you sure?';
+  document.getElementById('confirmMessage').textContent = message || 'This action cannot be undone.';
+  document.getElementById('confirmIcon').textContent = icon || '⚠️';
+  const btn = document.getElementById('confirmAction');
+  btn.onclick = function() { closeConfirmModal(); if (onConfirm) onConfirm(); };
+  modal.classList.remove('hidden');
+  btn.focus();
+}
+function closeConfirmModal() {
+  document.getElementById('confirmModal').classList.add('hidden');
+}
+</script>
