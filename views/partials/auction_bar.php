@@ -21,13 +21,13 @@
   <?php if ($auction): ?>
   <div id="auctionEditPanel" class="hidden bg-ak-bg2 border border-ak-border rounded-xl p-5 mt-3 animate-slide-down">
     <form onsubmit="return submitSaveAuction(event)" data-parsley-validate>
-      <div class="flex items-center gap-2 flex-wrap">
-        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Auction Name</label><input class="inp w-56" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
-        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Date</label><input class="inp w-36 opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
-        <div><label class="text-[10px] text-ak-muted uppercase tracking-wider">Commission ¥/member</label><input class="inp font-mono w-20" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
-        <div class="flex items-end gap-2 pt-4">
-          <button class="btn btn-gold btn-sm" type="submit">💾 Save</button>
-          <a class="btn btn-sm" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <div><label class="lbl">Auction Name</label><input class="inp" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
+        <div><label class="lbl">Date</label><input class="inp opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
+        <div><label class="lbl">Commission ¥/member</label><input class="inp font-mono" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
+        <div class="flex items-end gap-2">
+          <button class="btn btn-gold btn-sm flex-1 sm:flex-initial" type="submit">💾 Save</button>
+          <a class="btn btn-sm flex-1 sm:flex-initial" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
         </div>
       </div>
     </form>
