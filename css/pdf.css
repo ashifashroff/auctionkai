@@ -31,3 +31,20 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
   .page:last-child{page-break-after:auto}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
 }
+
+/* ── Mobile screen view ────────────────── */
+@media screen and (max-width:768px){
+  .page{width:100%!important;min-height:auto!important;padding:20px 16px!important;margin:0 0 16px!important;box-shadow:none!important;font-size:12px}
+  .hdr{flex-direction:column;align-items:flex-start;gap:12px}
+  .meta{text-align:left}
+  .brand{font-size:20px}
+  table{font-size:11px;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  th,td{padding:6px 8px;white-space:nowrap}
+  .ctrl{padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .ctrl span{font-size:12px}
+  .bp{margin-left:0;width:100%;text-align:center;padding:12px}
+  .net{flex-direction:column;gap:8px;text-align:center}
+  .net-n{font-size:22px}
+  .row{font-size:12px}
+  .fees{padding:14px}
+}
