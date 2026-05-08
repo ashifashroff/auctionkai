@@ -537,13 +537,13 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <h2 class="text-lg font-bold text-ak-gold mb-4">⏱ Session Settings</h2>
 <div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
   <div class="bg-ak-bg rounded-lg p-4 mb-5 text-ak-muted text-sm">💡 Users will be automatically logged out after the specified period of inactivity. A warning toast will appear before logout.</div>
-  <form id="sessionSettingsForm" data-parsley-validate>
+  <form id="sessionSettingsForm">
     <input type="hidden" name="action" value="save_session_settings">
     <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-4">
       <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="session_timeout_enabled" value="1" <?= ($settings['session_timeout_enabled'] ?? '1')==='1'?'checked':'' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Enable Session Timeout</span></label>
     </div>
-    <div class="mb-4"><label class="lbl">Timeout Duration (minutes) *</label><input class="inp" type="number" name="session_timeout_minutes" value="<?= h($settings['session_timeout_minutes'] ?? '30') ?>" min="5" max="480" data-parsley-required="true" data-parsley-type="number" data-parsley-min="5" data-parsley-max="480" data-parsley-required-message="Timeout duration is required"></div>
-    <div class="mb-5"><label class="lbl">Warning Before Expiry (minutes) *</label><input class="inp" type="number" name="session_timeout_warn_minutes" value="<?= h($settings['session_timeout_warn_minutes'] ?? '2') ?>" min="1" max="10" data-parsley-required="true" data-parsley-type="number" data-parsley-min="1" data-parsley-max="10" data-parsley-required-message="Warning time is required"></div>
+    <div class="mb-4"><label class="lbl">Timeout Duration (minutes) *</label><input class="inp" type="number" name="session_timeout_minutes" value="<?= h($settings['session_timeout_minutes'] ?? '30') ?>" min="5" max="480" required></div>
+    <div class="mb-5"><label class="lbl">Warning Before Expiry (minutes) *</label><input class="inp" type="number" name="session_timeout_warn_minutes" value="<?= h($settings['session_timeout_warn_minutes'] ?? '2') ?>" min="1" max="10" required></div>
     <button class="btn btn-gold w-full" type="submit" id="sessionSettingsBtn">💾 Save Session Settings</button>
   </form>
 </div>
