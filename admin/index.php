@@ -318,7 +318,7 @@ $currentEnabled = getSetting($db, 'recaptcha_enabled', '0') === '1';
     <div class="bg-ak-green/15 border border-ak-green/30 text-ak-green rounded-lg p-3 text-sm mb-4"><?= h($success) ?></div>
   <?php endif; ?>
 
-  <form method="POST">
+  <form method="POST" action="?tab=recaptcha">
     <input type="hidden" name="form" value="recaptcha">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
