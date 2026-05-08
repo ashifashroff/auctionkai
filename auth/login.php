@@ -195,9 +195,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 </div><script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <?php endif; ?>
 </head>
-<body class="bg-ak-bg text-ak-text font-sans min-h-screen">
+<body class="bg-ak-bg text-ak-text font-sans h-screen overflow-hidden">
 
-<div class="min-h-screen flex items-center justify-center px-4">
+<div class="h-full flex items-center justify-center px-4 overflow-y-auto">
   <div class="w-full max-w-md">
 
     <!-- Logo -->
