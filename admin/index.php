@@ -241,31 +241,34 @@ $tabs = [
       <span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $statusColors[$st]??$statusColors['active'] ?>"><?= h($st) ?></span>
     </div>
   </div>
-  <div class="flex gap-4 text-xs text-ak-muted mb-3">
-    <span><b class="text-ak-text font-mono"><?= (int)$u['auction_count'] ?></b> auctions</span>
-    <span><b class="text-ak-text font-mono"><?= (int)$u['member_count'] ?></b> members</span>
+  <!-- Stats row -->
+  <div class="flex gap-4 py-2 mb-3 border-y border-ak-border/50">
+    <div class="text-center flex-1">
+      <div class="font-mono font-bold text-ak-text"><?= (int)$u['auction_count'] ?></div>
+      <div class="text-[10px] text-ak-muted">Auctions</div>
+    </div>
+    <div class="text-center flex-1">
+      <div class="font-mono font-bold text-ak-text"><?= (int)$u['member_count'] ?></div>
+      <div class="text-[10px] text-ak-muted">Members</div>
+    </div>
+    <div class="text-center flex-1">
+      <div class="text-[11px] font-mono text-ak-muted"><?= $u['last_login'] ? date('m/d H:i', strtotime($u['last_login'])) : 'Never' ?></div>
+      <div class="text-[10px] text-ak-muted">Last Login</div>
+    </div>
   </div>
-  <div class="flex gap-4 text-xs text-ak-muted mb-3">
-    <span>Joined <?= h(date('M j, Y',strtotime($u['created_at']))) ?></span>
-    <span>Login <?= $u['last_login'] ? date('M j, H:i', strtotime($u['last_login'])) : 'Never' ?></span>
-  </div>
-  <div class="flex gap-1.5 flex-wrap border-t border-ak-border pt-3">
+  <!-- Action buttons -->
+  <div class="flex flex-wrap gap-1.5">
     <?php if (!$isSelf): ?>
       <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="login_as"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-dark btn-sm text-[11px]" type="submit">Login As</button></form>
     <?php endif; ?>
     <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['username'])) ?>','<?= h(addslashes($u['name'])) ?>','<?= h(addslashes($u['email'])) ?>','<?= h($u['role']) ?>')">Edit</button>
     <?php if (!$isSelf): ?>
-      <?php if ($st==='suspended'): ?>
-        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="unsuspend_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/20 text-ak-green border border-ak-green/30 hover:bg-ak-green/30" type="submit">Reactivate</button></form>
-      <?php else: ?>
-        <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['name'])) ?>')">Suspend</button>
-      <?php endif; ?>
       <?php if ($isDisabled): ?>
-        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="enable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/15 text-ak-green border border-ak-green/30 hover:bg-ak-green/25" type="submit">Enable</button></form>
+        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="enable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/15 text-ak-green border border-ak-green/30" type="submit">Enable</button></form>
       <?php else: ?>
-        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="disable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" type="submit">Disable</button></form>
+        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="disable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30" type="submit">Disable</button></form>
       <?php endif; ?>
-      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their data.')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">Delete</button></form>
+      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete <?= h(addslashes($u['name'])) ?>?')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30" type="submit">Delete</button></form>
     <?php endif; ?>
   </div>
 </div>
@@ -356,13 +359,13 @@ $currentEnabled = getSetting($db, 'recaptcha_enabled', '0') === '1';
 
 <?php elseif ($tab === 'activity'): ?>
 <div id="activity-log">
-  <div class="flex items-center justify-between mb-4">
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
     <div class="flex items-center gap-3">
-      <h2 class="text-lg font-bold text-ak-gold whitespace-nowrap">📋 Activity Log</h2>
+      <h2 class="text-base md:text-lg font-bold text-ak-gold whitespace-nowrap">📋 Activity Log</h2>
       <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-border text-ak-text2 whitespace-nowrap" id="activityCountBadge">— events</span>
     </div>
     <div class="flex items-center gap-2">
-      <select id="activityFilter" class="inp text-sm py-1.5 px-3" onchange="loadActivityLog(1, this.value)">
+      <select id="activityFilter" class="inp text-sm py-1.5 px-3 flex-1 sm:flex-none" onchange="loadActivityLog(1, this.value)">
         <option value="all">All</option>
         <option value="logins">Logins</option>
         <option value="vehicles">Vehicles</option>
@@ -370,10 +373,10 @@ $currentEnabled = getSetting($db, 'recaptcha_enabled', '0') === '1';
         <option value="auctions">Auctions</option>
         <option value="admin">Admin</option>
       </select>
-      <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')" class="inline-flex">
+      <form method="POST" action="actions.php" onsubmit="return confirm('Delete logs older than 90 days?')" class="inline-flex shrink-0">
         <input type="hidden" name="action" value="clear_old_logs">
         <input type="hidden" name="_tok" value="<?= h($tok) ?>">
-        <button class="btn btn-sm text-xs px-3 py-1.5 bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear Old</button>
+        <button class="btn btn-sm text-xs px-3 py-1.5 bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25 whitespace-nowrap" type="submit">🧹 Clear</button>
       </form>
     </div>
   </div>
@@ -398,18 +401,51 @@ function loadActivityLog(page, filter) {
       content.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center text-ak-muted">No activity recorded yet.</div>';
       return;
     }
-    let html = '<div class="bg-ak-card border border-ak-border rounded-xl overflow-hidden"><div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]"><thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-3 md:px-4 py-2 md:py-3 text-left">Time</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">User</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Action</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Entity</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Description</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">IP</th></tr></thead><tbody>';
+    let html = '';
+
+    // Desktop table
+    html += '<div class="hidden md:block bg-ak-card border border-ak-border rounded-xl overflow-hidden">';
+    html += '<div class="overflow-x-auto">';
+    html += '<table class="w-full text-sm">';
+    html += '<thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">';
+    html += '<th class="px-4 py-3 text-left">Time</th>';
+    html += '<th class="px-4 py-3 text-left">User</th>';
+    html += '<th class="px-4 py-3 text-left">Action</th>';
+    html += '<th class="px-4 py-3 text-left">Description</th>';
+    html += '<th class="px-4 py-3 text-left">IP</th>';
+    html += '</tr></thead><tbody>';
+
     data.rows.forEach(r => {
-      html += '<tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors ' + r.border + '">';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3"><div class="text-ak-text text-xs">' + (r.username || '') + '</div><div class="text-ak-muted text-[10px]">' + r.user_name + '</div></td>';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3"><span class="inline-flex items-center gap-1.5 text-xs ' + r.color + '">' + r.icon + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + r.action + '</span></span></td>';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-xs">' + r.entity + '</td>';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-text2 text-xs">' + (r.description || '') + '</td>';
-      html += '<td class="px-3 md:px-4 py-2 md:py-3 text-ak-muted text-[11px] font-mono">' + (r.ip || '') + '</td>';
-      html += '</tr>';
+     html += '<tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">';
+     html += '<td class="px-4 py-2 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
+     html += '<td class="px-4 py-2"><div class="text-ak-text text-xs">' + (r.username||'') + '</div><div class="text-ak-muted text-[10px]">' + r.user_name + '</div></td>';
+     html += '<td class="px-4 py-2"><span class="inline-flex items-center gap-1.5 text-xs ' + r.color + '">' + r.icon + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + r.action + '</span></span></td>';
+     html += '<td class="px-4 py-2 text-ak-text2 text-xs max-w-[200px] truncate">' + (r.description||'') + '</td>';
+     html += '<td class="px-4 py-2 text-ak-muted text-[11px] font-mono">' + (r.ip||'') + '</td>';
+     html += '</tr>';
     });
     html += '</tbody></table></div></div>';
+
+    // Mobile card list
+    html += '<div class="md:hidden space-y-2">';
+    data.rows.forEach(r => {
+     html += '<div class="bg-ak-card border border-ak-border rounded-xl p-3">';
+     html += '<div class="flex items-start justify-between gap-2 mb-1.5">';
+     html += '<div class="flex items-center gap-2">';
+     html += '<span class="text-sm ' + r.color + '">' + r.icon + '</span>';
+     html += '<span class="text-xs font-mono bg-ak-bg px-2 py-0.5 rounded ' + r.color + '">' + r.action + '</span>';
+     html += '</div>';
+     html += '<span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">' + r.time + '</span>';
+     html += '</div>';
+     html += '<div class="text-ak-text2 text-xs mb-1">' + (r.description||'—') + '</div>';
+     html += '<div class="flex items-center justify-between">';
+     html += '<span class="text-[10px] text-ak-muted">@' + (r.username||'?') + '</span>';
+     html += '<span class="text-[10px] text-ak-muted font-mono">' + (r.ip||'') + '</span>';
+     html += '</div>';
+     html += '</div>';
+    });
+    html += '</div>';
+
     content.innerHTML = html;
 
     if (data.lastPage > 1) {
@@ -448,11 +484,11 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
 <div class="mb-6">
   <label class="lbl mb-3">Mail Provider</label>
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="servermail" onclick="selectProvider('servermail')"><div class="text-2xl mb-1">🖥</div><div class="text-sm font-semibold text-ak-text">Server Mail</div><div class="text-[10px] text-ak-muted">PHP mail()</div></div>
-    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="smtp" onclick="selectProvider('smtp')"><div class="text-2xl mb-1">📧</div><div class="text-sm font-semibold text-ak-text">Custom SMTP</div><div class="text-[10px] text-ak-muted">Any host</div></div>
-    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="gmail" onclick="selectProvider('gmail')"><div class="text-2xl mb-1">G</div><div class="text-sm font-semibold text-ak-text">Gmail SMTP</div><div class="text-[10px] text-ak-muted">App Password</div></div>
-    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="xserver" onclick="selectProvider('xserver')"><div class="text-2xl mb-1">X</div><div class="text-sm font-semibold text-ak-text">Xserver</div><div class="text-[10px] text-ak-muted">Japan hosting</div></div>
-    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="sakura" onclick="selectProvider('sakura')"><div class="text-2xl mb-1">🌸</div><div class="text-sm font-semibold text-ak-text">Sakura</div><div class="text-[10px] text-ak-muted">Internet</div></div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-3 md:p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="servermail" onclick="selectProvider('servermail')"><div class="text-xl md:text-2xl mb-1">🖥</div><div class="text-sm font-semibold text-ak-text">Server Mail</div><div class="text-[10px] text-ak-muted">PHP mail()</div></div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-3 md:p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="smtp" onclick="selectProvider('smtp')"><div class="text-xl md:text-2xl mb-1">📧</div><div class="text-sm font-semibold text-ak-text">Custom SMTP</div><div class="text-[10px] text-ak-muted">Any host</div></div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-3 md:p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="gmail" onclick="selectProvider('gmail')"><div class="text-xl md:text-2xl mb-1">G</div><div class="text-sm font-semibold text-ak-text">Gmail SMTP</div><div class="text-[10px] text-ak-muted">App Password</div></div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-3 md:p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="xserver" onclick="selectProvider('xserver')"><div class="text-xl md:text-2xl mb-1">X</div><div class="text-sm font-semibold text-ak-text">Xserver</div><div class="text-[10px] text-ak-muted">Japan hosting</div></div>
+    <div class="provider-card cursor-pointer bg-ak-card border border-ak-border rounded-xl p-3 md:p-4 text-center transition-all duration-200 hover:border-ak-gold/50" data-provider="sakura" onclick="selectProvider('sakura')"><div class="text-xl md:text-2xl mb-1">🌸</div><div class="text-sm font-semibold text-ak-text">Sakura</div><div class="text-[10px] text-ak-muted">Internet</div></div>
   </div>
 </div>
 <div class="provider-fields" data-for="servermail" style="display:none"><div class="bg-ak-bg rounded-lg p-4 mb-4 text-ak-muted text-sm">💡 Uses your hosting server's built-in mail. No SMTP credentials needed. Works on Xserver, Sakura, ConoHa automatically.</div></div>
@@ -584,11 +620,11 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
     <div class="text-ak-muted text-xs mt-1">Backup Files</div>
   </div>
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
-    <div class="text-2xl font-bold font-mono text-ak-text"><?= h($settings['backup_last_run'] ?: 'Never') ?></div>
+    <div class="text-sm md:text-base font-bold font-mono text-ak-text leading-tight"><?php $lastRun = $settings['backup_last_run'] ?? ''; echo $lastRun ? h(date('m/d H:i', strtotime($lastRun))) : 'Never'; ?></div>
     <div class="text-ak-muted text-xs mt-1">Last Run</div>
   </div>
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
-    <div class="text-2xl font-bold font-mono text-ak-text"><?= h($settings['backup_next_run'] ?: 'Not scheduled') ?></div>
+    <div class="text-sm md:text-base font-bold font-mono text-ak-text leading-tight"><?php $nextRun = $settings['backup_next_run'] ?? ''; echo $nextRun ? h(date('m/d H:i', strtotime($nextRun))) : 'Not set'; ?></div>
     <div class="text-ak-muted text-xs mt-1">Next Run</div>
   </div>
   <div class="bg-ak-card rounded-xl p-4 border border-ak-border text-center">
@@ -632,8 +668,8 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
   <?php if (empty($backupFiles)): ?>
   <div class="p-6 text-center text-ak-muted text-sm">No backup files yet. Run a manual backup or set up a cron job.</div>
   <?php else: ?>
-  <div class="overflow-x-auto -mx-4 md:mx-0">
-    <div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]">
+  <div class="overflow-x-auto -mx-4 md:mx-0 hidden md:block">
+    <table class="w-full text-sm min-w-[600px]">
       <thead><tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase"><th class="px-3 md:px-4 py-2 md:py-3 text-left">Filename</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Size</th><th class="px-3 md:px-4 py-2 md:py-3 text-left">Created</th><th class="px-3 md:px-4 py-2 md:py-3 text-center">Actions</th></tr></thead>
       <tbody>
       <?php foreach ($backupFiles as $bf): ?>
@@ -649,6 +685,20 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
       <?php endforeach; ?>
       </tbody>
     </table></div>
+  <!-- Mobile card list -->
+  <div class="md:hidden divide-y divide-ak-border">
+  <?php foreach ($backupFiles as $bf): ?>
+  <div class="p-4 flex items-center justify-between gap-3">
+    <div class="min-w-0 flex-1">
+      <div class="font-mono text-[11px] text-ak-gold truncate"><?= h($bf['name']) ?></div>
+      <div class="text-[10px] text-ak-muted mt-0.5"><?= h($bf['size_fmt']) ?> · <?= h(date('Y-m-d H:i', strtotime($bf['date']))) ?></div>
+    </div>
+    <div class="flex gap-1.5 shrink-0">
+      <a href="download_backup.php?file=<?= urlencode($bf['name']) ?>" class="btn btn-dark btn-sm text-[11px]">↓</a>
+      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete this backup?')"><input type="hidden" name="action" value="delete_backup"><input type="hidden" name="filename" value="<?= h($bf['name']) ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30" type="submit">🗑</button></form>
+    </div>
+  </div>
+  <?php endforeach; ?>
   </div>
   <?php endif; ?>
 </div>
