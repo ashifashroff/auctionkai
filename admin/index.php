@@ -153,7 +153,7 @@ $tabs = [
 
 <?php if ($tab === 'users'): ?>
 <h2 class="text-lg font-bold mb-5">All Registered Users</h2>
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto hidden md:block">
   <div class="overflow-x-auto -mx-4 md:mx-0"><table class="w-full text-sm min-w-[600px]">
     <thead>
       <tr class="border-b border-ak-border text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">
