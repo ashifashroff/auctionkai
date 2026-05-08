@@ -167,6 +167,18 @@ switch ($action) {
         }
         exit;
 
+    case 'save_session_settings':
+        $enabled = isset($_POST['session_timeout_enabled']) ? '1' : '0';
+        $minutes = max(5, min(480, (int)($_POST['session_timeout_minutes'] ?? 30)));
+        $warnMins = max(1, min(10, (int)($_POST['session_timeout_warn_minutes'] ?? 2)));
+        saveSettings($db, [
+            'session_timeout_enabled'      => $enabled,
+            'session_timeout_minutes'      => (string)$minutes,
+            'session_timeout_warn_minutes' => (string)$warnMins,
+        ]);
+        echo json_encode(['success' => true, 'message' => "Session settings saved ({$minutes} min timeout, enabled: {$enabled})"]);
+        exit;
+
     default:
         echo json_encode(['success' => false, 'message' => 'Unknown action']);
         exit;
