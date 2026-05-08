@@ -314,7 +314,7 @@ td.mono{font-family:'Space Mono',monospace;text-align:right}
 .fee-total-amount{font-family:'Space Mono',monospace;color:#CC7777;font-size:14px}
 .net-payout{margin:0 24px 24px;background:<?= $accentColor ?>;border-radius:12px;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
 .net-label{font-size:13px;font-weight:700;color:#0A1420;letter-spacing:0.5px}
-.net-amount{font-size:28px;font-weight:700;font-family:'Space Mono',monospace;color:#0A1420;letter-spacing:-1px}
+.net-amount{font-size:clamp(20px,5vw,28px);font-weight:700;font-family:'Space Mono',monospace;color:#0A1420;letter-spacing:-1px;word-break:break-all;overflow-wrap:break-word}
 .views-info{text-align:center;font-size:11px;color:#3A5570;padding:12px;border-top:1px solid #1E3A5F}
 .page-footer{text-align:center;padding:24px;font-size:11px;color:#3A5570;border-top:1px solid #1E3A5F;margin-top:24px}
 .page-footer b{color:#5A7A90}
