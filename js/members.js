@@ -352,18 +352,18 @@ const MembersPager = {
       const netPayout = parseInt(m.net_payout || 0);
       const id = parseInt(m.id);
 
-      return `<div class="bg-ak-card rounded-xl border border-ak-border p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
-        <div class="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
+      return `<div class="bg-ak-card rounded-xl border border-ak-border p-4 flex flex-col gap-3 hover:border-ak-border/80 transition-all duration-200 animate-fade-in-up">
+        <div class="flex items-center gap-3 min-w-0">
           <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-lg shrink-0">${initial}</div>
           <div class="min-w-0 flex-1">
             <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors truncate" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
             <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' \u00B7 ' : ''}${this.esc(email)}</div>
           </div>
         </div>
-        <div class="flex items-center justify-between w-full sm:w-auto gap-3">
+        <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-4">
             <div>
-              <div class="font-mono font-bold text-ak-gold text-lg">\u00A5${netPayout.toLocaleString()}</div>
+              <div class="font-mono font-bold text-ak-gold text-base sm:text-lg">\u00A5${netPayout.toLocaleString()}</div>
               <div class="text-[10px] text-ak-muted">net payout</div>
             </div>
             <div class="text-center">
