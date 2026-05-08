@@ -307,48 +307,35 @@ $currentSiteKey = getSetting($db, 'recaptcha_site_key', '');
 $currentSecretKey = getSetting($db, 'recaptcha_secret_key', '');
 $currentEnabled = getSetting($db, 'recaptcha_enabled', '0') === '1';
 ?>
-<div class="max-w-xl">
-  <h2 class="text-lg font-bold text-ak-text mb-4">🛡 reCAPTCHA Settings</h2>
-  <p class="text-ak-muted text-sm mb-6">Configure Google reCAPTCHA v2 for the registration form. Get your keys from <a href="https://www.google.com/recaptcha/admin" target="_blank" class="text-ak-gold hover:underline">google.com/recaptcha/admin</a></p>
+<div class="bg-ak-card border border-ak-border rounded-xl p-4 md:p-7 max-w-lg mx-auto animate-fade-in-up">
+  <h2 class="text-lg font-bold text-ak-gold mb-4">🛡 reCAPTCHA Settings</h2>
+  <div class="bg-ak-bg rounded-lg p-4 mb-5 text-ak-muted text-sm">💡 Configure Google reCAPTCHA v2 for the registration form. Get your keys from <a href="https://www.google.com/recaptcha/admin" target="_blank" class="text-ak-gold hover:underline">google.com/recaptcha/admin</a></div>
 
   <?php if (!empty($error)): ?>
-    <div class="bg-ak-red/15 border border-ak-red/30 text-ak-red rounded-lg p-3 text-sm mb-4"><?= h($error) ?></div>
+    <div class="bg-ak-red/15 text-ak-red px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm mb-4"><?= h($error) ?></div>
   <?php endif; ?>
   <?php if (!empty($success)): ?>
-    <div class="bg-ak-green/15 border border-ak-green/30 text-ak-green rounded-lg p-3 text-sm mb-4"><?= h($success) ?></div>
+    <div class="bg-ak-green/15 text-ak-green px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm mb-4"><?= h($success) ?></div>
   <?php endif; ?>
 
   <form method="POST" action="?tab=recaptcha">
     <input type="hidden" name="form" value="recaptcha">
     <input type="hidden" name="_tok" value="<?= h($tok) ?>">
 
-    <div class="mb-5">
-      <label class="flex items-center gap-3 cursor-pointer">
-        <input type="checkbox" name="recaptcha_enabled" value="1" <?= $currentEnabled ? 'checked' : '' ?> class="w-5 h-5 accent-[#D4A84B]">
-        <div>
-          <div class="text-ak-text font-semibold">Enable reCAPTCHA</div>
-          <div class="text-ak-muted text-xs">Show CAPTCHA verification on the registration form</div>
-        </div>
-      </label>
+    <div class="flex items-center gap-3 mb-5 bg-ak-bg rounded-lg p-4">
+      <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" name="recaptcha_enabled" value="1" <?= $currentEnabled ? 'checked' : '' ?> class="w-5 h-5 accent-ak-gold rounded"><span class="text-sm font-semibold text-ak-text">Enable reCAPTCHA</span></label>
     </div>
 
-    <div class="mb-4">
-      <label class="lbl">Site Key</label>
-      <input class="inp font-mono text-xs" name="recaptcha_site_key" value="<?= h($currentSiteKey) ?>" placeholder="6Lc...">
-    </div>
+    <div class="mb-4"><label class="lbl">Site Key</label><input class="inp font-mono text-xs" name="recaptcha_site_key" value="<?= h($currentSiteKey) ?>" placeholder="6Lc..."></div>
 
-    <div class="mb-6">
-      <label class="lbl">Secret Key</label>
-      <input class="inp font-mono text-xs" name="recaptcha_secret_key" value="<?= h($currentSecretKey) ?>" placeholder="6Lc...">
-      <div class="text-ak-muted text-[10px] mt-1">Keys are stored in the database, not in code files.</div>
-    </div>
+    <div class="mb-5"><label class="lbl">Secret Key</label><input class="inp font-mono text-xs" name="recaptcha_secret_key" value="<?= h($currentSecretKey) ?>" placeholder="6Lc..."><div class="text-ak-muted text-[10px] mt-1">Keys are stored in the database, not in code files.</div></div>
 
-    <button class="btn btn-gold" type="submit">💾 Save Settings</button>
+    <button class="btn btn-gold w-full" type="submit">💾 Save Settings</button>
   </form>
 
   <?php if ($currentEnabled && $currentSiteKey): ?>
-  <div class="mt-6 p-4 rounded-xl bg-ak-infield border border-ak-border">
-    <div class="text-xs font-bold text-ak-muted uppercase tracking-wider mb-2">Preview</div>
+  <div class="mt-5 p-4 rounded-xl bg-ak-infield border border-ak-border">
+    <div class="text-[10px] font-bold text-ak-muted uppercase tracking-[2px] mb-3">Preview</div>
     <div class="flex justify-center p-4 bg-ak-bg rounded-lg">
       <div class="g-recaptcha" data-sitekey="<?= h($currentSiteKey) ?>"></div>
     </div>
