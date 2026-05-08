@@ -970,5 +970,6 @@ document.getElementById('suspendForm')?.addEventListener('submit', async functio
 // Init provider
 if (document.getElementById('mail_provider_input')) selectProvider(currentProvider);
 </script>
+<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 </body>
 </html>
