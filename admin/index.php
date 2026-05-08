@@ -968,7 +968,7 @@ document.getElementById('suspendForm')?.addEventListener('submit', async functio
 });
 
 // Init provider
-selectProvider(currentProvider);
+if (document.getElementById('mail_provider_input')) selectProvider(currentProvider);
 </script>
 </body>
 </html>
