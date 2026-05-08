@@ -131,11 +131,11 @@ $tabs = [
 </div>
 
 <!-- Tabs -->
-<div class="bg-ak-bg border-b border-ak-border px-4 md:px-7 flex items-center gap-1 overflow-x-auto">
+<div class="bg-ak-bg border-b border-ak-border px-2 md:px-7 flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-ak">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="px-3 md:px-5 py-3 text-xs md:text-sm font-semibold transition-all duration-200 border-b-2 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><?= $t['icon'] ?> <?= $t['label'] ?></a>
+    <a class="px-2.5 md:px-5 py-3 text-xs md:text-sm font-semibold transition-all duration-200 border-b-2 whitespace-nowrap flex flex-col md:flex-row items-center gap-0.5 md:gap-1.5 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><span class="text-base md:text-sm leading-none"><?= $t['icon'] ?></span><span class="text-[9px] md:text-sm leading-none"><?= $t['label'] ?></span></a>
   <?php endforeach; ?>
-  <div class="ml-auto text-xs text-ak-muted flex gap-4">
+  <div class="ml-auto text-xs text-ak-muted flex gap-4 hidden md:flex">
     <span><b class="text-ak-text"><?= count($users) ?></b> total users</span>
   </div>
 </div>
@@ -217,6 +217,59 @@ $tabs = [
     <?php endforeach; ?>
     </tbody>
   </table></div>
+</div>
+
+<!-- Mobile Card View -->
+<div class="md:hidden space-y-3">
+<?php foreach ($users as $u):
+  $isSelf = (int)$u['id'] === $userId;
+  $st = $u['status'] ?? 'active';
+  $isDisabled = !empty($u['disabled']);
+  if ($isDisabled) $st = 'disabled';
+  $statusColors = ['active'=>'bg-ak-green/20 text-ak-green','suspended'=>'bg-yellow-500/20 text-yellow-400','disabled'=>'bg-ak-red/20 text-ak-red'];
+?>
+<div class="bg-ak-card border border-ak-border rounded-xl p-4">
+  <div class="flex items-start gap-3 mb-3">
+    <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold shrink-0"><?= mb_strtoupper(mb_substr($u['name'],0,1)) ?></div>
+    <div class="flex-1 min-w-0">
+      <div class="font-semibold text-ak-text truncate"><?= h($u['name']) ?></div>
+      <div class="text-ak-muted text-xs font-mono truncate">@<?= h($u['username']) ?></div>
+      <div class="text-ak-muted text-xs truncate"><?= h($u['email']) ?></div>
+    </div>
+    <div class="flex flex-col gap-1 items-end shrink-0">
+      <span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $u['role']==='admin'?'bg-ak-gold/20 text-ak-gold':'bg-blue-500/20 text-blue-400' ?>"><?= h($u['role']) ?></span>
+      <span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $statusColors[$st]??$statusColors['active'] ?>"><?= h($st) ?></span>
+    </div>
+  </div>
+  <div class="flex gap-4 text-xs text-ak-muted mb-3">
+    <span><b class="text-ak-text font-mono"><?= (int)$u['auction_count'] ?></b> auctions</span>
+    <span><b class="text-ak-text font-mono"><?= (int)$u['member_count'] ?></b> members</span>
+  </div>
+  <div class="flex gap-4 text-xs text-ak-muted mb-3">
+    <span>Joined <?= h(date('M j, Y',strtotime($u['created_at']))) ?></span>
+    <span>Login <?= $u['last_login'] ? date('M j, H:i', strtotime($u['last_login'])) : 'Never' ?></span>
+  </div>
+  <div class="flex gap-1.5 flex-wrap border-t border-ak-border pt-3">
+    <?php if (!$isSelf): ?>
+      <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="login_as"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-dark btn-sm text-[11px]" type="submit">Login As</button></form>
+    <?php endif; ?>
+    <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['username'])) ?>','<?= h(addslashes($u['name'])) ?>','<?= h(addslashes($u['email'])) ?>','<?= h($u['role']) ?>')">Edit</button>
+    <?php if (!$isSelf): ?>
+      <?php if ($st==='suspended'): ?>
+        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="unsuspend_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/20 text-ak-green border border-ak-green/30 hover:bg-ak-green/30" type="submit">Reactivate</button></form>
+      <?php else: ?>
+        <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['name'])) ?>')">Suspend</button>
+      <?php endif; ?>
+      <?php if ($isDisabled): ?>
+        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="enable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/15 text-ak-green border border-ak-green/30 hover:bg-ak-green/25" type="submit">Enable</button></form>
+      <?php else: ?>
+        <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="disable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" type="submit">Disable</button></form>
+      <?php endif; ?>
+      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their data.')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">Delete</button></form>
+    <?php endif; ?>
+  </div>
+</div>
+<?php endforeach; ?>
 </div>
 
 <?php elseif ($tab === 'create'): ?>
