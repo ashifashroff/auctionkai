@@ -8,7 +8,7 @@ function submitAddAuction(e) {
   btn.disabled = true; btn.textContent = 'Creating…';
   fetch('api.php', {
     method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value, _tok:CSRF_TOKEN})
+    body: JSON.stringify({action:'add_auction', name:form.name.value, date:form.date.value, commission_fee:form.commission_fee.value, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='+ Create';return;}
     window.location.href = 'index.php?auction_id=' + d.auction_id + '&tab=dashboard';
