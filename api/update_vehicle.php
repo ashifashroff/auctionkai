@@ -12,7 +12,7 @@ $db = db();
 $userId = (int)$_SESSION['user_id'];
 
 // Read JSON body
-$input = json_decode(file_get_contents('php://input'), true);
+$input = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 
 $id        = (int)($input['id'] ?? 0);
 $memberId  = (int)($input['memberId'] ?? 0);

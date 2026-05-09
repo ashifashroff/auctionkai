@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
+    $input = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     $name = trim($input['name'] ?? '');
     $phone = trim($input['phone'] ?? '');

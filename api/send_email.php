@@ -11,7 +11,7 @@ if (!$userId) {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 $memberId = (int)($data['member_id'] ?? 0);
 $auctionId = (int)($data['auction_id'] ?? 0);
 

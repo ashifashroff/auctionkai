@@ -6,7 +6,7 @@ require_once __DIR__ . "/../includes/api_bootstrap.php";
 $db = db();
 $userId = (int)$_SESSION['user_id'];
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 $lot = trim($data['lot'] ?? '');
 $auctionId = (int)($data['auction_id'] ?? 0);
 $excludeId = (int)($data['exclude_id'] ?? 0); // for edit mode

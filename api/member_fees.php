@@ -5,7 +5,7 @@ require_once __DIR__ . '/../includes/activity.php';
 
 header('Content-Type: application/json');
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 
 // CSRF check for write actions
 $action = $data['action'] ?? '';

@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $db = db();
 $userId = (int)$_SESSION['user_id'];
 
-$input = json_decode(file_get_contents('php://input'), true);
+$input = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 
 $memberId   = (int)($input['memberId'] ?? 0);
 $make       = trim($input['make'] ?? '');

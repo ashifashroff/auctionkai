@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tok = $_POST['_tok'] ?? '';
     if (empty($tok)) {
         $rawInput = file_get_contents('php://input');
-        $input = json_decode($rawInput, true);
-        $tok = $input['_tok'] ?? '';
+        $GLOBALS['_json_input'] = json_decode($rawInput, true);
+        $tok = $GLOBALS['_json_input']['_tok'] ?? '';
     }
     if (empty($tok) || $tok !== ($_SESSION['tok'] ?? '')) {
         http_response_code(403);

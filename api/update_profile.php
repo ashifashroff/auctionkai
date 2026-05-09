@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
+$data = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
 $action = $data['action'] ?? '';
 
 switch ($action) {
