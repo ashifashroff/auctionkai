@@ -381,3 +381,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 600);
   });
 })();
+
+// ── Confirm Modal ────────────────────────────
+function showConfirmModal(title, message, onConfirm) {
+  // If called with (title, message, callback)
+  if (typeof onConfirm === 'function') {
+    _showConfirmModal(title, message, onConfirm);
+    return;
+  }
+  // If called with (title, callback) — old 2-arg signature
+  if (typeof message === 'function') {
+    _showConfirmModal('Confirm', title, message);
+    return;
+  }
+  // If called with (title, message) — return promise
+  return new Promise(resolve => _showConfirmModal(title, message, () => resolve(true)));
+}
+
+function _showConfirmModal(title, message, onConfirm) {
+  let modal = document.getElementById('confirmModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'confirmModal';
+    modal.className = 'fixed inset-0 bg-black/85 backdrop-blur-md z-[99999] flex items-center justify-center';
+    modal.style.display = 'none';
+    modal.innerHTML = '<div class="bg-ak-card border border-ak-border rounded-2xl w-[95%] max-w-[400px] p-7 shadow-2xl relative animate-fade-in-up"><h3 class="text-ak-gold text-lg font-bold mb-3" id="confirmModalTitle"></h3><div class="text-ak-text2 text-sm mb-5" id="confirmModalMsg"></div><div class="flex justify-end gap-2"><button class="btn btn-dark btn-sm" id="confirmModalCancel">Cancel</button><button class="btn btn-gold btn-sm" id="confirmModalOk">Confirm</button></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+  }
+  document.getElementById('confirmModalTitle').textContent = title;
+  document.getElementById('confirmModalMsg').textContent = message;
+  modal.style.display = 'flex';
+  const ok = document.getElementById('confirmModalOk');
+  const cancel = document.getElementById('confirmModalCancel');
+  const cleanup = () => { modal.style.display = 'none'; ok.replaceWith(ok.cloneNode(true)); cancel.replaceWith(cancel.cloneNode(true)); };
+  document.getElementById('confirmModalOk').onclick = () => { cleanup(); onConfirm(); };
+  document.getElementById('confirmModalCancel').onclick = () => { cleanup(); };
+}
