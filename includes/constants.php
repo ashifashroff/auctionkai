@@ -23,3 +23,8 @@ const STATEMENT_LINK_PIN_MAX_ATTEMPTS = 5;
 // Error log retention
 const ERROR_LOG_RETENTION_DAYS = 30;
 const ERROR_LOG_RESOLVED_CLEANUP_DAYS = 30;
+
+// App version & updates
+const APP_VERSION = 'v3.7';
+const APP_GITHUB_REPO = 'ashifashroff/auctionkai';
+const UPDATE_CHECK_INTERVAL = 3600; // 1 hour cache

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/branding.php';
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 require_once __DIR__ . '/../includes/activity.php';
+require_once __DIR__ . '/../includes/updater.php';
 
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
 $tok = $_SESSION['tok'];
@@ -21,6 +22,9 @@ $db = db();
 $settings = loadSettings($db);
 $brand = loadBranding($db);
 $maintenanceOn = ($settings['maintenance_mode'] ?? '0') === '1';
+
+// Check for updates
+$updateInfo = checkForUpdates($db);
 
 // List existing backup files
 $backupDir = __DIR__ . '/../backups/';
@@ -141,6 +145,7 @@ $tabs = [
 </div>
 
 <!-- Messages -->
+<?= renderUpdateBanner($updateInfo) ?>
 <?php if (!empty($_SESSION['admin_success'])): ?>
 <div class="px-4 md:px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
 <?php endif; ?>
