@@ -88,52 +88,88 @@ function checkForUpdates(PDO $db): array {
         $db->prepare("
             INSERT INTO settings (`key`, `value`)
             VALUES ('update_check_cache', ?)
-            ON DUPLICATE KEY UPDATE value = VALUES(value)
+            ON DUPLICATE KEY UPDATE value = VALUES(`value`)
         ")->execute([json_encode($result)]);
 
         return $result;
 
     } catch (Exception $e) {
-        $default['error'] = 'Update check failed: ' . $e->getMessage();
+        $default['error'] = $e->getMessage();
         return $default;
     }
 }
 
 /**
- * Render the update notification banner HTML
+ * Format GitHub markdown release notes to clean HTML for display
  */
-function renderUpdateBanner(array $updateInfo): string {
-    if (empty($updateInfo['has_update'])) return '';
+function formatReleaseNotes(string $notes): string {
+    if (empty($notes)) return '';
 
-    $v = h($updateInfo['latest_version']);
-    $name = h($updateInfo['release_name']);
-    $url = h($updateInfo['release_url']);
-    $notes = $updateInfo['release_notes'] ?? '';
-    $published = $updateInfo['published_at'] ?? '';
-    $dateStr = $published ? date('M j, Y', strtotime($published)) : '';
+    $html = htmlspecialchars($notes, ENT_QUOTES);
 
-    // Convert markdown-style notes to HTML (basic)
-    $notesHtml = nl2br(h($notes));
-    $notesHtml = preg_replace('/\*\*(.*?)\*\*/', '<b>$1</b>', $notesHtml);
-    $notesHtml = preg_replace('/^- (.+)$/m', '• $1', $notesHtml);
+    // Headers ### → bold section
+    $html = preg_replace(
+        '/^###\s+(.+)$/m',
+        '<div class="font-bold text-ak-gold text-xs uppercase tracking-wider mt-3 mb-1">$1</div>',
+        $html
+    );
 
-    return '<div class="bg-ak-gold/10 border border-ak-gold/30 rounded-xl p-4 mb-4 animate-fade-in">
-      <div class="flex items-start gap-3">
-        <span class="text-xl">🚀</span>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-ak-gold font-bold text-sm">Update Available!</span>
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-ak-gold/20 text-ak-gold">' . $v . '</span>
-            ' . ($name && $name !== $v ? '<span class="text-ak-muted text-xs">— ' . $name . '</span>' : '') . '
-            ' . ($dateStr ? '<span class="text-ak-muted text-[10px]">(' . $dateStr . ')</span>' : '') . '
-          </div>
-          <div class="text-ak-muted text-xs mt-1">Current: ' . h($updateInfo['current_version']) . ' → Latest: ' . $v . '</div>
-          ' . ($notesHtml ? '<div class="mt-3 p-3 bg-ak-bg rounded-lg text-ak-text2 text-xs leading-relaxed max-h-40 overflow-y-auto">' . $notesHtml . '</div>' : '') . '
-          <div class="flex gap-2 mt-3">
-            <a href="' . $url . '" target="_blank" class="btn btn-gold btn-sm text-[11px]">↓ View Release</a>
-            <button class="btn btn-dark btn-sm text-[11px]" onclick="this.closest(\'.bg-ak-gold\\/10\').style.display=\'none\'">Dismiss</button>
-          </div>
-        </div>
-      </div>
-    </div>';
+    // Headers ## → section title
+    $html = preg_replace(
+        '/^##\s+(.+)$/m',
+        '<div class="font-bold text-ak-text text-sm mt-4 mb-2">$1</div>',
+        $html
+    );
+
+    // Bullet points - → list items
+    $html = preg_replace(
+        '/^[-*]\s+(.+)$/m',
+        '<div class="flex items-start gap-2 py-0.5"><span class="text-ak-gold shrink-0 mt-0.5">•</span><span class="text-ak-text2 text-xs">$1</span></div>',
+        $html
+    );
+
+    // Bold text
+    $html = preg_replace(
+        '/\*\*(.+?)\*\*/',
+        '<strong class="text-ak-text">$1</strong>',
+        $html
+    );
+
+    // Inline code
+    $html = preg_replace(
+        '/`(.+?)`/',
+        '<code class="bg-ak-infield px-1.5 py-0.5 rounded text-ak-gold font-mono text-[10px]">$1</code>',
+        $html
+    );
+
+    // Clean up multiple blank lines
+    $html = preg_replace('/\n{3,}/', "\n\n", $html);
+
+    // Convert remaining newlines to br
+    $html = nl2br($html);
+
+    return $html;
+}
+
+/**
+ * Dismiss update notification for current version
+ */
+function dismissUpdate(PDO $db, string $version): void {
+    $db->prepare("
+        INSERT INTO settings (`key`, `value`)
+        VALUES ('update_dismissed_version', ?)
+        ON DUPLICATE KEY UPDATE value = VALUES(`value`)
+    ")->execute([$version]);
+}
+
+/**
+ * Check if this version's update was dismissed
+ */
+function isUpdateDismissed(PDO $db, string $version): bool {
+    try {
+        $dismissed = $db->query("SELECT value FROM settings WHERE `key` = 'update_dismissed_version'")->fetchColumn();
+        return $dismissed === $version;
+    } catch (Exception $e) {
+        return false;
+    }
 }

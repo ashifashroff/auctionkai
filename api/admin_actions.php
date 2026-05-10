@@ -179,6 +179,26 @@ switch ($action) {
         echo json_encode(['success' => true, 'message' => "Session settings saved ({$minutes} min timeout, enabled: {$enabled})"]);
         exit;
 
+    case 'dismiss_update':
+        $version = trim($_POST['version'] ?? '');
+        if (!empty($version)) {
+            require_once __DIR__ . '/../includes/updater.php';
+            dismissUpdate($db, $version);
+            echo json_encode(['success' => true, 'message' => 'Update dismissed']);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid version']);
+        }
+        exit;
+
+    case 'refresh_update_check':
+        $db->prepare("
+            INSERT INTO settings (`key`, `value`)
+            VALUES ('update_check_cache', '')
+            ON DUPLICATE KEY UPDATE value = ''
+        ")->execute();
+        echo json_encode(['success' => true, 'message' => 'Cache cleared']);
+        exit;
+
     default:
         echo json_encode(['success' => false, 'message' => 'Unknown action']);
         exit;

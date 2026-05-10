@@ -61,6 +61,8 @@ Or register a new account. Usernames and emails must be unique.
 
 **🔒 Forgot Password** — request a password reset link by email. Reset with a new password (minimum 8 characters). Password strength indicator shows Weak/Fair/Good/Strong in real-time.
 
+**🆕 Auto-Update Notifications** — checks GitHub releases for new versions hourly. Full changelog shown from GitHub release notes (markdown formatted). Update banner in admin topbar when new version available. Dedicated Updates tab with version comparison and step-by-step update guide. Dismiss button to hide notification for current version. Manual refresh to check immediately. Red dot badge on Updates tab when update available. Cached for 1 hour — no performance impact.
+
 **🛡 reCAPTCHA** — Google reCAPTCHA v2 on the registration form. Enable/disable and configure site key + secret key from Admin Panel → reCAPTCHA tab. Get your keys from google.com/recaptcha/admin.
 
 **⌨ Keyboard Shortcuts** — press `?` to see all shortcuts. Navigate tabs with `G` then `M/V/S/D`. Add vehicle with `N`, add member with `Shift+N`. Focus lot field with `L`. Search with `/`. Close modals with `Esc`.
@@ -156,6 +158,7 @@ auctionkai/
 │   ├── settings.php             ← User settings CRUD
 │   ├── activity.php             ← Activity logging + icons/colors
 │   ├── error_handler.php        ← Custom error handler + DB logging
+│   ├── updater.php              ← GitHub release checker & update notifications
 │   ├── maintenance_check.php    ← Maintenance mode check
 │   ├── models.php               ← Model loader
 │   ├── branding.php             ← Dynamic branding loader
@@ -286,6 +289,18 @@ Deep navy background (#0A1420), dark blue cards (#111E2D), gold accent (#D4A84B)
 ## Troubleshooting
 
 If CSS looks broken or modals don't open, hard refresh (Ctrl+Shift+R) — the Tailwind CDN and JS files cache aggressively. CSS and JS files include `?v=3.5` cache-busting to help. If you're locked out of login, wait 30 seconds. If a form says "Invalid request", refresh the page (CSRF token expired). After schema changes, always drop the entire database and re-import `schema.sql` rather than trying to alter tables. If toast notifications don't appear, clear browser cache and reload.
+
+---
+
+## 🔔 Update Notifications
+
+AuctionKai checks your GitHub repository for new releases automatically. To trigger an update notification:
+
+1. Create a new Release on GitHub
+2. Tag it as `v3.8` (or next version)
+3. Write release notes in the description
+4. Publish the release
+5. Admin panel will show the notification within 1 hour (or click Refresh)
 
 ---
 

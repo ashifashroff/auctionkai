@@ -25,6 +25,7 @@ $maintenanceOn = ($settings['maintenance_mode'] ?? '0') === '1';
 
 // Check for updates
 $updateInfo = checkForUpdates($db);
+$showUpdate = $updateInfo['has_update'] && !isUpdateDismissed($db, $updateInfo['latest_version']);
 
 // List existing backup files
 $backupDir = __DIR__ . '/../backups/';
@@ -82,6 +83,7 @@ $tabs = [
     'backups' => ['icon' => '💾', 'label' => 'Backups'],
     'recaptcha' => ['icon' => '🛡', 'label' => 'reCAPTCHA'],
     'settings' => ['icon' => '⚙', 'label' => 'Admin Settings'],
+    'updates' => ['icon' => '🆕', 'label' => 'Updates'],
 ];
 ?>
 <!DOCTYPE html>
@@ -112,6 +114,54 @@ $tabs = [
   </div>
 </div>
 
+<?php if ($showUpdate): ?>
+<!-- Update Available Banner -->
+<div class="bg-ak-gold/10 border-b border-ak-gold/30 px-4 md:px-7 py-2.5" id="updateBanner">
+  <div class="flex items-center justify-between gap-3 flex-wrap max-w-[1400px] mx-auto">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🆕</span>
+      <div>
+        <div class="text-ak-gold font-bold text-sm flex items-center gap-2 flex-wrap">Update Available:
+          <span class="font-mono bg-ak-gold/20 px-2 py-0.5 rounded"><?= h($updateInfo['latest_version']) ?></span>
+          <span class="text-ak-muted text-xs font-normal">(current: <?= h(APP_VERSION) ?>)</span>
+        </div>
+        <?php if (!empty($updateInfo['published_at'])): ?>
+        <div class="text-ak-muted text-[10px] mt-0.5">Released: <?= h(date('Y-m-d', strtotime($updateInfo['published_at']))) ?></div>
+        <?php endif; ?>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button onclick="toggleChangelog()" class="btn btn-gold btn-sm text-[11px]">📋 View Changelog</button>
+      <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="btn btn-dark btn-sm text-[11px]">↗ GitHub</a>
+      <button onclick="dismissUpdate('<?= h($updateInfo['latest_version']) ?>')" class="text-ak-muted text-xs hover:text-ak-text transition-colors px-2 py-1" title="Dismiss this update notification">✕ Dismiss</button>
+    </div>
+  </div>
+  <!-- Changelog panel — hidden by default -->
+  <div id="changelogPanel" class="hidden mt-3 pt-3 border-t border-ak-gold/20 max-w-[1400px] mx-auto">
+    <div class="bg-ak-card border border-ak-border rounded-xl p-5 max-h-[400px] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-ak-gold text-sm">📋 What's new in <?= h($updateInfo['latest_version']) ?></h3>
+        <button onclick="toggleChangelog()" class="text-ak-muted hover:text-ak-text text-xl leading-none">×</button>
+      </div>
+      <?php if (!empty($updateInfo['release_notes'])): ?>
+      <div class="release-notes text-sm leading-relaxed"><?= formatReleaseNotes($updateInfo['release_notes']) ?></div>
+      <?php else: ?>
+      <div class="text-ak-muted text-sm">No release notes available. <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="text-ak-gold hover:underline ml-1">View on GitHub →</a></div>
+      <?php endif; ?>
+      <div class="mt-4 pt-4 border-t border-ak-border flex items-center justify-between">
+        <span class="text-ak-muted text-xs">Last checked: <?= h($updateInfo['checked_at']) ?></span>
+        <button onclick="refreshUpdateCheck()" class="text-ak-gold text-xs hover:underline">🔄 Check again</button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
+<?php if (!$showUpdate && !empty($updateInfo['error'])): ?>
+<!-- Silent error — only visible in dev -->
+<!-- Error: <?= h($updateInfo['error']) ?> -->
+<?php endif; ?>
+
 <!-- Stats -->
 <div class="px-4 md:px-7 pb-0 max-w-[1400px] mx-auto">
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -137,7 +187,7 @@ $tabs = [
 <!-- Tabs -->
 <div class="bg-ak-bg border-b border-ak-border px-2 md:px-7 flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-ak">
   <?php foreach ($tabs as $key => $t): ?>
-    <a class="px-2.5 md:px-5 py-3 text-xs md:text-sm font-semibold transition-all duration-200 border-b-2 whitespace-nowrap flex flex-col md:flex-row items-center gap-0.5 md:gap-1.5 <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><span class="text-base md:text-sm leading-none"><?= $t['icon'] ?></span><span class="text-[9px] md:text-sm leading-none"><?= $t['label'] ?></span></a>
+    <a class="px-2.5 md:px-5 py-3 text-xs md:text-sm font-semibold transition-all duration-200 border-b-2 whitespace-nowrap flex flex-col md:flex-row items-center gap-0.5 md:gap-1.5 relative <?= $tab === $key ? 'text-ak-gold border-ak-gold' : 'text-ak-muted border-transparent hover:text-ak-text2' ?>" href="?tab=<?= $key ?>"><span class="text-base md:text-sm leading-none"><?= $t['icon'] ?></span><span class="text-[9px] md:text-sm leading-none"><?= $t['label'] ?></span><?php if ($key === 'updates' && $updateInfo['has_update'] && !isUpdateDismissed($db, $updateInfo['latest_version'])): ?><span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-ak-red rounded-full border-2 border-ak-bg2"></span><?php endif; ?></a>
   <?php endforeach; ?>
   <div class="ml-auto text-xs text-ak-muted flex gap-4 hidden md:flex">
     <span><b class="text-ak-text"><?= count($users) ?></b> total users</span>
@@ -145,7 +195,6 @@ $tabs = [
 </div>
 
 <!-- Messages -->
-<?= renderUpdateBanner($updateInfo) ?>
 <?php if (!empty($_SESSION['admin_success'])): ?>
 <div class="px-4 md:px-7 pt-4"><div class="bg-ak-green/15 text-ak-green px-3 md:px-4 py-2 md:py-3 rounded-lg text-sm animate-fade-in"><?= h($_SESSION['admin_success']); unset($_SESSION['admin_success']); ?></div></div>
 <?php endif; ?>
@@ -789,6 +838,73 @@ document.addEventListener('DOMContentLoaded', () => {
     <button class="btn btn-gold w-full" type="submit" id="adminSettingsBtn">Save Settings</button>
   </form>
 </div>
+<?php elseif ($tab === 'updates'): ?>
+
+<div class="flex items-center gap-3 mb-5">
+  <h2 class="text-lg font-bold">🆕 System Updates</h2>
+  <?php if ($updateInfo['has_update']): ?>
+  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-gold/15 text-ak-gold border border-ak-gold/30 animate-pulse">Update Available</span>
+  <?php else: ?>
+  <span class="text-[11px] font-bold px-3 py-1.5 rounded-full bg-ak-green/15 text-ak-green border border-ak-green/30">✓ Up to Date</span>
+  <?php endif; ?>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+  <div class="bg-ak-card border border-ak-border rounded-xl p-5">
+    <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Installed Version</div>
+    <div class="text-3xl font-bold font-mono text-ak-gold mb-1"><?= h(APP_VERSION) ?></div>
+    <div class="text-ak-muted text-xs">AuctionKai Settlement System</div>
+    <div class="text-ak-muted text-xs mt-1">Developed by Mirai Global Solutions</div>
+  </div>
+  <div class="bg-ak-card border <?= $updateInfo['has_update'] ? 'border-ak-gold/40' : 'border-ak-border' ?> rounded-xl p-5">
+    <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Latest Version on GitHub</div>
+    <?php if (!empty($updateInfo['error'])): ?>
+    <div class="text-ak-red text-sm">⚠ <?= h($updateInfo['error']) ?></div>
+    <?php else: ?>
+    <div class="text-3xl font-bold font-mono <?= $updateInfo['has_update'] ? 'text-ak-gold' : 'text-ak-green' ?> mb-1"><?= h($updateInfo['latest_version']) ?></div>
+    <div class="text-ak-muted text-xs"><?= $updateInfo['has_update'] ? '🆕 New version available!' : '✓ You are on the latest version' ?></div>
+    <?php if (!empty($updateInfo['published_at'])): ?>
+    <div class="text-ak-muted text-xs mt-1">Released: <?= h(date('Y-m-d', strtotime($updateInfo['published_at']))) ?></div>
+    <?php endif; ?>
+    <?php endif; ?>
+    <div class="mt-3 text-[10px] text-ak-muted">Checked: <?= h($updateInfo['checked_at']) ?></div>
+  </div>
+</div>
+
+<?php if ($updateInfo['has_update']): ?>
+<div class="bg-ak-gold/5 border border-ak-gold/30 rounded-xl p-5 mb-6">
+  <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+    <h3 class="font-bold text-ak-gold">📋 Release Notes — <?= h($updateInfo['latest_version']) ?></h3>
+    <div class="flex gap-2">
+      <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="btn btn-gold btn-sm text-[11px]">↗ View on GitHub</a>
+      <button onclick="dismissUpdate('<?= h($updateInfo['latest_version']) ?>')" class="btn btn-dark btn-sm text-[11px]">Dismiss</button>
+    </div>
+  </div>
+  <?php if (!empty($updateInfo['release_notes'])): ?>
+  <div class="bg-ak-card rounded-xl p-5 release-notes"><?= formatReleaseNotes($updateInfo['release_notes']) ?></div>
+  <?php else: ?>
+  <div class="text-ak-muted text-sm">No release notes provided. <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="text-ak-gold hover:underline">View release on GitHub →</a></div>
+  <?php endif; ?>
+</div>
+<div class="bg-ak-card border border-ak-border rounded-xl p-5">
+  <h3 class="font-bold text-ak-text mb-4">⚙ How to Update</h3>
+  <div class="space-y-3 text-sm text-ak-text2">
+    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">1</span><div><div class="font-semibold text-ak-text">Backup your database</div><div class="text-ak-muted text-xs mt-0.5">Go to Backups tab → Download Backup before updating</div></div></div>
+    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">2</span><div><div class="font-semibold text-ak-text">Pull latest code</div><div class="text-ak-muted text-xs mt-0.5">Run in your project directory:</div><div class="bg-ak-infield rounded-lg px-3 py-2 mt-1.5 font-mono text-xs text-ak-gold">git pull origin main</div></div></div>
+    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">3</span><div><div class="font-semibold text-ak-text">Run migrations if any</div><div class="text-ak-muted text-xs mt-0.5">Check release notes for any new database changes and run them in phpMyAdmin → SQL tab</div></div></div>
+    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">4</span><div><div class="font-semibold text-ak-text">Clear browser cache</div><div class="text-ak-muted text-xs mt-0.5">Press Ctrl+Shift+R to force reload CSS and JS files</div></div></div>
+  </div>
+</div>
+<?php else: ?>
+<div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center">
+  <div class="text-5xl mb-3">✅</div>
+  <div class="font-bold text-ak-green text-lg mb-2">You are up to date!</div>
+  <div class="text-ak-muted text-sm"><?= h(APP_VERSION) ?> is the latest version.</div>
+  <div class="text-ak-muted text-xs mt-2">Last checked: <?= h($updateInfo['checked_at']) ?></div>
+  <button onclick="refreshUpdateCheck()" class="btn btn-dark btn-sm mt-4 text-[11px]">🔄 Check for Updates Now</button>
+</div>
+<?php endif; ?>
+
 <?php endif; ?>
 
 </div>
@@ -974,6 +1090,43 @@ document.getElementById('suspendForm')?.addEventListener('submit', async functio
 
 // Init provider
 if (document.getElementById('mail_provider_input')) selectProvider(currentProvider);
+
+// ── Update System ─────────────────────────────
+function toggleChangelog() {
+  const panel = document.getElementById('changelogPanel');
+  if (panel) panel.classList.toggle('hidden');
+}
+
+async function dismissUpdate(version) {
+  try {
+    const fd = new FormData();
+    fd.append('action', 'dismiss_update');
+    fd.append('version', version);
+    fd.append('_tok', CSRF_TOKEN);
+    await fetch('../api/admin_actions.php', { method: 'POST', body: fd });
+    const banner = document.getElementById('updateBanner');
+    if (banner) { banner.style.opacity = '0'; banner.style.transition = 'opacity 0.3s ease'; setTimeout(() => banner.remove(), 300); }
+    showToast('Update notification dismissed', 'info', 2000);
+  } catch (err) {
+    showToast('Error dismissing update', 'error');
+  }
+}
+
+async function refreshUpdateCheck() {
+  const btn = event.target;
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Checking...';
+  btn.disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('action', 'refresh_update_check');
+    fd.append('_tok', CSRF_TOKEN);
+    const res = await fetch('../api/admin_actions.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    if (data.success) { showToast('✓ Update check refreshed', 'success', 2000); setTimeout(() => location.reload(), 1000); }
+  } catch { showToast('Check failed', 'error'); }
+  finally { btn.textContent = origText; btn.disabled = false; }
+}
 </script>
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 </body>

@@ -181,7 +181,9 @@ INSERT INTO settings (`key`, value) VALUES
   ('backup_retention_days', '30'),
   ('backup_compress', '1'),
   ('backup_last_run', ''),
-  ('backup_next_run', '')
+  ('backup_next_run', ''),
+  ('update_check_cache', ''),
+  ('update_dismissed_version', '')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- Migration for existing installs
