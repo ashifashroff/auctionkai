@@ -105,6 +105,43 @@ function installUpdate(PDO $db, int $userId): string {
     file_put_contents($lockFile, time());
 
     try {
+        // ── Step 0: Pre-update backup ───────────────
+        $appRoot = dirname(__DIR__);
+        $backupDir = $appRoot . '/backups/pre_update';
+        if (!is_dir($backupDir)) mkdir($backupDir, 0755, true);
+
+        // 0a. Snapshot current project files (excluding vendor, .git, backups)
+        $snapshotLabel = 'snapshot_v' . ltrim(APP_VERSION, 'v') . '_' . date('Y-m-d_His');
+        $snapshotFile = $backupDir . '/' . $snapshotLabel . '.zip';
+        $zip = new ZipArchive();
+        if ($zip->open($snapshotFile, ZipArchive::CREATE) === true) {
+            $skipDirs = ['vendor', '.git', 'backups'];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($appRoot, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
+            foreach ($iterator as $item) {
+                $rel = substr($item->getPathname(), strlen($appRoot) + 1);
+                $top = explode('/', $rel)[0];
+                if (in_array($top, $skipDirs)) continue;
+                if ($item->isDir()) {
+                    $zip->addEmptyDir($rel);
+                } else {
+                    $zip->addFile($item->getPathname(), $rel);
+                }
+            }
+            $zip->close();
+        }
+
+        // 0b. Database backup
+        $dbBackupFile = $backupDir . '/db_v' . ltrim(APP_VERSION, 'v') . '_' . date('Y-m-d_His') . '.sql';
+        $dbBackupData = generateDbBackup($db);
+        file_put_contents($dbBackupFile, $dbBackupData);
+
+        // 0c. Schedule cleanup of backups older than 14 days
+        // (handled by cleanup_expired.php or on next update)
+        cleanupOldBackups($backupDir, 14);
+
         // 1. Get latest release info
         $stmt = $db->query("SELECT value FROM settings WHERE `key` = 'update_check_cache'");
         $cacheJson = $stmt ? $stmt->fetchColumn() : null;
@@ -197,7 +234,6 @@ function installUpdate(PDO $db, int $userId): string {
         ];
 
         // 5. Copy files to app root
-        $appRoot = dirname(__DIR__);
         $copied = 0;
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($sourceDir, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -264,7 +300,7 @@ function installUpdate(PDO $db, int $userId): string {
 
         return json_encode([
             'success' => true,
-            'message' => "Successfully updated to v{$newVersion}! ({$copied} files updated)",
+            'message' => "Updated to v{$newVersion}! ({$copied} files updated). Pre-update snapshot & DB backup saved in backups/pre_update/ — auto-deleted after 14 days.",
             'old_version' => $currentVersion,
             'new_version' => $newVersion,
             'files_updated' => $copied,
@@ -288,4 +324,64 @@ function cleanup(string $tempDir, string $lockFile): void {
         rmdir($tempDir);
     }
     @unlink($lockFile);
+}
+
+/**
+ * Generate database backup SQL string.
+ */
+function generateDbBackup(PDO $db): string {
+    $out = "-- AuctionKai Pre-Update Database Backup\n";
+    $out .= "-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
+    $out .= "SET FOREIGN_KEY_CHECKS=0;\nSET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\nSET NAMES utf8mb4;\n\n";
+
+    $tables = ['users', 'auction', 'members', 'vehicles', 'fees', 'custom_deductions', 'member_fees', 'payment_status', 'password_resets', 'settings', 'activity_log', 'statement_links', 'statement_history', 'login_history', 'error_logs'];
+
+    foreach ($tables as $table) {
+        try {
+            $check = $db->query("SHOW TABLES LIKE '$table'")->fetch();
+            if (!$check) continue;
+
+            $out .= "-- Table: $table\n";
+            $createStmt = $db->query("SHOW CREATE TABLE `$table`")->fetch(PDO::FETCH_NUM);
+            $out .= "DROP TABLE IF EXISTS `$table`;\n" . $createStmt[1] . ";\n\n";
+
+            $rows = $db->query("SELECT * FROM `$table`")->fetchAll(PDO::FETCH_NUM);
+            if (empty($rows)) { $out .= "-- (no data)\n\n"; continue; }
+
+            $cols = $db->query("SHOW COLUMNS FROM `$table`")->fetchAll(PDO::FETCH_COLUMN);
+            $colList = '`' . implode('`, `', $cols) . '`';
+
+            $batch = [];
+            foreach ($rows as $row) {
+                $values = array_map(fn($v) => $v === null ? 'NULL' : $db->quote((string)$v), $row);
+                $batch[] = '(' . implode(', ', $values) . ')';
+                if (count($batch) >= 100) {
+                    $out .= "INSERT INTO `$table` ($colList) VALUES\n" . implode(",\n", $batch) . ";\n";
+                    $batch = [];
+                }
+            }
+            if (!empty($batch)) {
+                $out .= "INSERT INTO `$table` ($colList) VALUES\n" . implode(",\n", $batch) . ";\n";
+            }
+            $out .= "\n";
+        } catch (Exception $e) {
+            $out .= "-- Error backing up $table: " . $e->getMessage() . "\n\n";
+        }
+    }
+
+    $out .= "SET FOREIGN_KEY_CHECKS=1;\n";
+    return $out;
+}
+
+/**
+ * Delete pre-update backups older than N days.
+ */
+function cleanupOldBackups(string $dir, int $days): void {
+    if (!is_dir($dir)) return;
+    $cutoff = time() - ($days * 86400);
+    foreach (glob($dir . '/*') as $file) {
+        if (is_file($file) && filemtime($file) < $cutoff) {
+            @unlink($file);
+        }
+    }
 }
