@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
     <h3 class="font-bold text-ak-gold">📋 Release Notes — <?= h($updateInfo['latest_version']) ?></h3>
     <div class="flex gap-2">
-      <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="btn btn-gold btn-sm text-[11px]">↗ View on GitHub</a>
+      <a href="<?= h($updateInfo['release_url']) ?>" target="_blank" class="btn btn-dark btn-sm text-[11px]">↗ View on GitHub</a>
       <button onclick="dismissUpdate('<?= h($updateInfo['latest_version']) ?>')" class="btn btn-dark btn-sm text-[11px]">Dismiss</button>
     </div>
   </div>
@@ -887,13 +887,29 @@ document.addEventListener('DOMContentLoaded', () => {
   <?php endif; ?>
 </div>
 <div class="bg-ak-card border border-ak-border rounded-xl p-5">
-  <h3 class="font-bold text-ak-text mb-4">⚙ How to Update</h3>
-  <div class="space-y-3 text-sm text-ak-text2">
-    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">1</span><div><div class="font-semibold text-ak-text">Backup your database</div><div class="text-ak-muted text-xs mt-0.5">Go to Backups tab → Download Backup before updating</div></div></div>
-    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">2</span><div><div class="font-semibold text-ak-text">Pull latest code</div><div class="text-ak-muted text-xs mt-0.5">Run in your project directory:</div><div class="bg-ak-infield rounded-lg px-3 py-2 mt-1.5 font-mono text-xs text-ak-gold">git pull origin main</div></div></div>
-    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">3</span><div><div class="font-semibold text-ak-text">Run migrations if any</div><div class="text-ak-muted text-xs mt-0.5">Check release notes for any new database changes and run them in phpMyAdmin → SQL tab</div></div></div>
-    <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">4</span><div><div class="font-semibold text-ak-text">Clear browser cache</div><div class="text-ak-muted text-xs mt-0.5">Press Ctrl+Shift+R to force reload CSS and JS files</div></div></div>
+  <h3 class="font-bold text-ak-text mb-4">⚡ One-Click Update</h3>
+  <div class="text-sm text-ak-text2 mb-4">Install the update directly from GitHub. Your <code class="text-ak-gold">config.php</code>, <code class="text-ak-gold">.env</code>, and <code class="text-ak-gold">vendor/</code> folder will be preserved.</div>
+  <div class="flex items-center gap-3 flex-wrap">
+    <button onclick="installUpdate()" id="installBtn" class="btn btn-gold flex items-center gap-2">⚡ Install Update</button>
+    <span id="installStatus" class="text-sm text-ak-muted"></span>
   </div>
+  <div id="installProgress" class="hidden mt-4 bg-ak-bg rounded-xl p-4 border border-ak-border">
+    <div class="flex items-center gap-3">
+      <div class="animate-spin w-5 h-5 border-2 border-ak-gold border-t-transparent rounded-full"></div>
+      <span class="text-ak-gold text-sm font-semibold">Installing update...</span>
+    </div>
+    <div class="text-ak-muted text-xs mt-2">This may take a minute. Do not close this page.</div>
+  </div>
+  <div id="installResult" class="hidden mt-4"></div>
+  <details class="mt-4">
+    <summary class="text-ak-muted text-xs cursor-pointer hover:text-ak-text">Manual update steps (advanced)</summary>
+    <div class="space-y-3 text-sm text-ak-text2 mt-3">
+      <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">1</span><div><div class="font-semibold text-ak-text">Backup your database</div><div class="text-ak-muted text-xs mt-0.5">Go to Backups tab → Download Backup before updating</div></div></div>
+      <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">2</span><div><div class="font-semibold text-ak-text">Pull latest code</div><div class="text-ak-muted text-xs mt-0.5">Run: <code class="text-ak-gold">git pull origin main</code></div></div></div>
+      <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">3</span><div><div class="font-semibold text-ak-text">Run migrations if any</div><div class="text-ak-muted text-xs mt-0.5">Check release notes for database changes</div></div></div>
+      <div class="flex items-start gap-3"><span class="bg-ak-gold text-ak-bg w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0">4</span><div><div class="font-semibold text-ak-text">Clear browser cache</div><div class="text-ak-muted text-xs mt-0.5">Press Ctrl+Shift+R</div></div></div>
+    </div>
+  </details>
 </div>
 <?php else: ?>
 <div class="bg-ak-card border border-ak-border rounded-xl p-8 text-center">
@@ -1127,6 +1143,52 @@ async function refreshUpdateCheck() {
   } catch { showToast('Check failed', 'error'); }
   finally { btn.textContent = origText; btn.disabled = false; }
 }
+
+async function installUpdate() {
+  const btn = document.getElementById('installBtn');
+  const status = document.getElementById('installStatus');
+  const progress = document.getElementById('installProgress');
+  const result = document.getElementById('installResult');
+  
+  if (!confirm('Install the latest update from GitHub?\n\nMake sure you have a database backup before proceeding.')) return;
+  
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Installing...';
+  status.textContent = 'Downloading and installing update...';
+  progress.classList.remove('hidden');
+  result.classList.add('hidden');
+  
+  try {
+    const fd = new FormData();
+    fd.append('action', 'install');
+    fd.append('_tok', CSRF_TOKEN);
+    
+    const res = await fetch('../api/auto_update.php', { method: 'POST', body: fd });
+    const data = await res.json();
+    
+    progress.classList.add('hidden');
+    result.classList.remove('hidden');
+    
+    if (data.success) {
+      result.innerHTML = '<div class="bg-ak-green/15 border border-ak-green/30 text-ak-green rounded-lg px-4 py-3 text-sm"><div class="font-bold text-base mb-1">✅ ' + (data.message || 'Update installed!') + '</div><div class="text-ak-green/80 text-xs">The page will reload in 3 seconds...</div></div>';
+      showToast('✓ Update installed successfully!', 'success', 5000);
+      setTimeout(() => location.reload(), 3000);
+    } else {
+      result.innerHTML = '<div class="bg-ak-red/15 border border-ak-red/30 text-ak-red rounded-lg px-4 py-3 text-sm"><div class="font-bold mb-1">❌ Update Failed</div><div class="text-ak-red/80 text-xs">' + (data.message || 'Unknown error') + '</div></div>';
+      btn.disabled = false;
+      btn.innerHTML = '⚡ Install Update';
+      status.textContent = '';
+    }
+  } catch (err) {
+    progress.classList.add('hidden');
+    result.classList.remove('hidden');
+    result.innerHTML = '<div class="bg-ak-red/15 border border-ak-red/30 text-ak-red rounded-lg px-4 py-3 text-sm">❌ Network error during update. Please try again.</div>';
+    btn.disabled = false;
+    btn.innerHTML = '⚡ Install Update';
+    status.textContent = '';
+  }
+}
+
 </script>
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 </body>
