@@ -80,7 +80,7 @@ foreach ($tables as $table) {
     $chunks = array_chunk($rows, 100);
     foreach ($chunks as $chunk) {
         $values = array_map(function($row) {
-            return '(' . implode(', ', array_map(fn($v) => $v === null ? 'NULL' : "'" . addslashes($v) . "'", $row)) . ')';
+            return '(' . implode(', ', array_map(fn($v) => $v === null ? 'NULL' : $db->quote((string)$v), $row)) . ')';
         }, $chunk);
         $sql .= "INSERT INTO `$table` ($colList) VALUES\n";
         $sql .= implode(",\n", $values) . ";\n";

@@ -5,6 +5,8 @@ require_once __DIR__ . '/../includes/constants.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/mailer.php';
 require_once __DIR__ . '/../includes/branding.php';
+require_once __DIR__ . "/../includes/session_config.php";
+configureSession();
 session_start();
 
 $db = db();
@@ -70,11 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = sendEmail($db, $email, $user['name'] ?? '', $subject, $htmlBody);
 
                 if (!$result['success']) {
-                    // Email failed — fall back to showing link on screen
-                    $error = 'Could not send email: ' . $result['message'];
-                    // Still show the link as fallback
+                    // Email failed — log error, show generic message (never expose token)
+                    error_log('[AuctionKai] Password reset email failed for ' . $email . ': ' . ($result['message'] ?? 'unknown error'));
                     $sent = true;
-                    $fallbackLink = $resetLink;
                 } else {
                     $sent = true;
                 }
@@ -117,13 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <?php if ($sent): ?>
         <div class="bg-ak-green/15 text-ak-green px-4 py-3 rounded-lg text-sm mb-5">
-          <?php if (!empty($fallbackLink)): ?>
-            <p class="mb-2 font-semibold">Email could not be sent, but here is your reset link:</p>
-            <p class="break-all font-mono text-xs bg-ak-bg p-3 rounded text-ak-text"><?= h($fallbackLink) ?></p>
-          <?php else: ?>
             <p class="font-semibold">✓ Reset link sent!</p>
             <p class="mt-1 text-ak-green/80">If that email exists in our system, you'll receive a password reset link shortly. Check your inbox and spam folder.</p>
-          <?php endif; ?>
         </div>
         <div class="text-center mt-5">
           <a href="login.php" class="btn btn-gold w-full inline-block text-center">← Back to Login</a>

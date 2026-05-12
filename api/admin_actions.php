@@ -60,8 +60,8 @@ switch ($action) {
                 echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
                 exit;
             }
-            if (strlen($newPass) < 6) {
-                echo json_encode(['success' => false, 'message' => 'New password must be at least 6 characters.']);
+            if (strlen($newPass) < 8 || !preg_match('/[A-Z]/', $newPass) || !preg_match('/[a-z]/', $newPass) || !preg_match('/[0-9]/', $newPass)) {
+                echo json_encode(['success' => false, 'message' => 'New password must be at least 8 characters and contain uppercase, lowercase, and a number.']);
                 exit;
             }
             $hash = password_hash($newPass, PASSWORD_DEFAULT);
@@ -85,8 +85,8 @@ switch ($action) {
             echo json_encode(['success' => false, 'message' => 'Username, name, and password are required.']);
             exit;
         }
-        if (strlen($password) < 6) {
-            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters.']);
+        if (strlen($password) < 8 || !preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters and contain uppercase, lowercase, and a number.']);
             exit;
         }
         $chk = $db->prepare("SELECT id FROM users WHERE username=?");
@@ -115,7 +115,7 @@ switch ($action) {
             'mail_from_name'  => trim($_POST['mail_from_name'] ?? 'AuctionKai Settlement System'),
         ]);
         if (!empty($newPass)) {
-            saveSetting($db, 'mail_password', $newPass);
+            saveSetting($db, 'mail_password', encryptSetting($newPass));
         }
         echo json_encode(['success' => true, 'message' => 'Email settings saved (' . ucfirst($provider) . ')']);
         exit;

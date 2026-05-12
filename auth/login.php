@@ -43,6 +43,26 @@ function logLoginHistory(PDO $db, int $userId, string $status): void {
   }
 }
 
+// Login rate limit — database-based (IP + username)
+function checkLoginRateLimit(PDO $db, string $username): bool {
+    try {
+        $window = 15 * 60; // 15 minutes
+        $since = date('Y-m-d H:i:s', time() - $window);
+        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+
+        $stmt = $db->prepare("
+            SELECT COUNT(*) FROM login_history
+            WHERE (ip_address = ? OR user_id IN (SELECT id FROM users WHERE username = ?))
+              AND status = 'failed'
+              AND created_at > ?
+        ");
+        $stmt->execute([$ip, $username, $since]);
+        return (int)$stmt->fetchColumn() >= 5;
+    } catch (Exception $e) {
+        return false; // Never block on error
+    }
+}
+
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
 $tok = $_SESSION['tok'];
 
@@ -56,15 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    // Brute force protection
-    $attemptKey = 'login_attempts_' . $username;
-    if (!isset($_SESSION[$attemptKey])) $_SESSION[$attemptKey] = ['count' => 0, 'last' => 0];
-    $att = &$_SESSION[$attemptKey];
-    if ($att['count'] >= MAX_LOGIN_ATTEMPTS && (time() - $att['last']) < LOGIN_LOCKOUT_SECONDS) {
-        $remaining = 30 - (time() - $att['last']);
-        $error = "Too many failed attempts. Try again in {$remaining}s.";
-    }
-    elseif ($username === '' || $password === '') {
+    // Database-based rate limit check
+    if (checkLoginRateLimit($db, $username)) {
+        $error = 'Too many failed login attempts. Please wait 15 minutes before trying again.';
+    } elseif ($username === '' || $password === '') {
         $error = 'Please fill in all fields.';
     } else {
         $stmt = $db->prepare("SELECT id, username, password, name, email, role, status, suspended_until, suspend_reason FROM users WHERE username = ?");
@@ -95,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
                 $error = 'Your account has been restricted. Contact an administrator.';
             }
             if ($userStatus === 'active') {
-                unset($_SESSION[$attemptKey]);
+                // Rate limit cleared on success (DB-based, no session tracking needed)
                 logActivity($db, (int)$user['id'], 'login', 'user', (int)$user['id'], "Login from IP: " . ($_SERVER['REMOTE_ADDR'] ?? ''));
                 logLoginHistory($db, (int)$user['id'], 'success');
                 $_SESSION['user_id'] = (int)$user['id'];
@@ -107,8 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
                 exit;
             }
         } else {
-            $att['count']++;
-            $att['last'] = time();
             $error = 'Invalid credentials.';
             require_once __DIR__ . '/../includes/activity.php';
             logActivity($db, 0, 'login.failed', 'user', 0, "Failed login for username: " . $username);
@@ -144,14 +157,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
     } else {
         // Verify reCAPTCHA if configured
         if (recaptchaEnabled() && recaptchaSecretKey()) {
-            $verify = file_get_contents('https://www.google.com/recaptcha/api/siteverify?' . http_build_query([
-                'secret' => recaptchaSecretKey(),
-                'response' => $_POST['g-recaptcha-response'] ?? '',
-                'remoteip' => $_SERVER['REMOTE_ADDR'] ?? ''
-            ]));
-            $recaptchaResult = json_decode($verify, true);
-            if (empty($recaptchaResult['success'])) {
-                $error = 'CAPTCHA verification failed. Please try again.';
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => 'https://www.google.com/recaptcha/api/siteverify',
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => http_build_query([
+                    'secret' => recaptchaSecretKey(),
+                    'response' => $_POST['g-recaptcha-response'] ?? '',
+                    'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                ]),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 5,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+            $verify = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($verify === false || $httpCode !== 200) {
+                error_log('[AuctionKai] reCAPTCHA verification request failed');
+                // Don't block on failure — allow through
+            } else {
+                $recaptchaResult = json_decode($verify, true);
+                if (empty($recaptchaResult['success'])) {
+                    $error = 'CAPTCHA verification failed. Please try again.';
+                }
             }
         }
         // Check username/email uniqueness
@@ -332,10 +362,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <script src="../js/app.js"></script>
 <script>
 <?php if (!empty($error)): ?>
-showToast('<?= addslashes($error) ?>', 'error');
+showToast(<?= json_encode($error) ?>, 'error');
 <?php endif; ?>
 <?php if (!empty($success)): ?>
-showToast('<?= addslashes($success) ?>', 'success');
+showToast(<?= json_encode($success) ?>, 'success');
 <?php endif; ?>
 </script>
 </body>

@@ -255,10 +255,10 @@ function parseOS(string $ua): string {
 <script>const CSRF_TOKEN = '<?= h($tok ?? $_SESSION["tok"] ?? "") ?>';</script>
 <script>
 <?php if (!empty($error)): ?>
-showToast('<?= addslashes($error) ?>', 'error');
+showToast(<?= json_encode($error) ?>, 'error');
 <?php endif; ?>
 <?php if (!empty($success)): ?>
-showToast('<?= addslashes($success) ?>', 'success');
+showToast(<?= json_encode($success) ?>, 'success');
 <?php endif; ?>
 document.addEventListener('DOMContentLoaded', function() {
   <?php

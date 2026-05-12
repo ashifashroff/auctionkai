@@ -5,6 +5,13 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/branding.php';
 require_once __DIR__ . '/../includes/activity.php';
 
+// CSRF check for GET requests
+$getToken = $_GET['_tok'] ?? '';
+if (empty($getToken) || $getToken !== ($_SESSION['tok'] ?? '')) {
+    http_response_code(403);
+    exit('Forbidden — invalid CSRF token');
+}
+
 if (!class_exists('ZipArchive')) {
     http_response_code(500);
     exit('ZIP extension not available on this server. Please contact your host.');

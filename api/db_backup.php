@@ -9,6 +9,15 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
     exit('Forbidden');
 }
 
+// CSRF protection — require valid token
+$getToken = $_GET['_tok'] ?? '';
+if (empty($getToken) || $getToken !== ($_SESSION['tok'] ?? '')) {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'CSRF token required']);
+    exit;
+}
+
 $db = db();
 $filename = 'auctionkai_backup_' . date('Y-m-d_H-i-s') . '.sql';
 
@@ -76,7 +85,7 @@ foreach ($tables as $table) {
     foreach ($rows as $row) {
         $values = array_map(function($val) use ($db) {
             if ($val === null) return 'NULL';
-            return "'" . addslashes($val) . "'";
+            return $db->quote((string)$val);
         }, $row);
         $batch[] = '(' . implode(', ', $values) . ')';
 

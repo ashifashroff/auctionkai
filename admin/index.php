@@ -251,19 +251,19 @@ $tabs = [
             <?php if (!$isSelf): ?>
               <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="login_as"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-dark btn-sm text-[11px]" type="submit">Login As</button></form>
             <?php endif; ?>
-            <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['username'])) ?>','<?= h(addslashes($u['name'])) ?>','<?= h(addslashes($u['email'])) ?>','<?= h($u['role']) ?>')">Edit</button>
+            <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h($u['username']) ?>','<?= h($u['name']) ?>','<?= h($u['email']) ?>','<?= h($u['role']) ?>')">Edit</button>
             <?php if (!$isSelf): ?>
               <?php if ($st==='suspended'): ?>
                 <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="unsuspend_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/20 text-ak-green border border-ak-green/30 hover:bg-ak-green/30" type="submit">Reactivate</button></form>
               <?php else: ?>
-                <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['name'])) ?>')">Suspend</button>
+                <button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" onclick="openSuspendModal(<?= (int)$u['id'] ?>,'<?= h($u['name']) ?>')">Suspend</button>
               <?php endif; ?>
               <?php if ($isDisabled): ?>
                 <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="enable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/15 text-ak-green border border-ak-green/30 hover:bg-ak-green/25" type="submit">Enable</button></form>
               <?php else: ?>
                 <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="disable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/25" type="submit">Disable</button></form>
               <?php endif; ?>
-              <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete user <?= h(addslashes($u['name'])) ?>? This will also delete all their data.')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">Delete</button></form>
+              <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete user <?= h($u['name']) ?>? This will also delete all their data.')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30 hover:bg-ak-red/25" type="submit">Delete</button></form>
             <?php endif; ?>
           </div>
         </td>
@@ -315,14 +315,14 @@ $tabs = [
     <?php if (!$isSelf): ?>
       <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="login_as"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-dark btn-sm text-[11px]" type="submit">Login As</button></form>
     <?php endif; ?>
-    <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h(addslashes($u['username'])) ?>','<?= h(addslashes($u['name'])) ?>','<?= h(addslashes($u['email'])) ?>','<?= h($u['role']) ?>')">Edit</button>
+    <button class="btn btn-dark btn-sm text-[11px]" onclick="openEditUserModal(<?= (int)$u['id'] ?>,'<?= h($u['username']) ?>','<?= h($u['name']) ?>','<?= h($u['email']) ?>','<?= h($u['role']) ?>')">Edit</button>
     <?php if (!$isSelf): ?>
       <?php if ($isDisabled): ?>
         <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="enable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-green/15 text-ak-green border border-ak-green/30" type="submit">Enable</button></form>
       <?php else: ?>
         <form method="POST" action="actions.php" style="display:inline"><input type="hidden" name="action" value="disable_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-yellow-500/15 text-yellow-400 border border-yellow-500/30" type="submit">Disable</button></form>
       <?php endif; ?>
-      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete <?= h(addslashes($u['name'])) ?>?')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30" type="submit">Delete</button></form>
+      <form method="POST" action="actions.php" style="display:inline" onsubmit="return confirm('Delete <?= h($u['name']) ?>?')"><input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="<?= (int)$u['id'] ?>"><input type="hidden" name="_tok" value="<?= h($tok) ?>"><button class="btn btn-sm text-[11px] bg-ak-red/15 text-ak-red border border-ak-red/30" type="submit">Delete</button></form>
     <?php endif; ?>
   </div>
 </div>
@@ -641,7 +641,7 @@ $currentProvider = $settings['mail_provider'] ?? 'smtp';
       <div class="text-ak-text font-semibold text-sm mb-1">🗄 Manual SQL Backup</div>
       <div class="text-ak-muted text-xs leading-relaxed max-w-lg">Downloads a complete SQL dump of all tables. Safe to import directly into phpMyAdmin.</div>
     </div>
-    <a href="../api/db_backup.php" class="btn btn-gold" onclick="showBackupToast()">↓ Download Backup</a>
+    <a href="../api/db_backup.php?_tok=<?= h($_SESSION["tok"] ?? "") ?>" class="btn btn-gold" onclick="showBackupToast()">↓ Download Backup</a>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-ak-border">
     <div><div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-1">Format</div><div class="text-ak-text2 text-sm">SQL (phpMyAdmin compatible)</div></div>

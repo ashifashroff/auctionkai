@@ -41,7 +41,7 @@ function sendEmail(
             $mail->isSMTP();
             $mail->SMTPAuth = true;
             $mail->Username = $s['mail_username'] ?? '';
-            $mail->Password = $s['mail_password'] ?? '';
+            $mail->Password = decryptSetting($s['mail_password'] ?? '');
             $mail->SMTPOptions = [
                 'ssl' => [
                     'verify_peer' => false,
@@ -152,7 +152,7 @@ function sendSettlementEmail(
             $mail->isSMTP();
             $mail->SMTPAuth = true;
             $mail->Username = $s['mail_username'] ?? '';
-            $mail->Password = $s['mail_password'] ?? '';
+            $mail->Password = decryptSetting($s['mail_password'] ?? '');
             $mail->SMTPOptions = [
                 'ssl' => [
                     'verify_peer' => false,

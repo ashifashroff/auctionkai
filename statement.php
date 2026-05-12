@@ -108,26 +108,56 @@ if (strtotime($link['expires_at']) < time()) {
 // ── PIN verification ──────────────────────────
 $pinVerified = false;
 $pinError = '';
-$pinAttemptKey = 'pin_attempts_' . md5($token);
-$ipPinKey = 'pin_ip_' . md5($token . '_' . trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]));
-$maxAttempts = 5;
+$maxPinAttempts = 5;
 
-if (session_status() === PHP_SESSION_NONE) session_start();
-// Regenerate session ID after successful PIN to prevent fixation
+// IP-based PIN rate limiting (file-based, survives session reset)
+function getPinRateFile(string $token, string $ip): string {
+    return sys_get_temp_dir() . '/ak_pin_' . md5($token . '_' . $ip) . '.lock';
+}
+function checkPinRateLimit(string $token, string $ip, int $max): bool {
+    $file = getPinRateFile($token, $ip);
+    if (!file_exists($file)) return false;
+    $data = json_decode(file_get_contents($file), true);
+    if (!$data) return false;
+    if (time() - ($data['first'] ?? 0) > 900) return false; // 15-min window expired
+    return ($data['count'] ?? 0) >= $max;
+}
+function recordPinAttempt(string $token, string $ip): void {
+    $file = getPinRateFile($token, $ip);
+    $data = ['count' => 1, 'first' => time()];
+    if (file_exists($file)) {
+        $existing = json_decode(file_get_contents($file), true);
+        if ($existing && time() - ($existing['first'] ?? 0) < 900) {
+            $data = ['count' => ($existing['count'] ?? 0) + 1, 'first' => $existing['first']];
+        }
+    }
+    file_put_contents($file, json_encode($data));
+}
+function clearPinAttempts(string $token, string $ip): void {
+    $file = getPinRateFile($token, $ip);
+    if (file_exists($file)) @unlink($file);
+}
+
+$pinIp = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+
+if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+    if ($isHttps) ini_set('session.cookie_secure', '1');
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_samesite', 'Lax');
+    session_start();
+}
 $pinJustVerified = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
 
- $attempts = (int)($_SESSION[$pinAttemptKey] ?? 0) + (int)($_SESSION[$ipPinKey] ?? 0);
-
- if ($attempts >= $maxAttempts) {
- $pinError = 'Too many incorrect attempts. Please try again later.';
+ if (checkPinRateLimit($token, $pinIp, $maxPinAttempts)) {
+ $pinError = 'Too many incorrect PIN attempts. Please try again in 15 minutes.';
  } else {
  $enteredPin = trim($_POST['pin'] ?? '');
  if ($enteredPin === $link['pin']) {
  $pinVerified = true;
- $_SESSION[$pinAttemptKey] = 0;
- $_SESSION[$ipPinKey] = 0;
+ clearPinAttempts($token, $pinIp);
  $_SESSION['verified_token_' . md5($token)] = true;
  $pinJustVerified = true;
  session_regenerate_id(true);
@@ -141,10 +171,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
  ")->execute([$token]);
 
  } else {
- $_SESSION[$pinAttemptKey] = $attempts + 1;
- $_SESSION[$ipPinKey] = ($_SESSION[$ipPinKey] ?? 0) + 1;
- $remaining = $maxAttempts - ($attempts + 1);
- $pinError = "Incorrect PIN. {$remaining} attempt(s) remaining.";
+ recordPinAttempt($token, $pinIp);
+ $remaining = $maxPinAttempts - (checkPinRateLimit($token, $pinIp, $maxPinAttempts) ? $maxPinAttempts : (json_decode(file_get_contents(getPinRateFile($token, $pinIp)), true)['count'] ?? 0));
+ $pinError = "Incorrect PIN. " . max(0, $maxPinAttempts - $remaining) . " attempt(s) remaining.";
  }
  }
 } elseif (isset($_SESSION['verified_token_' . md5($token)])) {

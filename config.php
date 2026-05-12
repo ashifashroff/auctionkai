@@ -3,11 +3,17 @@
 if (file_exists(__DIR__ . '/.env')) {
     $lines = file(__DIR__ . '/.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        $parts = explode('=', $line, 2);
-        if (count($parts) === 2) {
-            $_ENV[trim($parts[0])] = trim($parts[1]);
+        $line = trim($line);
+        if (str_starts_with($line, '#')) continue;
+        if (!str_contains($line, '=')) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        // Strip surrounding quotes
+        if (preg_match('/^(["\'])(.*)\\1$/', $value, $m)) {
+            $value = $m[2];
         }
+        $_ENV[$key] = $value;
     }
 }
 
@@ -24,3 +30,6 @@ if (!defined('RECAPTCHA_SITE_KEY')) {
     define('RECAPTCHA_SITE_KEY', $_ENV['RECAPTCHA_SITE_KEY'] ?? '');
     define('RECAPTCHA_SECRET_KEY', $_ENV['RECAPTCHA_SECRET_KEY'] ?? '');
 }
+
+// Secret key for encrypting sensitive settings (SMTP passwords, etc.)
+define('APP_SECRET_KEY', getenv('APP_SECRET_KEY') ?: 'change-this-to-a-random-64-char-string');

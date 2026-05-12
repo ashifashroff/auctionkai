@@ -201,3 +201,32 @@ function appUrl(): string {
     $path = dirname($_SERVER['SCRIPT_NAME'] ?? '');
     return ($https ? 'https' : 'http') . '://' . $host . ($path !== '/' ? $path : '');
 }
+
+/**
+ * Encrypt a setting value using AES-256-CBC.
+ */
+function encryptSetting(string $value): string {
+    if ($value === '') return '';
+    $key = defined('APP_SECRET_KEY') ? APP_SECRET_KEY : (getenv('APP_SECRET_KEY') ?: 'auctionkai_default_key_change_me');
+    $iv = random_bytes(16);
+    $encrypted = openssl_encrypt($value, 'AES-256-CBC', hash('sha256', $key, true), 0, $iv);
+    return base64_encode($iv . $encrypted);
+}
+
+/**
+ * Decrypt a setting value encrypted with encryptSetting().
+ */
+function decryptSetting(string $value): string {
+    if ($value === '') return '';
+    try {
+        $key = defined('APP_SECRET_KEY') ? APP_SECRET_KEY : (getenv('APP_SECRET_KEY') ?: 'auctionkai_default_key_change_me');
+        $data = base64_decode($value);
+        if (strlen($data) < 17) return $value; // Not encrypted — return as-is (legacy)
+        $iv = substr($data, 0, 16);
+        $encrypted = substr($data, 16);
+        $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', hash('sha256', $key, true), 0, $iv);
+        return $decrypted !== false ? $decrypted : $value; // Fall back to raw value if decryption fails
+    } catch (Exception $e) {
+        return $value;
+    }
+}

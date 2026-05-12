@@ -5,14 +5,9 @@ require_once __DIR__ . '/../includes/activity.php';
 
 header('Content-Type: application/json');
 
-$data = $GLOBALS['_json_input'] ?? json_decode(file_get_contents('php://input'), true);
+$data = $GLOBALS['_json_input'] ?? [];
 
-// CSRF check
-$csrfToken = $data['_tok'] ?? '';
-if (empty($_SESSION['tok']) || !hash_equals($_SESSION['tok'], $csrfToken)) {
-    echo json_encode(['success' => false, 'message' => 'Invalid request']);
-    exit;
-}
+// CSRF already checked by api_bootstrap.php
 
 // Rate limiting: max 3 attempts per 5 minutes
 $rateKey = 'delacct_' . $userId;
