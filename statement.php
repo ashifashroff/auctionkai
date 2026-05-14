@@ -348,22 +348,30 @@ td.mono{font-family:'Space Mono',monospace;text-align:right}
 .page-footer{text-align:center;padding:24px;font-size:11px;color:#3A5570;border-top:1px solid #1E3A5F;margin-top:24px}
 .page-footer b{color:#5A7A90}
 @media print{
- body{background:#fff;color:#111}
- .topbar,.expiry-banner,.views-info,.page-footer{display:none}
- .stmt-card{background:#fff;border:1px solid #ddd;border-radius:0}
- .stmt-name{color:#111}
- .stmt-meta,.stmt-auction{color:#555}
- .section-title{color:#999}
- th{color:#555}
- td{border-color:#f0f0f0}
- .lot-badge{background:#f5f5f5;color:#B8912A}
- .fee-label{color:#555}
- .fee-label.dim{color:#999}
- .fee-deduction{color:#CC3333}
- .fee-addition{color:#2E7D52}
- .fee-neutral{color:#111}
- .fee-total-label,.fee-total-amount{color:#CC3333}
- .net-payout{background:<?= $accentColor ?>;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body{background:#fff!important;color:#111!important}
+ *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .topbar,.expiry-banner,.views-info,.page-footer,.btn-print{display:none!important}
+ .stmt-card{background:#fff!important;border:1px solid #ddd;border-radius:0}
+ .stmt-name{color:#111!important}
+ .stmt-meta,.stmt-auction{color:#555!important}
+ .section-title{color:#999!important;background:transparent!important}
+ table{background:#fff!important}
+ th{color:#555!important;background:#f5f5f5!important}
+ td{border-color:#f0f0f0!important;color:#111!important}
+ .lot-badge{background:#f5f5f5!important;color:#B8912A!important}
+ .sold-badge{background:#e8f5e9!important;color:#2E7D52!important}
+ .unsold-badge{background:#fce4ec!important;color:#C62828!important}
+ .fees-section{background:#fff!important}
+ .fee-label{color:#555!important}
+ .fee-label.dim{color:#999!important}
+ .fee-deduction{color:#CC3333!important}
+ .fee-addition{color:#2E7D52!important}
+ .fee-neutral{color:#111!important}
+ .fee-total-label,.fee-total-amount{color:#CC3333!important}
+ .fee-divider{border-top-color:#ddd!important}
+ .net-payout{background:<?= $accentColor ?>!important;color:#0A1420!important}
+ .net-label{color:#0A1420!important}
+ .net-amount{color:#0A1420!important}
  @page{size:A4;margin:15mm}
 }
 @media(max-width:600px){

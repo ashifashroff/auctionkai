@@ -25,6 +25,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0} .r{text-align:right;font-fa
 .bp{background:#D4A84B;color:#0A1420;border:none;border-radius:8px;padding:9px 22px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;margin-left:auto}
 .bp:hover{opacity:.9}
 @media print{
+ *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .ctrl{display:none!important}
   body{background:#fff!important}
   .page{margin:0!important;box-shadow:none!important;width:100%!important;min-height:auto!important;page-break-after:always}
