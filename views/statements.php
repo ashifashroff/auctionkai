@@ -164,11 +164,12 @@ foreach ($members as $m) {
         </div>
 
         <!-- Share link result -->
-        <div id="link-result-<?= (int)$m['id'] ?>" class="hidden w-full mt-1 p-3 rounded-xl border border-ak-border bg-ak-infield"></div>
       </div>
     </div>
 
     <button class="w-full px-4 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-gold hover:bg-ak-infield/50 transition-colors sm:hidden" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.stmt-chevron').classList.toggle('rotate-180')"><span>📊 View Breakdown</span><span class="stmt-chevron transition-transform">▾</span></button><div class="sb2 hidden sm:grid">
+      <!-- Share link result (inside breakdown) -->
+      <div id="link-result-<?= (int)$m['id'] ?>" class="hidden col-span-2 p-3 rounded-xl border border-ak-border bg-ak-infield mb-2"></div>
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
         <?php foreach ($s['mv'] as $v): $vTax = round((float)$v['sold_price'] * 0.10); $vRecycle = (float)($v['recycle_fee'] ?? 0); ?>
