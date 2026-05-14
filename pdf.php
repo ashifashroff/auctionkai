@@ -168,7 +168,7 @@ window.addEventListener('beforeprint', function() {
   if (landscapePages.length > 0) {
     var style = document.createElement('style');
     style.id = 'dynamic-landscape';
-    style.textContent = '@page { size: A4 landscape; margin: 4mm; }';
+    style.textContent = '@page { size: A4 landscape; margin: 0mm; }';
     document.head.appendChild(style);
   }
 });
