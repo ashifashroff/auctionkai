@@ -60,6 +60,15 @@ if ($activeAuctionId) {
 
 if (empty($targets)) { echo 'No members found.'; exit; }
 
+// Detect if any sold vehicle exceeds ¥1,000,000 → use landscape
+$useLandscape = false;
+if ($activeAuctionId) {
+    $maxPrice = $db->prepare("SELECT MAX(sold_price) FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id = ? AND v.sold = 1 AND m.user_id = ?");
+    $maxPrice->execute([$activeAuctionId, $userId]);
+    if ((float)$maxPrice->fetchColumn() >= 1000000) $useLandscape = true;
+}
+$pageClass = $useLandscape ? 'page landscape' : 'page';
+
 // Fetch payment statuses
 $paymentStatuses = [];
 if ($activeAuctionId) {
@@ -83,7 +92,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     }
     $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
-    <div class='page'>
+    <div class='{$pageClass}'>
       " . ($payStatus === 'paid' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #2E7D52;color:#2E7D52;padding:6px 16px;border-radius:4px;font-size:22px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PAID</div>" : ($payStatus === 'partial' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #B8912A;color:#B8912A;padding:6px 16px;border-radius:4px;font-size:18px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PARTIAL</div>" : '')) . "
       <div class='hdr'>
         <div><div class='brand'>" . h($brand['brand_name']) . " <span>精算書</span></div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div>" . ((!empty($brand['brand_email']) || !empty($brand['brand_phone'])) ? "<div style='font-size:11px;color:#666;margin-top:4px'>" . (!empty($brand['brand_email']) ? '✉ ' . h($brand['brand_email']) . ' ' : '') . (!empty($brand['brand_phone']) ? '📞 ' . h($brand['brand_phone']) : '') . "</div>" : "") . "</div>
@@ -129,6 +138,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pdf.css?v=3.8.1">
+<?php if ($useLandscape): ?><style>@page{size:A4 landscape;margin:12mm}</style><?php endif; ?>
 </head>
 <body>
 

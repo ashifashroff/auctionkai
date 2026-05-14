@@ -1,6 +1,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Noto Sans JP',sans-serif;background:#ffffff;color:#111;font-size:13px;line-height:1.5}
-.page{position:relative;background:#fff;width:297mm;min-height:auto;margin:0 auto 20px;padding:40px 44px;box-shadow:0 4px 24px rgba(0,0,0,.15)}
+.page{position:relative;background:#fff;width:210mm;min-height:auto;margin:0 auto 20px;padding:40px 44px;box-shadow:0 4px 24px rgba(0,0,0,.15)}
 .hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #111;padding-bottom:16px;margin-bottom:28px}
 .brand{font-size:26px;font-weight:700;letter-spacing:-.5px} .brand span{color:#B8912A}
 .sub{font-size:11px;color:#666;margin-top:3px}
@@ -27,7 +27,7 @@ td{padding:8px 6px;border-bottom:1px solid #f0f0f0;font-size:11px} .r{text-align
 .bp:hover{opacity:.9}
 
 @media print{
- @page{size:A4 landscape;margin:12mm}
+ @page{size:A4;margin:12mm}
 
  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .ctrl{display:none!important}
@@ -53,3 +53,7 @@ td{padding:8px 6px;border-bottom:1px solid #f0f0f0;font-size:11px} .r{text-align
   .row{font-size:12px}
   .fees{padding:14px}
 }
+
+.page.landscape{width:297mm}
+.page.landscape ~ .page.landscape,
+.page.landscape + .page.landscape{width:297mm}
