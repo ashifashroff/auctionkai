@@ -159,7 +159,7 @@ async function generateStatementLink(memberId, auctionId, btnEl) {
     const res = await fetch('api/generate_link.php', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({member_id: memberId, auction_id: auctionId})
+      body: JSON.stringify({member_id: memberId, auction_id: auctionId, _tok: CSRF_TOKEN})
     });
     const data = await res.json();
     if (data.success) {
