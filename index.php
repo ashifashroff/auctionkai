@@ -198,11 +198,11 @@ foreach ($members as $m) {
 </div>
 
 <script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;const CSRF_TOKEN = '<?= h($tok) ?>';</script>
-<script src="js/common.js?v=3.6"></script>
-<script src="js/vehicles.js?v=3.6"></script>
-<script src="js/members.js?v=3.6"></script>
-<script src="js/statements.js?v=3.6"></script>
-<script src="js/fees.js?v=3.6"></script>
+<script src="js/common.js?v=3.8.1"></script>
+<script src="js/vehicles.js?v=3.8.1"></script>
+<script src="js/members.js?v=3.8.1"></script>
+<script src="js/statements.js?v=3.8.1"></script>
+<script src="js/fees.js?v=3.8.1"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof VehiclesPager !== 'undefined' && document.getElementById('vehicles-tbody')) {

@@ -66,7 +66,7 @@ function parseOS(string $ua): string {
 <title>AuctionKai — Profile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.5">
+<link rel="stylesheet" href="css/style.css?v=3.8.1">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -250,8 +250,8 @@ function parseOS(string $ua): string {
 <?php require_once 'includes/footer.php'; ?>
 <!-- Toast Container -->
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
-<script src="js/common.js?v=3.6"></script>
-<script src="js/members.js?v=3.6"></script>
+<script src="js/common.js?v=3.8.1"></script>
+<script src="js/members.js?v=3.8.1"></script>
 <script>const CSRF_TOKEN = '<?= h($tok ?? $_SESSION["tok"] ?? "") ?>';</script>
 <script>
 <?php if (!empty($error)): ?>

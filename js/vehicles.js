@@ -580,7 +580,6 @@ document.addEventListener('dblclick', function(e) {
     if (ev.key === 'Escape') { td.textContent = currentValue; }
   });
 });
-JSEEOF
 // ── Toggle all columns ───────────────────────
 function toggleAllColumns(btn) {
   const hiddenCols = document.querySelectorAll('.hide-md');

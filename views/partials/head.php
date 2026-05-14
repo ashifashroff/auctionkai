@@ -7,7 +7,7 @@
 <title><?= h($brand['brand_name'] ?? 'AuctionKai') ?> — <?= h($brand['brand_tagline'] ?? 'Settlement System') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.5">
+<link rel="stylesheet" href="css/style.css?v=3.8.1">
 <?php include 'css/tailwind-config.php'; ?>
 <style>
 :root {

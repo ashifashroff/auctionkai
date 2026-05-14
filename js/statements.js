@@ -239,4 +239,3 @@ async function markAllUnpaidAsPaid() {
   showToast(`✓ ${success} marked as paid${failed ? `, ${failed} failed` : ''}`, success ? 'success' : 'error');
   setTimeout(() => location.reload(), 1500);
 }
-JSEEOF
