@@ -528,7 +528,6 @@ td.mono{font-family:'Space Mono',monospace;text-align:right}
  <div class="net-payout">
  <div>
  <div class="net-label">NET PAYOUT</div>
- <div class="net-label">お支払い額</div>
  </div>
  <div class="net-amount">¥<?= number_format($s['netPayout']) ?></div>
  </div>

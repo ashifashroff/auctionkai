@@ -137,7 +137,9 @@ foreach ($members as $m) {
 
         <!-- Row 2: Email + WhatsApp + Share -->
         <div class="flex gap-1.5 w-full sm:w-auto">
+          <?php if (!empty($m['email'])): ?>
           <button onclick="sendStatementEmail(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="btn-email flex-1 sm:flex-none text-center text-xs py-1.5" id="email-btn-<?= (int)$m['id'] ?>">✉ Email</button>
+          <?php endif; ?>
 
           <?php
             $memberSpecialFees = $memberFeesAll[$m['id']] ?? [];

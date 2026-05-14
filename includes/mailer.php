@@ -208,7 +208,7 @@ function sendSettlementEmail(
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($member['email'], $member['name']);
 
-        $mail->Subject = '精算書 / Settlement Statement — ' . ($brand['brand_name'] ?? 'AuctionKai') . ' · ' . $auction['name'] . ' (' . $auction['date'] . ')';
+        $mail->Subject = 'Settlement — ' . ($brand['brand_name'] ?? 'AuctionKai') . ' · ' . $auction['name'] . ' (' . $auction['date'] . ')';
         $mail->Body = $htmlBody;
         $mail->AltBody = strip_tags($htmlBody);
 
@@ -263,7 +263,7 @@ function buildEmailBody(
     <body style='font-family:sans-serif;background:#f4f4f4;padding:20px;color:#111;font-size:13px'>
       <div style='max-width:600px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1)'>
         <div style='background:#0A1420;padding:24px 32px'>
-          <div style='font-size:22px;font-weight:700;color:' . $accentColor . ''>⚡ ' . h($brandName) . ' 精算書</div>
+          <div style='font-size:22px;font-weight:700;color:' . $accentColor . ''>⚡ ' . h($brandName) . ' Settlement</div>
           <div style='font-size:12px;color:#6A88A0;margin-top:4px'>Settlement Statement · " . htmlspecialchars($auction['name']) . "</div>
         </div>
         <div style='padding:24px 32px 0'>

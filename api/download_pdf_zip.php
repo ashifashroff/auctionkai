@@ -112,7 +112,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
 </head>
 <body>
 <div class='hdr'>
-  <div><div class='brand'>⚡ <span>{$brandName}</span> 精算書</div><div class='sub'>Settlement Statement · {$aName}</div></div>
+  <div><div class='brand'>⚡ <span>Settlement</span></div><div class='sub'>Settlement · {$aName}</div></div>
   <div class='meta'><strong>{$mName}</strong>{$mPhone}<br>{$mEmail}<br><br>Date: {$aDate}</div>
 </div>
 <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
@@ -126,7 +126,7 @@ td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
   {$dedRows}
   <div class='row total'><span>Total Deductions</span><span>−¥" . number_format($s['totalDed']) . "</span></div>
 </div>
-<div class='net'><span class='net-l'>NET PAYOUT / お支払い額</span><span class='net-n'>¥" . number_format($s['netPayout']) . "</span></div>
+<div class='net'><span class='net-l'>NET PAYOUT</span><span class='net-n'>¥" . number_format($s['netPayout']) . "</span></div>
 <div class='footer'>{$aName} · {$aDate} · {$footerText}</div>
 </body></html>";
 }

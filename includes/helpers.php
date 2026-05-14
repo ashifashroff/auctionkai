@@ -61,7 +61,7 @@ function sanitizeInput(string $input, string $type = 'string'): mixed {
 function buildWhatsAppMessage(array $member, array $auction, array $s, array $specialFees = [], string $brandName = 'AuctionKai', string $shareUrl = ''): string {
     $fmt = fn(float $n) => '¥' . number_format(round($n));
 
-    $msg = "⚡ *{$brandName} 精算書*\n";
+    $msg = "⚡ *{$brandName} Settlement*\n";
     $msg .= "━━━━━━━━━━━━━━━━━━━\n";
     $msg .= "🏷 *{$auction['name']}*\n";
     $msg .= "📅 " . $auction['date'] . "\n";
@@ -107,7 +107,6 @@ function buildWhatsAppMessage(array $member, array $auction, array $s, array $sp
 
     $msg .= "━━━━━━━━━━━━━━━━━━━\n";
     $msg .= "💴 *NET PAYOUT*\n";
-    $msg .= "💴 *お支払い額*\n";
     $msg .= "💴 *" . $fmt($s['netPayout']) . "*\n";
     $msg .= "━━━━━━━━━━━━━━━━━━━\n\n";
 
@@ -159,7 +158,7 @@ function buildPdfHtml(array $member, array $auction, array $s, array $fees, arra
         .footer{text-align:center;color:#999;font-size:10px;margin-top:24px;padding-top:12px;border-top:1px solid #e8e8e8}
     </style></head><body>
         <div class="header">
-            <h1>⚡ ' . h($brandName) . ' 精算書</h1>
+            <h1>⚡ ' . h($brandName) . ' Settlement</h1>
             <div class="sub">' . h($auction['name']) . ' · ' . h($auction['date']) . '</div>
         </div>
         <div style="font-size:14px;font-weight:600;margin-bottom:12px">' . h($member['name']) . '</div>
@@ -183,7 +182,7 @@ function buildPdfHtml(array $member, array $auction, array $s, array $fees, arra
         '<div style="border-top:1px dashed #ccc;margin:8px 0"></div>
         <div class="fee-row deduction" style="font-weight:700"><span>Total Deductions</span><span>−' . $fmt($s['totalDed']) . '</span></div>
         <div class="net-box">
-            <div><div>NET PAYOUT</div><div style="font-size:11px">お支払い額</div></div>
+            <div>NET PAYOUT</div>
             <div class="amount">' . $fmt($s['netPayout']) . '</div>
         </div>
         <div class="footer">' . h($auction['name']) . ' · ' . h($auction['date']) . ' · ' . h($brand['brand_footer_text'] ?? 'Mirai Global Solutions') . '</div>
