@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/api_bootstrap.php';
+require_once '../includes/helpers.php';
 require_once '../includes/activity.php';
 
 header('Content-Type: application/json');
