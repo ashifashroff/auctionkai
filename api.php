@@ -53,8 +53,8 @@ if ($action === 'add_auction') {
         echo json_encode(['error' => 'Name and date are required.']);
         exit;
     }
-    $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, commission_fee, expires_at) VALUES (?,?,?,?,DATE_ADD(?, INTERVAL 14 DAY))");
-    $stmt->execute([$userId, $name, $date, $commissionFee, $date]);
+    $stmt = $db->prepare("INSERT INTO auction (user_id, name, date, commission_fee, expires_at) VALUES (?,?,?,?,DATE_ADD(NOW(), INTERVAL 14 DAY))");
+    $stmt->execute([$userId, $name, $date, $commissionFee]);
     $newId = (int)$db->lastInsertId();
     echo json_encode(['success' => true, 'message' => 'Auction created.', 'auction_id' => $newId]);
     exit;
