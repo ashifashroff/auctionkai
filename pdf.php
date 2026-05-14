@@ -60,15 +60,6 @@ if ($activeAuctionId) {
 
 if (empty($targets)) { echo 'No members found.'; exit; }
 
-// Detect if any sold vehicle exceeds ¥1,000,000 → use landscape
-$useLandscape = false;
-if ($activeAuctionId) {
-    $maxPrice = $db->prepare("SELECT MAX(sold_price) FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id = ? AND v.sold = 1 AND m.user_id = ?");
-    $maxPrice->execute([$activeAuctionId, $userId]);
-    if ((float)$maxPrice->fetchColumn() >= 1000000) $useLandscape = true;
-}
-$pageClass = $useLandscape ? 'page landscape' : 'page';
-
 // Fetch payment statuses
 $paymentStatuses = [];
 if ($activeAuctionId) {
@@ -77,7 +68,8 @@ if ($activeAuctionId) {
     foreach ($psq->fetchAll() as $ps) { $paymentStatuses[$ps['member_id']] = $ps; }
 }
 
-function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = []): string {
+function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = [], bool $useLandscape = false): string {
+    $pageClass = $useLandscape ? 'page landscape' : 'page';
     if (empty($brand)) {
         $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
     }
@@ -138,7 +130,6 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/pdf.css?v=3.8.1">
-<?php if ($useLandscape): ?><style>@page{size:A4 landscape;margin:12mm}</style><?php endif; ?>
 </head>
 <body>
 
@@ -154,7 +145,12 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     if ($s['count'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
-    echo renderStatement($m, $s, $auction, $payStatus, $brand);
+    // Detect if this member has any sold vehicle >= ¥1,000,000
+    $useLandscape = false;
+    foreach ($s['mv'] as $sv) {
+        if ((float)$sv['sold_price'] >= 1000000) { $useLandscape = true; break; }
+    }
+    echo renderStatement($m, $s, $auction, $payStatus, $brand, $useLandscape);
 
     // Log PDF generation to statement_history
     try {
