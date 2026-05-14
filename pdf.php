@@ -74,9 +74,8 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     }
     $rows = '';
     foreach ($s['mv'] as $v) {
-        $tax = round((float)$v['sold_price'] * 0.10);
-        $net = (float)$v['sold_price'] + $tax + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0);
-        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt($tax + (float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0) + (float)($v['sold_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt($net) . "</td></tr>";
+        $net = (float)$v['sold_price'] + round((float)$v['sold_price'] * 0.10) + (float)($v['recycle_fee'] ?? 0) - (float)($v['listing_fee'] ?? 0) - (float)($v['sold_fee'] ?? 0);
+        $rows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>" . fmt((float)$v['sold_price']) . "</td><td class='r'>" . fmt(round((float)$v['sold_price'] * 0.10)) . "</td><td class='r'>" . fmt((float)($v['recycle_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['listing_fee'] ?? 0)) . "</td><td class='r'>−" . fmt((float)($v['sold_fee'] ?? 0)) . "</td><td class='r' style='font-weight:700'>" . fmt($net) . "</td></tr>";
     }
     $uRows = '';
     foreach ($s['uv'] ?? [] as $v) {
@@ -91,8 +90,8 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         <div class='meta'><strong>" . h($m['name']) . "</strong> " . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
       </div>
       <div class='sec'>Sold Vehicles ({$s['count']} units)</div>
-      <table style='font-size:11px'>
-        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold</th><th class='r'>Tax+Recycle</th><th class='r'>Fees</th><th class='r'>Net</th></tr></thead>
+      <table>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Sold Price</th><th class='r'>Tax 10%</th><th class='r'>Recycle</th><th class='r'>Listing</th><th class='r'>Sold Fee</th><th class='r'>Net</th></tr></thead>
         <tbody>{$rows}</tbody>
       </table>
       " . ($s['unsoldCount'] > 0 ? "
