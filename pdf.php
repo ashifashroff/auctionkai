@@ -69,7 +69,8 @@ if ($activeAuctionId) {
 }
 
 function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = [], bool $useLandscape = false): string {
-    $pageClass = $useLandscape ? 'page landscape' : 'page';
+    $landscapeStyle = $useLandscape ? ' style="width:297mm"' : '';
+    $landscapePage = $useLandscape ? ' data-landscape="1"' : '';
     if (empty($brand)) {
         $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
     }
@@ -84,7 +85,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     }
     $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
     return "
-    <div class='{$pageClass}'>
+    <div class='page'{$landscapeStyle}{$landscapePage}>
       " . ($payStatus === 'paid' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #2E7D52;color:#2E7D52;padding:6px 16px;border-radius:4px;font-size:22px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PAID</div>" : ($payStatus === 'partial' ? "<div style='position:absolute;top:40px;right:44px;transform:rotate(-15deg);border:3px solid #B8912A;color:#B8912A;padding:6px 16px;border-radius:4px;font-size:18px;font-weight:900;opacity:0.35;letter-spacing:2px;font-family:Space Mono,monospace'>PARTIAL</div>" : '')) . "
       <div class='hdr'>
         <div><div class='brand'>" . h($brand['brand_name']) . " <span>精算書</span></div><div class='sub'>Settlement Statement · " . h($auction['name']) . $exp . "</div>" . ((!empty($brand['brand_email']) || !empty($brand['brand_phone'])) ? "<div style='font-size:11px;color:#666;margin-top:4px'>" . (!empty($brand['brand_email']) ? '✉ ' . h($brand['brand_email']) . ' ' : '') . (!empty($brand['brand_phone']) ? '📞 ' . h($brand['brand_phone']) : '') . "</div>" : "") . "</div>
@@ -160,5 +161,21 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 
 endforeach; ?>
 
+<script>
+// Auto-set print orientation per page based on data-landscape attribute
+window.addEventListener('beforeprint', function() {
+  var landscapePages = document.querySelectorAll('[data-landscape="1"]');
+  if (landscapePages.length > 0) {
+    var style = document.createElement('style');
+    style.id = 'dynamic-landscape';
+    style.textContent = '@page { size: A4 landscape; margin: 12mm; }';
+    document.head.appendChild(style);
+  }
+});
+window.addEventListener('afterprint', function() {
+  var el = document.getElementById('dynamic-landscape');
+  if (el) el.remove();
+});
+</script>
 </body>
 </html>
