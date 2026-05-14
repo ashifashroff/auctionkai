@@ -480,13 +480,13 @@ td.mono{font-family:'Space Mono',monospace;text-align:right}
  <?php endif; ?>
  <?php if (($s['soldFeeTotal']??0) > 0): ?>
  <div class="fee-row">
- <span class="fee-label dim">－ Sold Fee (落札手数料)</span>
+ <span class="fee-label dim">－ Sold Fee</span>
  <span class="fee-amount fee-deduction">－¥<?= number_format($s['soldFeeTotal']) ?></span>
  </div>
  <?php endif; ?>
  <?php if (($s['nagareFeeTotal']??0) > 0): ?>
  <div class="fee-row">
- <span class="fee-label dim">－ Nagare Fee (流れ費用)</span>
+ <span class="fee-label dim">－ Nagare Fee</span>
  <span class="fee-amount fee-deduction">－¥<?= number_format($s['nagareFeeTotal']) ?></span>
  </div>
  <?php endif; ?>

@@ -212,7 +212,7 @@ foreach ($members as $m) {
         <?php endif; ?>
         <?php endif; ?>
         <div class="dt"><span class="dt-l">Total Deductions</span><span class="dt-n">−<?= fmt($s['totalDed']) ?></span></div>
-        <div class="np"><span class="np-l">NET PAYOUT / お支払い額</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
+        <div class="np"><span class="np-l">NET PAYOUT</span><span class="np-n"><?= fmt($s['netPayout']) ?></span></div>
       </div>
 
       <?php
