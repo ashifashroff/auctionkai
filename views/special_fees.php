@@ -121,7 +121,7 @@
         </td>
         <td class="text-ak-muted text-xs font-mono"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></td>
         <td>
-          <button class="btn-icon" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
+          <button class="btn-icon min-w-[36px] min-h-[36px] sticky right-0" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
         </td>
       </tr>
       <?php endforeach; ?>
