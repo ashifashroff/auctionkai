@@ -120,7 +120,7 @@
           <?= $isAdd ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?>
         </td>
         <td class="text-ak-muted text-xs font-mono"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></td>
-        <td class="sticky right-0 bg-ak-card">
+        <td>
           <button class="btn-icon" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
         </td>
       </tr>
