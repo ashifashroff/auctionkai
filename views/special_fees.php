@@ -76,7 +76,7 @@
         <th>Type</th>
         <th class="r">Amount</th>
         <th>Added</th>
-        <th></th>
+        
       </tr>
     </thead>
     <tbody id="specialFeesTableBody">
@@ -118,11 +118,9 @@
         </td>
         <td class="text-right font-mono font-bold <?= $isAdd ? 'text-ak-green' : 'text-ak-red' ?>">
           <?= $isAdd ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?>
+          <button class="btn-icon ml-2" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
         </td>
         <td class="text-ak-muted text-xs font-mono"><?= date('Y-m-d', strtotime($fee['created_at'])) ?></td>
-        <td>
-          <button class="btn-icon min-w-[36px] min-h-[36px] sticky right-0" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
-        </td>
       </tr>
       <?php endforeach; ?>
       <?php endif; ?>
