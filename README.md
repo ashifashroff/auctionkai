@@ -95,6 +95,34 @@ No sold vehicles means ¥0 net payout.
 
 ---
 
+## 📱 Mobile App (PWA)
+
+AuctionKai supports installation as a Progressive Web App on iPhone and Android — no App Store required.
+
+### Install on iPhone (Safari)
+1. Open AuctionKai in Safari
+2. Tap the Share button (□↑)
+3. Scroll down → tap "Add to Home Screen"
+4. Tap "Add" — the app icon appears
+5. Open from home screen — runs like a native app (no browser bar)
+
+### Install on Android (Chrome)
+1. Open AuctionKai in Chrome
+2. Tap the install banner or menu → "Add to Home Screen"
+3. Tap "Install"
+
+### PWA Features
+- Installable on iPhone and Android
+- Full screen — no browser navigation bar
+- Safe area support for iPhone notch
+- Offline page when no connection
+- App icon with ⚡ AuctionKai branding
+- Shortcuts to Members, Vehicles, Statements
+- Auto-update notification when new version is deployed
+- Background sync ready for future use
+
+---
+
 ## File Structure
 
 ```

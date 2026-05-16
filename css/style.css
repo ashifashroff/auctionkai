@@ -957,3 +957,21 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold) !important
     padding: 20px !important;
   }
 }
+
+/* ── PWA Standalone Mode ───────────────── */
+@media (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior: none;
+  }
+  .topbar-inner {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+  }
+  .mobile-bottom-tabs {
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  }
+  .browser-only { display: none !important; }
+  * { -webkit-overflow-scrolling: touch; }
+}
+:root { color-scheme: dark; }

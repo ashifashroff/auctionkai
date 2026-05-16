@@ -1,0 +1,28 @@
+{
+  "name": "AuctionKai",
+  "short_name": "AuctionKai",
+  "description": "Japanese Auto Auction Settlement Management System",
+  "start_url": "/?pwa=1",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A1420",
+  "theme_color": "#D4A84B",
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    { "src": "icons/icon-72.png", "sizes": "72x72", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-128.png", "sizes": "128x128", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-144.png", "sizes": "144x144", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-152.png", "sizes": "152x152", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "categories": ["business", "finance"],
+  "shortcuts": [
+    { "name": "Members", "short_name": "Members", "url": "/?tab=members", "icons": [{"src": "icons/icon-96.png", "sizes": "96x96"}] },
+    { "name": "Vehicles", "short_name": "Vehicles", "url": "/?tab=vehicles", "icons": [{"src": "icons/icon-96.png", "sizes": "96x96"}] },
+    { "name": "Statements", "short_name": "Statements", "url": "/?tab=statements", "icons": [{"src": "icons/icon-96.png", "sizes": "96x96"}] }
+  ]
+}

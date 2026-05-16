@@ -418,3 +418,57 @@ function _showConfirmModal(title, message, onConfirm) {
   document.getElementById('confirmModalOk').onclick = () => { cleanup(); onConfirm(); };
   document.getElementById('confirmModalCancel').onclick = () => { cleanup(); };
 }
+
+// ── PWA Install Prompt ────────────────────────
+const PWAInstall = {
+  init() {
+    if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) return;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const dismissed = localStorage.getItem('pwa_prompt_dismissed');
+    if (dismissed && (Date.now() - parseInt(dismissed)) / (1000*60*60*24) < 7) return;
+    if (isIOS) {
+      setTimeout(() => {
+        const p = document.getElementById('iosInstallPrompt');
+        if (p) p.classList.remove('hidden');
+      }, 3000);
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
+      setTimeout(() => {
+        const p = document.getElementById('iosInstallPrompt');
+        if (p) {
+          const desc = p.querySelector('.text-ak-muted.text-xs');
+          if (desc) desc.innerHTML = 'Install AuctionKai for faster access and offline support.';
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-gold btn-sm mt-2 w-full';
+          btn.textContent = '+ Add to Home Screen';
+          btn.onclick = () => this.installApp();
+          p.querySelector('.flex-1')?.appendChild(btn);
+          p.classList.remove('hidden');
+        }
+      }, 3000);
+    });
+    window.addEventListener('appinstalled', () => {
+      localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
+      const p = document.getElementById('iosInstallPrompt');
+      if (p) p.remove();
+      if (typeof showToast === 'function') showToast('✓ AuctionKai installed!', 'success', 3000);
+    });
+  },
+  async installApp() {
+    if (!this.deferredPrompt) return;
+    this.deferredPrompt.prompt();
+    await this.deferredPrompt.userChoice;
+    this.deferredPrompt = null;
+  },
+  deferredPrompt: null,
+};
+
+function dismissInstallPrompt() {
+  const p = document.getElementById('iosInstallPrompt');
+  if (p) { p.style.opacity = '0'; p.style.transition = 'opacity 0.3s ease'; setTimeout(() => p.remove(), 300); }
+  localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
+}
+
+document.addEventListener('DOMContentLoaded', () => PWAInstall.init());
