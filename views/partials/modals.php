@@ -180,16 +180,15 @@
 </div>
 
 <!-- iOS Install Prompt -->
-<div id="iosInstallPrompt" class="hidden fixed bottom-20 md:bottom-6 left-4 right-4 z-[9990]">
+<div id="iosInstallPrompt" class="hidden fixed bottom-24 md:bottom-6 left-4 right-4 z-[9990]">
   <div class="bg-ak-card border border-ak-gold/40 rounded-2xl p-4 shadow-2xl flex items-start gap-3 animate-fade-in-up">
     <img src="icons/icon-72.png" alt="AuctionKai" class="w-12 h-12 rounded-xl shrink-0">
     <div class="flex-1 min-w-0">
       <div class="font-bold text-ak-text text-sm">Install AuctionKai</div>
-      <div class="text-ak-muted text-xs mt-0.5 leading-relaxed">Add to Home Screen for the best experience. Tap <span class="text-ak-gold">Share</span> then <span class="text-ak-gold">Add to Home Screen</span></div>
+      <div class="text-ak-muted text-xs mt-0.5 leading-relaxed" id="pwaInstallDesc">Add to Home Screen for faster access and offline support.</div>
     </div>
     <button onclick="dismissInstallPrompt()" class="text-ak-muted hover:text-ak-text text-xl leading-none shrink-0 mt-0.5">×</button>
   </div>
-  <div class="flex justify-center mt-2"><div class="text-ak-gold text-2xl animate-bounce">↓</div></div>
 </div>
 </body>
 </html>

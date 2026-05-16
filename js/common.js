@@ -429,6 +429,8 @@ const PWAInstall = {
     if (isIOS) {
       setTimeout(() => {
         const p = document.getElementById('iosInstallPrompt');
+        const desc = document.getElementById('pwaInstallDesc');
+        if (desc) desc.innerHTML = 'Tap <span class="text-ak-gold">Share</span> <span style="font-size:16px">⬆️</span> then <span class="text-ak-gold">Add to Home Screen</span>';
         if (p) p.classList.remove('hidden');
       }, 3000);
     }
