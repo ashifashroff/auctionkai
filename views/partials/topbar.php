@@ -55,6 +55,10 @@ if ($maintenanceOn && $userRole === 'admin'):
 <!-- ─── MOBILE MENU ─────────────────────────────────── -->
 <div id="mobileMenu" role="dialog" aria-label="Mobile navigation" class="mobile-menu">
   <div class="p-4 flex flex-col gap-3">
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-ak-muted text-xs uppercase tracking-wider">Menu</span>
+      <button onclick="document.getElementById('mobileMenu').classList.remove('open')" class="text-ak-muted hover:text-ak-text text-2xl leading-none">×</button>
+    </div>
     <a href="profile.php" class="flex items-center gap-3 text-ak-text font-semibold">
       <div class="w-10 h-10 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold"><?= mb_strtoupper(mb_substr($userName, 0, 1)) ?></div>
       <div><div><?= h($userName) ?></div><div class="text-ak-muted text-xs capitalize"><?= h($userRole) ?></div></div>
