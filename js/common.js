@@ -425,7 +425,11 @@ const PWAInstall = {
     if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) return;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const dismissed = localStorage.getItem('pwa_prompt_dismissed');
-    if (dismissed && (Date.now() - parseInt(dismissed)) / (1000*60*60*24) < 7) return;
+    if (dismissed) {
+      if (dismissed === 'permanent') return;
+      const daysSince = (Date.now() - parseInt(dismissed)) / (1000*60*60*24);
+      if (daysSince < 7) return;
+    }
     if (isIOS) {
       setTimeout(() => {
         const p = document.getElementById('iosInstallPrompt');
@@ -467,10 +471,19 @@ const PWAInstall = {
   deferredPrompt: null,
 };
 
-function dismissInstallPrompt() {
-  const p = document.getElementById('iosInstallPrompt');
-  if (p) { p.style.opacity = '0'; p.style.transition = 'opacity 0.3s ease'; setTimeout(() => p.remove(), 300); }
-  localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
+function dismissInstallPrompt(permanent = false) {
+  const prompt = document.getElementById('iosInstallPrompt');
+  if (prompt) {
+    prompt.style.opacity = '0';
+    prompt.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => prompt.remove(), 300);
+  }
+  if (permanent) {
+    localStorage.setItem('pwa_prompt_dismissed', 'permanent');
+    if (typeof showToast === 'function') showToast('Install prompt hidden permanently', 'info', 2000);
+  } else {
+    localStorage.setItem('pwa_prompt_dismissed', Date.now().toString());
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => PWAInstall.init());

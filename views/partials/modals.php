@@ -186,6 +186,10 @@
     <div class="flex-1 min-w-0">
       <div class="font-bold text-ak-text text-sm">Install AuctionKai</div>
       <div class="text-ak-muted text-xs mt-0.5 leading-relaxed" id="pwaInstallDesc">Add to Home Screen for faster access and offline support.</div>
+      <div class="flex items-center justify-between mt-2 pt-2 border-t border-ak-border/50">
+        <button onclick="dismissInstallPrompt(false)" class="text-ak-muted text-xs hover:text-ak-text transition-colors">Remind me later</button>
+        <button onclick="dismissInstallPrompt(true)" class="text-ak-red text-xs hover:opacity-80 transition-opacity">Don't show again</button>
+      </div>
     </div>
     <button onclick="dismissInstallPrompt()" class="text-ak-muted hover:text-ak-text text-xl leading-none shrink-0 mt-0.5">×</button>
   </div>
