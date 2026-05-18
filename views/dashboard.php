@@ -14,26 +14,26 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
 <div class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Members</div>
-    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= $membersInAuction ?></div>
+    <div class="text-3xl font-bold text-ak-text mt-2 font-mono" data-countup="true" data-target="<?= $membersInAuction ?>"><?= $membersInAuction ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.05s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Vehicles</div>
-    <div class="text-3xl font-bold text-ak-text mt-2 font-mono"><?= count($vehicles) ?></div>
+    <div class="text-3xl font-bold text-ak-text mt-2 font-mono" data-countup="true" data-target="<?= count($vehicles) ?>"><?= count($vehicles) ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.1s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Sold</div>
-    <div class="text-3xl font-bold text-ak-green mt-2 font-mono"><?= $totalSold ?></div>
+    <div class="text-3xl font-bold text-ak-green mt-2 font-mono" data-countup="true" data-target="<?= $totalSold ?>"><?= $totalSold ?></div>
     <?php $soldPct = count($vehicles) > 0 ? round(($totalSold / count($vehicles)) * 100) : 0; ?>
     <div class="mt-2 h-1.5 bg-ak-border rounded-full overflow-hidden"><div class="h-full bg-ak-green rounded-full transition-all" style="width:<?= $soldPct ?>%"></div></div>
     <div class="text-[10px] text-ak-muted mt-1"><?= $soldPct ?>% sell rate</div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.15s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross</div>
-    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono"><?= fmt($totalGross) ?></div>
+    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono" data-countup="true" data-target="<?= round($totalGross) ?>" data-prefix="¥"><?= fmt($totalGross) ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.2s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Net Payout</div>
-    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono"><?= fmt($totalNet) ?></div>
+    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono" data-countup="true" data-target="<?= round($totalNet) ?>" data-prefix="¥"><?= fmt($totalNet) ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.25s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Unpaid</div>

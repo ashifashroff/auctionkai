@@ -1191,5 +1191,6 @@ async function installUpdate() {
 
 </script>
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+<script src="js/animations.js?v=3.8"></script>
 </body>
 </html>

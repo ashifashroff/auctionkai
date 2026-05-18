@@ -975,3 +975,52 @@ input:focus, select:focus, textarea:focus { border-color: var(--gold) !important
   * { -webkit-overflow-scrolling: touch; }
 }
 :root { color-scheme: dark; }
+
+/* ── Animation System ──────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.btn, .btn-gold, .btn-dark, .btn-email, button[class*="btn"] {
+  transition: opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  position: relative; overflow: hidden; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.inp { transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease; }
+a { transition: color 0.15s ease, opacity 0.15s ease; }
+.bg-ak-card { transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease; will-change: transform; }
+.tab-btn-active { position: relative; }
+.tab-btn-active::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px;
+  background: var(--ak-gold, #D4A84B); border-radius: 2px 2px 0 0;
+  animation: tab-indicator-in 0.2s ease forwards;
+}
+@keyframes tab-indicator-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.sy, .sn { transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+[id^="pay-btn-"] { transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease; }
+.statement-card { transition: border-left-color 0.3s ease, box-shadow 0.2s ease; }
+@keyframes skeleton-shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton {
+  background: linear-gradient(90deg, #111E2D 25%, #1A2D42 50%, #111E2D 75%);
+  background-size: 200% 100%; animation: skeleton-shimmer 1.5s ease-in-out infinite; border-radius: 6px; color: transparent !important;
+}
+[href*="auction_id"] { transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease; }
+[href*="auction_id"]:hover { transform: translateY(-1px); }
+[href*="auction_id"].active { animation: chip-pulse 2s ease infinite; }
+@keyframes chip-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(212,168,75,0); } 50% { box-shadow: 0 0 0 4px rgba(212,168,75,0.15); } }
+.np { transition: box-shadow 0.3s ease; }
+.np:hover { box-shadow: 0 0 20px rgba(212,168,75,0.2); }
+.toast { animation: toast-slide-in 0.25s cubic-bezier(0.16,1,0.3,1) forwards; }
+@keyframes toast-slide-in { from { opacity: 0; transform: translateX(40px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
+.toast.hide { animation: toast-slide-out 0.2s ease-in forwards; }
+@keyframes toast-slide-out { from { opacity: 1; transform: translateX(0) scale(1); } to { opacity: 0; transform: translateX(40px) scale(0.95); } }
+[id$="Modal"], [class*="modal-overlay"] { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.main-content { animation: page-fade-in 0.3s ease forwards; }
+@keyframes page-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.stagger-1 { animation-delay: 50ms !important; }
+.stagger-2 { animation-delay: 100ms !important; }
+.stagger-3 { animation-delay: 150ms !important; }
+.stagger-4 { animation-delay: 200ms !important; }

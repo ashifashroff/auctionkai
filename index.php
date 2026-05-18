@@ -169,7 +169,7 @@ foreach ($members as $m) {
 
 <?php include 'views/partials/tabs.php'; ?>
 <!-- ─── CONTENT ─────────────────────────────────────── -->
-<div id="main-content" class="px-4 md:px-7 py-4 md:py-7 max-w-[1400px] mx-auto animate-fade-in pb-20 md:pb-7">
+<div id="main-content" class="main-content px-4 md:px-7 py-4 md:py-7 max-w-[1400px] mx-auto animate-fade-in pb-20 md:pb-7">
 
 <?php if (!$auction): ?>
   <div class="text-center py-24 animate-fade-in-up">

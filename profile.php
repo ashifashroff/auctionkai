@@ -444,5 +444,6 @@ async function submitPasswordForm(e) {
   return false;
 }
 </script>
+<script src="js/animations.js?v=3.8"></script>
 </body>
 </html>

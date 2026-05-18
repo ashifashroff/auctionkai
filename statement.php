@@ -64,7 +64,8 @@ if (!$link) {
  <h1>Link Not Found</h1>
  <p>This statement link is invalid or does not exist.</p>
  </div>
- </body>
+ <script src="js/animations.js?v=3.8"></script>
+</body>
  </html>
  <?php
  exit;
@@ -99,7 +100,7 @@ if (strtotime($link['expires_at']) < time()) {
  </p>
  <p style="margin-top:12px">Please contact your auction house operator for a new link.</p>
  </div>
- </body>
+</body>
  </html>
  <?php
  exit;

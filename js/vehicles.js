@@ -263,6 +263,7 @@ function toggleSold(id, btn) {
     body: JSON.stringify({action:'toggle_sold', id:id, _tok:CSRF_TOKEN})
   }).then(r=>r.json()).then(d=>{
     if(d.error){showToast(d.error, 'error');btn.disabled=false;return;}
+    AK.soldToggle(btn, d.sold !== undefined ? d.sold : true);
     if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
   }).catch(()=>{showToast('Connection error', 'error');btn.disabled=false;});
 }
@@ -289,7 +290,7 @@ function deleteVehicle(vehicleId, btn) {
     .then(data => {
       if (data.error) { showToast(data.error, 'error'); if (btn) { btn.disabled = false; btn.textContent = '×'; } return; }
       const row = document.querySelector(`tr[data-vid="${vehicleId}"]`);
-      if (row) { row.style.opacity = '0'; row.style.transition = 'opacity .3s'; setTimeout(() => {if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}}, 300); }
+      if (row) { AK.slideOutLeft(row).then(() => { if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();} }); }
       else if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
     })
     .catch(() => { showToast('Network error', 'error'); if (btn) { btn.disabled = false; btn.textContent = '×'; } });

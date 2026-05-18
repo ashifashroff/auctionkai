@@ -35,6 +35,8 @@ async function sendStatementEmail(
       btnEl.style.background = '#1A3A2A';
       btnEl.style.color = '#4CAF82';
       btnEl.style.border = '1px solid #2A5A3A';
+      AK.successPulse(btnEl);
+      AK.floatCheck(btnEl.getBoundingClientRect().left, btnEl.getBoundingClientRect().top);
 
       // Reset button after 4 seconds
       setTimeout(() => {
@@ -107,7 +109,11 @@ async function setPaymentStatus(memberId, auctionId, status, netPayout) {
         btn.className = `inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border cursor-pointer transition-all ${classes[status]}`;
         btn.innerHTML = `${icons[status]} <span class="text-[10px] opacity-60">▾</span>`;
         btn.disabled = false;
+        AK.paymentBadgeChange(btn);
       }
+      // Shimmer the net payout
+      const npEl = btn?.closest('.stmt-card, .statement-card')?.querySelector('.np');
+      if (npEl) AK.shimmer(npEl);
 
       showToast(`Payment marked as ${status}`, status === 'paid' ? 'success' : status === 'partial' ? 'warning' : 'info');
     } else {
