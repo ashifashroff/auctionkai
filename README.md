@@ -42,6 +42,9 @@ Or register a new account. Usernames and emails must be unique.
 **Auctions** — create multiple auctions, switch between them using the navbar chips. Each auction has its own commission fee (default ¥3,300 per member) and auto-expires after 2 weeks. Expired auctions delete all vehicles (sold and unsold) and the auction itself. Member records are preserved. A red badge warns you when expiry is close.
 
 **Members** — shared across all your auctions. Click a member's name to see their sold and unsold vehicles in a modal, with a button to download their PDF statement. Edit members through a popup — no page reload. Search members by name, phone, or email with instant filtering. Duplicate names are blocked with a clear error message. Bulk CSV import — upload CSV file to add multiple members at once. Auto-detects header row. Supports name/phone/email columns in any order. Skips duplicates automatically. Shows per-row error details. Download CSV template with example data.
+    - Member notes system — global notes (permanent per member) and per-auction notes (auction-specific)
+    - Notes visible on member cards with gold dot indicator and preview
+    - Notes shown in statements tab and on PDF statements
 
 **Vehicles** — add, edit, and delete without page reload (everything's AJAX). Toggle sold/unsold with one click. Paginated vehicles table (10/25/50/100 per page). Real-time search filter by lot, make, model, member name. AJAX pagination — no full page reload. Skeleton loading animation while fetching. Stays on same page after add/edit/delete. Nagare fee only appears for unsold vehicles — sold vehicles get sold price, tax, recycle, listing fee, and sold fee instead. Duplicate lot numbers are caught in real-time before submission.
 

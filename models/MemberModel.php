@@ -35,4 +35,8 @@ class MemberModel {
         $stmt = $this->db->prepare("DELETE FROM members WHERE id=? AND user_id=?");
         $stmt->execute([$id, $this->userId]);
     }
+
+    public function saveNotes(int $id, string $notes): void {
+        $this->db->prepare("UPDATE members SET notes=? WHERE id=? AND user_id=?")->execute([$notes ?: null, $id, $this->userId]);
+    }
 }

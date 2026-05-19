@@ -68,7 +68,7 @@ if ($activeAuctionId) {
     foreach ($psq->fetchAll() as $ps) { $paymentStatuses[$ps['member_id']] = $ps; }
 }
 
-function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = [], bool $useLandscape = false): string {
+function renderStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = [], bool $useLandscape = false, string $auctionNote = ''): string {
     $landscapeStyle = $useLandscape ? ' style="width:297mm"' : '';
     $landscapePage = $useLandscape ? ' data-landscape="1"' : '';
     if (empty($brand)) {
@@ -151,7 +151,15 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     foreach ($s['mv'] as $sv) {
         if ((float)$sv['sold_price'] >= 1000000) { $useLandscape = true; break; }
     }
-    echo renderStatement($m, $s, $auction, $payStatus, $brand, $useLandscape);
+    // Fetch auction note for this member
+    $auctionNote = '';
+    try {
+        $noteStmt = $db->prepare("SELECT notes FROM member_auction_notes WHERE auction_id = ? AND member_id = ?");
+        $noteStmt->execute([$activeAuctionId, (int)$m['id']]);
+        $auctionNote = $noteStmt->fetchColumn() ?? '';
+    } catch (Exception $e) {}
+
+    echo renderStatement($m, $s, $auction, $payStatus, $brand, $useLandscape, $auctionNote);
 
     // Log PDF generation to statement_history
     try {

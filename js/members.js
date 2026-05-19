@@ -358,6 +358,7 @@ const MembersPager = {
           <div class="min-w-0 flex-1">
             <div class="text-ak-text font-semibold cursor-pointer hover:text-ak-gold transition-colors truncate" onclick="openMemberDetail(${id})">${this.esc(m.name)}</div>
             <div class="text-ak-muted text-xs truncate">${this.esc(phone)}${phone && email ? ' \u00B7 ' : ''}${this.esc(email)}</div>
+            ${m.notes ? '<div class="flex items-center gap-1 mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-ak-gold shrink-0"></span><span class="text-ak-gold/70 text-[10px] truncate">' + this.esc(m.notes).substring(0, 40) + (m.notes.length > 40 ? '...' : '') + '</span></div>' : ''}
           </div>
         </div>
         <div class="flex items-center justify-between gap-3">
@@ -372,6 +373,7 @@ const MembersPager = {
             </div>
           </div>
           <div class="flex gap-1.5 shrink-0">
+            <button class="btn btn-dark btn-sm" onclick="MemberNotes.open(${id})" title="Notes">\u{1F4CB}</button>
             <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">\u270E</button>
             <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\\\'")}')" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">\u2715</button>
           </div>
@@ -513,3 +515,84 @@ function handleCsvImport(input) {
     importBtn.textContent = '↑ Import CSV';
   });
 }
+
+// ── Member Notes System ──────────────────────
+const MemberNotes = {
+  currentMemberId: null,
+
+  async open(memberId) {
+    this.currentMemberId = memberId;
+    const auctionId = document.querySelector('[name="auction_id"]')?.value || new URLSearchParams(location.search).get('auction_id') || '';
+
+    try {
+      const res = await fetch(`api/member_notes.php?member_id=${memberId}&auction_id=${auctionId}`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('globalNote').value = data.global_note || '';
+        document.getElementById('auctionNote').value = data.auction_note || '';
+        this.updateCounters();
+      }
+    } catch (e) {}
+
+    document.getElementById('notesModal').classList.remove('hidden');
+    document.getElementById('notesModal').style.display = 'flex';
+    if (typeof AK !== 'undefined') AK.scaleIn(document.querySelector('#notesModal .modal-content, #notesModalContent'));
+    document.getElementById('globalNote').focus();
+  },
+
+  close() {
+    const modal = document.getElementById('notesModal');
+    if (modal) { modal.classList.add('hidden'); modal.style.display = 'none'; }
+    this.currentMemberId = null;
+  },
+
+  async save() {
+    if (!this.currentMemberId) return;
+    const auctionId = document.querySelector('[name="auction_id"]')?.value || new URLSearchParams(location.search).get('auction_id') || '';
+    const globalNote = document.getElementById('globalNote').value.trim();
+    const auctionNote = document.getElementById('auctionNote').value.trim();
+    const saveBtn = document.getElementById('saveNotesBtn');
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+
+    try {
+      const res = await fetch('api/member_notes.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _tok: CSRF_TOKEN,
+          member_id: this.currentMemberId,
+          auction_id: parseInt(auctionId),
+          global_note: globalNote,
+          auction_note: auctionNote,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✓ Notes saved', 'success', 2000);
+        if (typeof AK !== 'undefined') AK.successPulse(saveBtn);
+        this.close();
+        if (typeof MembersPager !== 'undefined') MembersPager.reload();
+      } else {
+        showToast(data.message || 'Failed to save notes', 'error');
+      }
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
+
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Notes';
+  },
+
+  updateCounters() {
+    const g = document.getElementById('globalNote');
+    const a = document.getElementById('auctionNote');
+    const gc = document.getElementById('globalNoteCount');
+    const ac = document.getElementById('auctionNoteCount');
+    if (g && gc) gc.textContent = g.value.length;
+    if (a && ac) ac.textContent = a.value.length;
+  },
+};

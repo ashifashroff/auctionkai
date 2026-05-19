@@ -179,6 +179,42 @@
   </div>
 </div>
 
+<!-- Notes Modal -->
+<div id="notesModal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center p-4" style="display:none">
+  <div class="absolute inset-0 bg-black/60" onclick="MemberNotes.close()"></div>
+  <div id="notesModalContent" class="relative bg-ak-card border border-ak-border rounded-2xl w-full max-w-md p-6 shadow-2xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-ak-text">📋 Member Notes</h3>
+      <button onclick="MemberNotes.close()" class="text-ak-muted hover:text-ak-text text-2xl leading-none">×</button>
+    </div>
+
+    <div class="space-y-4">
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="text-xs font-bold text-ak-gold uppercase tracking-wider">Global Note</label>
+          <span id="globalNoteCount" class="text-[10px] text-ak-muted">0</span>
+        </div>
+        <textarea id="globalNote" rows="3" class="inp resize-none" placeholder="Bank details, contact preferences, VIP status, warnings..." oninput="MemberNotes.updateCounters()" maxlength="500"></textarea>
+        <div class="text-[10px] text-ak-muted mt-0.5">Visible on all auctions for this member</div>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="text-xs font-bold text-amber-400 uppercase tracking-wider">🏷 Auction Note</label>
+          <span id="auctionNoteCount" class="text-[10px] text-ak-muted">0</span>
+        </div>
+        <textarea id="auctionNote" rows="3" class="inp resize-none" placeholder="Outstanding balance, special agreements, delivery instructions..." oninput="MemberNotes.updateCounters()" maxlength="500"></textarea>
+        <div class="text-[10px] text-ak-muted mt-0.5">Specific to this auction only</div>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-5">
+      <button id="saveNotesBtn" onclick="MemberNotes.save()" class="btn btn-gold flex-1">Save Notes</button>
+      <button onclick="MemberNotes.close()" class="btn btn-dark flex-1">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <!-- iOS Install Prompt -->
 <div id="iosInstallPrompt" class="hidden fixed bottom-24 md:bottom-6 left-4 right-4 z-[9990]">
   <div class="bg-ak-card border border-ak-gold/40 rounded-2xl p-4 shadow-2xl flex items-start gap-3 animate-fade-in-up">

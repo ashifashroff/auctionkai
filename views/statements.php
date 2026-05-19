@@ -106,7 +106,27 @@ foreach ($members as $m) {
         <div class="w-9 h-9 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
         <div class="min-w-0 flex-1">
           <div class="sn2 text-base truncate"><?= h($m['name']) ?></div>
-          <div class="sm text-xs truncate"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
+          <div class="sm text-xs truncate"><?= h($m['email']) ?> \u00B7 <?= h($m['phone']) ?></div>
+          <?php
+          $globalNote = $m['notes'] ?? '';
+          $auctionNote = $auctionMemberNotes[$m['id']] ?? '';
+          ?>
+          <?php if ($globalNote || $auctionNote): ?>
+          <div class="mt-2 space-y-1">
+            <?php if ($globalNote): ?>
+            <div class="flex items-start gap-1.5">
+              <span class="text-[10px] font-bold text-ak-gold uppercase tracking-wider shrink-0 mt-0.5">\u{1F4CB}</span>
+              <span class="text-ak-muted text-xs leading-relaxed line-clamp-2"><?= h($globalNote) ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if ($auctionNote): ?>
+            <div class="flex items-start gap-1.5">
+              <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider shrink-0 mt-0.5">\u{1F3F7}\uFE0F</span>
+              <span class="text-amber-400/70 text-xs leading-relaxed line-clamp-2"><?= h($auctionNote) ?></span>
+            </div>
+            <?php endif; ?>
+          </div>
+          <?php endif; ?>
           <?php if ($payStatus === 'paid' && $ps['paid_at']): ?>
           <div class="text-ak-green text-[11px] mt-0.5">✓ Paid on <?= date('Y-m-d H:i', strtotime($ps['paid_at'])) ?></div>
           <?php endif; ?>

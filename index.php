@@ -193,6 +193,17 @@ foreach ($members as $m) {
 <?php include 'views/special_fees.php'; ?>
 
 <?php elseif ($tab === 'statements'): ?>
+<?php
+// Fetch per-auction notes for statements
+$auctionMemberNotes = [];
+if ($activeAuctionId) {
+    $notesStmt = $db->prepare("SELECT member_id, notes FROM member_auction_notes WHERE auction_id = ?");
+    $notesStmt->execute([$activeAuctionId]);
+    while ($nr = $notesStmt->fetch(PDO::FETCH_ASSOC)) {
+        $auctionMemberNotes[(int)$nr['member_id']] = $nr['notes'];
+    }
+}
+?>
 <?php include 'views/statements.php'; ?>
 <?php endif; ?>
 </div>
