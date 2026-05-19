@@ -29,11 +29,11 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.15s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Gross</div>
-    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono" data-countup="true" data-target="<?= round($totalGross) ?>" data-prefix="¥"><?= fmt($totalGross) ?></div>
+    <div class="text-2xl font-bold text-ak-text2 mt-2 font-mono" data-countup="true" data-target="<?= round($totalGross) ?>" data-prefix="¥" data-compact="true"><?= fmt($totalGross) ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.2s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Net Payout</div>
-    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono" data-countup="true" data-target="<?= round($totalNet) ?>" data-prefix="¥"><?= fmt($totalNet) ?></div>
+    <div class="text-2xl font-bold text-ak-gold mt-2 font-mono" data-countup="true" data-target="<?= round($totalNet) ?>" data-prefix="¥" data-compact="true"><?= fmt($totalNet) ?></div>
   </div>
   <div class="bg-ak-card border border-ak-border rounded-xl p-5 animate-fade-in-up" style="animation-delay:.25s">
     <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase">Unpaid</div>

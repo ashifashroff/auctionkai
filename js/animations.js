@@ -165,16 +165,36 @@ const AK = {
   countUp(el, target, options = {}) {
     if (!el) return;
     const { duration = 800, prefix = '', suffix = '', decimals = 0 } = options;
-    if (this.reducedMotion) { el.textContent = prefix + target.toLocaleString('ja-JP') + suffix; return; }
+    const compact = el.dataset.compact === 'true';
+    const isMobile = window.innerWidth < 640;
+    
+    function formatYen(val) {
+      if (compact) {
+        // Mobile: always use 万
+        if (isMobile && val >= 10000) {
+          return prefix + (val / 10000).toLocaleString('ja-JP', {maximumFractionDigits: 0}) + '万';
+        }
+        // Desktop: use 万 only over 100M (1億)
+        if (!isMobile && val >= 100000000) {
+          return prefix + (val / 100000000).toLocaleString('ja-JP', {maximumFractionDigits: 1}) + '億';
+        }
+        if (!isMobile && val >= 10000) {
+          return prefix + (val / 10000).toLocaleString('ja-JP', {maximumFractionDigits: 0}) + '万';
+        }
+      }
+      return prefix + val.toLocaleString('ja-JP') + suffix;
+    }
+    
+    if (this.reducedMotion) { el.textContent = formatYen(target); return; }
     const startTime = performance.now();
     function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
     function update(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const current = Math.floor(target * easeOutExpo(progress));
-      el.textContent = prefix + current.toLocaleString('ja-JP') + suffix;
+      el.textContent = formatYen(current);
       if (progress < 1) requestAnimationFrame(update);
-      else el.textContent = prefix + target.toLocaleString('ja-JP') + suffix;
+      else el.textContent = formatYen(target);
     }
     requestAnimationFrame(update);
   },
