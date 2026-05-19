@@ -115,13 +115,13 @@ foreach ($members as $m) {
           <div class="mt-2 space-y-1">
             <?php if ($globalNote): ?>
             <div class="flex items-start gap-1.5">
-              <span class="text-[10px] font-bold text-ak-gold uppercase tracking-wider shrink-0 mt-0.5">\u{1F4CB}</span>
+              <span class="text-[10px] font-bold text-ak-gold uppercase tracking-wider shrink-0 mt-0.5">📋</span>
               <span class="text-ak-muted text-xs leading-relaxed line-clamp-2"><?= h($globalNote) ?></span>
             </div>
             <?php endif; ?>
             <?php if ($auctionNote): ?>
             <div class="flex items-start gap-1.5">
-              <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider shrink-0 mt-0.5">\u{1F3F7}\uFE0F</span>
+              <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider shrink-0 mt-0.5">🏷️</span>
               <span class="text-amber-400/70 text-xs leading-relaxed line-clamp-2"><?= h($auctionNote) ?></span>
             </div>
             <?php endif; ?>
