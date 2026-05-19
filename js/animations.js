@@ -283,13 +283,21 @@ document.addEventListener('mousedown', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   AK.initCardHover('.bg-ak-card');
 
-  // Count up numbers
-  document.querySelectorAll('[data-countup="true"]').forEach(el => {
-    const target = parseFloat(el.dataset.target || '0');
-    const prefix = el.dataset.prefix || '';
-    const suffix = el.dataset.suffix || '';
-    AK.countUp(el, target, { duration: 800, prefix, suffix });
-  });
+  // Count up numbers (with retry for dynamically loaded content)
+  function initCountUps() {
+    document.querySelectorAll('[data-countup="true"]').forEach(el => {
+      if (el.dataset.countupDone) return;
+      el.dataset.countupDone = '1';
+      const target = parseFloat(el.dataset.target || '0');
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      AK.countUp(el, target, { duration: 800, prefix, suffix });
+    });
+  }
+  initCountUps();
+  // Retry after tab loads
+  setTimeout(initCountUps, 500);
+  setTimeout(initCountUps, 1500);
 
   // Animate main content in
   const main = document.querySelector('.main-content, [class*="px-4"][class*="py-4"]');
