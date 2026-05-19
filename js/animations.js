@@ -172,12 +172,12 @@ const AK = {
       if (compact) {
         if (val >= 100000) {
           const man = val / 10000;
-          const formatted = man % 1 === 0 ? man.toLocaleString('ja-JP', {maximumFractionDigits: 0}) : man.toLocaleString('ja-JP', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+          const formatted = man % 1 === 0 ? man.toLocaleString('ja-JP', {maximumFractionDigits: 2}) : man.toLocaleString('ja-JP', {minimumFractionDigits: 2, maximumFractionDigits: 2});
           return prefix + formatted + '万';
         }
         if (val >= 10000) {
           const man = val / 10000;
-          return prefix + man.toLocaleString('ja-JP', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + '万';
+          return prefix + man.toLocaleString('ja-JP', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '万';
         }
       }
       return prefix + val.toLocaleString('ja-JP') + suffix;
