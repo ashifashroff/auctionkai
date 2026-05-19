@@ -25,6 +25,6 @@ const ERROR_LOG_RETENTION_DAYS = 30;
 const ERROR_LOG_RESOLVED_CLEANUP_DAYS = 30;
 
 // App version & updates
-const APP_VERSION = 'v3.8.1';
+const APP_VERSION = 'v3.9.0';
 const APP_GITHUB_REPO = 'ashifashroff/auctionkai';
 const UPDATE_CHECK_INTERVAL = 3600; // 1 hour cache

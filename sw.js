@@ -1,4 +1,4 @@
-const CACHE_NAME = 'auctionkai-v3.8.1';
+const CACHE_NAME = 'auctionkai-v3.9.0';
 const OFFLINE_URL = '/offline.php';
 
 const STATIC_ASSETS = [

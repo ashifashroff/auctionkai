@@ -64,7 +64,7 @@ if (!$link) {
  <h1>Link Not Found</h1>
  <p>This statement link is invalid or does not exist.</p>
  </div>
- <script src="js/animations.js?v=3.8"></script>
+ <script src="js/animations.js?v=3.9.0"></script>
 </body>
  </html>
  <?php

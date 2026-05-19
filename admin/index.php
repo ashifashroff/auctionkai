@@ -94,7 +94,7 @@ $tabs = [
 <title>AuctionKai — Admin Panel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3.8.1">
+<link rel="stylesheet" href="../css/style.css?v=3.9.0">
 <?php include '../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
@@ -957,7 +957,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <?php require_once '../includes/footer.php'; ?>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/parsleyjs@2.9.2/dist/parsley.min.js"></script>
-<script src="../js/app.js?v=3.8.1"></script>
+<script src="../js/app.js?v=3.9.0"></script>
 <script>
 const CSRF_TOKEN = '<?= h($tok) ?>';
 
@@ -1191,6 +1191,6 @@ async function installUpdate() {
 
 </script>
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
-<script src="js/animations.js?v=3.8"></script>
+<script src="js/animations.js?v=3.9.0"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ $brand = loadBranding($db);
 <title><?= h($brand['brand_name']) ?> — About</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.8.1">
+<link rel="stylesheet" href="css/style.css?v=3.9.0">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -38,12 +38,12 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-gold/30 rounded-xl p-8 text-center">
   <div class="text-4xl font-bold text-ak-gold tracking-tight mb-2">⚡ AuctionKai</div>
   <div class="text-ak-muted text-sm mb-3">Settlement Management System</div>
-  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.7</span>
+  <span class="text-[10px] bg-ak-gold/20 text-ak-gold px-2 py-0.5 rounded font-mono">v3.9.0</span>
   <p class="text-ak-text2 text-sm leading-relaxed mt-5 max-w-2xl mx-auto">
     AuctionKai is a purpose-built settlement management system for Japanese vehicle auction operators.
     Designed to replace manual paper-based accounting, AuctionKai allows auction house owners to manage
     members, track vehicle sales, calculate fees, and generate professional settlement statements in PDF
-    format — all from a single dashboard.
+    format — all from a single dashboard. Installable as a mobile app (PWA) on iPhone and Android.
   </p>
 </div>
 
@@ -76,7 +76,9 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold text-lg mb-4">📋 Version History</h2>
   <div class="space-y-3">
-    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.7</span><span class="text-ak-text2 text-sm">WhatsApp statement sharing, shareable links with PIN protection, online statement view, view counter, auto-cleanup</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.9</span><span class="text-ak-text2 text-sm">PWA install on iPhone/Android, member notes (global + per-auction), animation system, auto-update from admin, smart 万 formatting</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.8.1</span><span class="text-ak-text2 text-sm">Security patch: SQL injection fix, CSRF on downloads, reset token exposure, DB-based brute force, SMTP encryption, API rate limiting</span></div>
+    <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.7</span><span class="text-ak-text2 text-sm">WhatsApp statement sharing, shareable links with PIN protection, online statement view, view counter, auto-cleanup</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.4</span><span class="text-ak-text2 text-sm">Login history, session timeout, GDPR deletion, payment status, health check, maintenance mode, branding, backups, statement history, ZIP download, special fees</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.3</span><span class="text-ak-text2 text-sm">Login history tracking, failed attempt highlighting, auto-cleanup</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.2</span><span class="text-ak-text2 text-sm">Bulk member CSV import, activity log system, admin log viewer</span></div>

@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>AuctionKai — Delete Auction</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=3.8.1">
+<link rel="stylesheet" href="../css/style.css?v=3.9.0">
 <?php include __DIR__ . '/../css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen">
