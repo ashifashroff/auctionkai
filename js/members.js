@@ -67,35 +67,22 @@ function filterMemberList() {
 }
 
 // ─── REMOVE MEMBER (AJAX) ──────────────────────────
-function removeMember(id, name) {
-  document.getElementById('removeMemberName').textContent = name;
-  document.getElementById('removeMemberModal').dataset.memberId = id;
-  document.getElementById('removeMemberModal').style.display = 'flex';
-}
-
-function closeRemoveMemberModal() {
-  document.getElementById('removeMemberModal').style.display = 'none';
-}
-
-function confirmRemoveMember() {
-  const modal = document.getElementById('removeMemberModal');
-  const id = modal.dataset.memberId;
-  const btn = document.getElementById('confirmRemoveMemberBtn');
-  btn.disabled = true;
-  btn.textContent = 'Removing...';
-
-  fetch('api.php', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'remove_member', id:id, _tok:CSRF_TOKEN})
-  }).then(r=>r.json()).then(d=>{
-    if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='Remove';return;}
-    showToast('Member removed successfully', 'success', 3000);
-    closeRemoveMemberModal();
-    if(typeof MembersPager!=="undefined"){MembersPager.reload();}else{location.reload();}
-    btn.disabled=false;btn.textContent='Remove';
-  }).catch(()=>{
-    showToast('Error removing member', 'error');
-    btn.disabled=false;btn.textContent='Remove';
+function removeMember(id, name, btn) {
+  inlineConfirm(btn, () => {
+    btn.disabled = true;
+    btn.textContent = '…';
+    fetch('api.php', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({action:'remove_member', id:id, _tok:CSRF_TOKEN})
+    }).then(r=>r.json()).then(d=>{
+      if(d.error){showToast(d.error, 'error');btn.disabled=false;btn.textContent='✕';return;}
+      showToast('Member removed successfully', 'success', 3000);
+      if(typeof MembersPager!=="undefined"){MembersPager.reload();}else{location.reload();}
+      btn.disabled=false;btn.textContent='✕';
+    }).catch(()=>{
+      showToast('Error removing member', 'error');
+      btn.disabled=false;btn.textContent='✕';
+    });
   });
 }
 
@@ -375,7 +362,7 @@ const MembersPager = {
           <div class="flex gap-1.5 shrink-0">
             <button class="btn btn-dark btn-sm" onclick="MemberNotes.open(${id})" title="Notes">\u{1F4CB}</button>
             <button class="btn btn-dark btn-sm" onclick="openEditMemberModal(${id})">\u270E</button>
-            <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\\\'")}')" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">\u2715</button>
+            <button class="btn btn-sm" onclick="removeMember(${id}, '${this.esc(m.name).replace(/'/g, "\\\\'")}', this)" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">\u2715</button>
           </div>
         </div>
       </div>`;

@@ -487,3 +487,32 @@ function dismissInstallPrompt(permanent = false) {
 }
 
 document.addEventListener('DOMContentLoaded', () => PWAInstall.init());
+
+// ── Inline Confirm (replaces modal confirmations) ────────
+function inlineConfirm(btn, action) {
+  const existing = btn.parentElement.querySelector('.ic-wrap');
+  if (existing) { existing.remove(); return; }
+  const wrap = document.createElement('span');
+  wrap.className = 'ic-wrap';
+  wrap.style.cssText = 'display:inline-flex;align-items:center;gap:4px;margin-left:4px;';
+  const y = document.createElement('button');
+  y.className = 'btn btn-gold btn-sm';
+  y.style.cssText = 'padding:2px 10px;font-size:12px;';
+  y.textContent = 'Yes';
+  const n = document.createElement('button');
+  n.className = 'btn btn-dark btn-sm';
+  n.style.cssText = 'padding:2px 10px;font-size:12px;';
+  n.textContent = 'No';
+  const q = document.createElement('span');
+  q.style.cssText = 'font-size:12px;color:var(--ak-text2);';
+  q.textContent = 'Sure?';
+  wrap.append(q, y, n);
+  btn.after(wrap);
+  const cleanup = () => wrap.remove();
+  y.onclick = (e) => { e.stopPropagation(); cleanup(); action(); };
+  n.onclick = (e) => { e.stopPropagation(); cleanup(); };
+  setTimeout(() => {
+    const handler = (e) => { if (!wrap.contains(e.target)) { cleanup(); document.removeEventListener('click', handler); } };
+    setTimeout(() => document.addEventListener('click', handler), 0);
+  }, 0);
+}
