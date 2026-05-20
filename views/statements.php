@@ -30,7 +30,7 @@
 $totalPaid = 0; $totalUnpaid = 0; $totalPartial = 0; $totalNetPayout = 0;
 foreach ($members as $m) {
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
-    if ($s['count'] === 0 && !($s['isNagareOnly'] ?? false)) continue;
+    if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
     $totalNetPayout += $s['netPayout'];
@@ -76,7 +76,7 @@ foreach ($members as $m) {
   <?php $hasSales = false; $stmtRank = 1; ?>
   <?php foreach ($members as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
-    if ($s['count'] === 0 && !($s['isNagareOnly'] ?? false)) continue;
+    if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $hasSales = true;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
@@ -93,31 +93,65 @@ foreach ($members as $m) {
   ?>
   <?php if ($s['isNagareOnly'] ?? false): ?>
   <!-- Nagare-only member card -->
-  <div class="nagare-only-card bg-ak-card rounded-xl border border-amber-500/20 border-l-4 border-l-amber-400 overflow-hidden animate-fade-in-up statement-card" data-member-name="<?= h(mb_strtolower($m['name'])) ?>">
-    <div class="p-4 md:p-5">
-      <div class="flex items-start gap-3">
-        <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-2">
-            <span class="text-base font-semibold text-ak-text truncate"><?= h($m['name']) ?></span>
-            <span class="nagare-badge">Nagare Only</span>
-          </div>
-          <div class="text-xs text-ak-muted truncate mt-0.5"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
+  <?php
+  $hasSales = true;
+  $emailSubject = urlencode("Fee Notice – {$auction['name']} {$auction['date']}");
+  $emailBody = urlencode("Dear {$m['name']},\n\nRegarding {$auction['name']} on {$auction['date']}.\n\nAll vehicles were unsold.\n\nNagare Fee: " . fmt($s['nagareFeeTotal']) . "\nOther Fees: " . fmt($s['otherFeeTotal']) . "\nCommission: " . fmt($s['commissionTotal']) . "\n\nTOTAL OWED: " . fmt(abs($s['netPayout'])) . "\n\nThank you.");
+  ?>
+  <div class="bg-ak-card rounded-xl border border-ak-red/30 mb-5 overflow-hidden animate-fade-in-up">
+
+    <!-- Header -->
+    <div class="sh nagare-header">
+      <div>
+        <div class="flex items-center gap-2">
+          <div class="sn2"><?= h($m['name']) ?></div>
+          <span class="nagare-badge">✗ No Sales</span>
         </div>
+        <div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
       </div>
-      <div class="mt-3 pt-3 border-t border-ak-border/50 grid grid-cols-2 gap-2 text-sm">
-        <?php if ($s['nagareFeeTotal'] > 0): ?>
-        <div class="nagare-row"><span class="nagare-l">Nagare Fee</span><span class="nagare-v">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
-        <?php endif; ?>
-        <?php if (($s['otherFeeTotal'] ?? 0) > 0): ?>
-        <div class="nagare-row"><span class="nagare-l">Other Fee</span><span class="nagare-v">−<?= fmt($s['otherFeeTotal']) ?></span></div>
-        <?php endif; ?>
-        <?php if ($s['commissionTotal'] > 0): ?>
-        <div class="nagare-row"><span class="nagare-l">Commission</span><span class="nagare-v">−<?= fmt($s['commissionTotal']) ?></span></div>
-        <?php endif; ?>
-        <div class="nagare-row nagare-total col-span-2"><span class="nagare-l font-semibold">Balance Due</span><span class="nagare-v font-bold text-ak-red">−<?= fmt(abs($s['netPayout'])) ?></span></div>
+      <div class="sa">
+        <a class="btn-email" href="mailto:<?= h($m['email']) ?>?subject=<?= $emailSubject ?>&body=<?= $emailBody ?>">✉️ Send Email</a>
+        <a class="btn btn-gold btn-sm" href="pdf.php?member=<?= (int)$m['id'] ?>&auction_id=<?= $activeAuctionId ?>" target="_blank">↓ PDF</a>
       </div>
     </div>
+
+    <!-- Body -->
+    <div class="sb2">
+      <div class="sl">
+        <div class="ssl">Unsold Vehicles (<?= $s['unsoldCount'] ?>)</div>
+        <?php foreach ($s['uv'] as $v): ?>
+        <div class="vr">
+          <span class="vr-car">
+            <span class="vr-lot"><?= h($v['lot'] ?: '—') ?></span>
+            <?= h($v['make'] . ' ' . $v['model']) ?>
+          </span>
+          <span class="vr-p text-ak-red">
+            <?= (float)($v['nagare_fee'] ?? 0) > 0 ? '−' . fmt((float)$v['nagare_fee']) : '—' ?>
+          </span>
+        </div>
+        <?php endforeach; ?>
+        <div class="sg">
+          <span class="sg-l">Gross Sales</span>
+          <span class="sg-n text-ak-muted">¥0</span>
+        </div>
+      </div>
+
+      <div class="sr">
+        <div class="ssl">Fees Owed</div>
+        <?php if ($s['nagareFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Nagare Fee ×<?= $s['unsoldCount'] ?></span><span class="dr-a">−<?= fmt($s['nagareFeeTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['otherFeeTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Other Fee</span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
+        <?php endif; ?>
+        <?php if ($s['commissionTotal'] > 0): ?>
+        <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <?php endif; ?>
+        <div class="dt"><span class="dt-l">Total Fees</span><span class="dt-n">−<?= fmt(abs($s['netPayout'])) ?></span></div>
+        <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red"><?= fmt(abs($s['netPayout'])) ?></span></div>
+      </div>
+    </div>
+
   </div>
   <?php continue; ?>
   <?php endif; ?>

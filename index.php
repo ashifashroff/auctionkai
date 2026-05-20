@@ -154,7 +154,7 @@ $membersInAuction = count(array_unique(array_column($vehicles, 'member_id')));
 $totalUnpaid = 0;
 foreach ($members as $m) {
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
-    if ($s['count'] === 0) continue;
+    if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     if (($ps['status'] ?? 'unpaid') === 'unpaid') $totalUnpaid++;
 }
