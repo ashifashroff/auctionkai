@@ -106,7 +106,7 @@ foreach ($members as $m) {
         <div class="w-9 h-9 rounded-full bg-ak-gold text-ak-bg flex items-center justify-center font-bold text-sm shrink-0"><?= mb_strtoupper(mb_substr($m['name'],0,1)) ?></div>
         <div class="min-w-0 flex-1">
           <div class="sn2 text-base truncate"><?= h($m['name']) ?></div>
-          <div class="sm text-xs truncate"><?= h($m['email']) ?> \u00B7 <?= h($m['phone']) ?></div>
+          <div class="sm text-xs truncate"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
           <?php
           $globalNote = $m['notes'] ?? '';
           $auctionNote = $auctionMemberNotes[$m['id']] ?? '';
