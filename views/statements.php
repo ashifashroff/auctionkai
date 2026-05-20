@@ -166,6 +166,9 @@ foreach ($members as $m) {
         <?php if ($s['commissionTotal'] > 0): ?>
         <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
         <?php endif; ?>
+        <?php if (!empty($s['specialFees'])): foreach ($s['specialFees'] as $sf): $isAdd = ($sf['fee_type'] ?? 'deduction') === 'addition'; ?>
+        <div class="dr"><span class="dr-l"><?= $isAdd ? '+' : '−' ?> <?= h($sf['fee_name']) ?></span><span class="dr-a"><?= $isAdd ? '+' : '−' ?><?= fmt((float)$sf['amount']) ?></span></div>
+        <?php endforeach; endif; ?>
         <div class="dt"><span class="dt-l">Total Fees</span><span class="dt-n">−<?= fmt(abs($s['netPayout'])) ?></span></div>
         <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red"><?= fmt(abs($s['netPayout'])) ?></span></div>
       </div>

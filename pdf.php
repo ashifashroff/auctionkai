@@ -147,6 +147,7 @@ function renderNagareStatement(array $m, array $s, array $auction, string $paySt
         " . ($s['nagareFeeTotal'] > 0 ? "<div class='row dim'><span>− Nagare Fee ×{$s['unsoldCount']}</span><span>" . fmt($s['nagareFeeTotal']) . "</span></div>" : "") . "
         " . (($s['otherFeeTotal'] ?? 0) > 0 ? "<div class='row dim'><span>− Other Fee</span><span>" . fmt($s['otherFeeTotal']) . "</span></div>" : "") . "
         " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission ¥" . number_format($s['commissionFee']) . "/member</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
+        " . (!empty($s['specialFees']) ? implode('', array_map(function($sf) { $isAdd = ($sf['fee_type'] ?? 'deduction') === 'addition'; return "<div class='row dim'><span>" . ($isAdd ? '+ ' : '− ') . htmlspecialchars($sf['fee_name']) . "</span><span>" . ($isAdd ? '+' : '−') . '¥' . number_format((float)$sf['amount']) . "</span></div>"; }, $s['specialFees'])) : "") . "
         <div class='row total'><span>Total Fees</span><span>−" . fmt(abs($s['netPayout'])) . "</span></div>
       </div>
       <div class='net' style='border-color:#e74c3c'><div class='net-l' style='color:#e74c3c'>AMOUNT OWED</div><div class='net-n' style='color:#e74c3c'>−" . fmt(abs($s['netPayout'])) . "</div></div>
