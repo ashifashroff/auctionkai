@@ -1133,3 +1133,43 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   flex-shrink: 0;
   margin-top: 1px;
 }
+
+/* ── Nagare-only member card ───────────────────────────────────────── */
+.nagare-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 0.5px solid rgba(245, 158, 11, 0.3);
+}
+
+.nagare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.nagare-l {
+  color: var(--ak-muted, #6A88A0);
+  font-size: 12px;
+}
+
+.nagare-v {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--ak-red);
+  text-align: right;
+}
+
+.nagare-total {
+  border-top: 0.5px solid rgba(245, 158, 11, 0.2);
+  margin-top: 4px;
+  padding-top: 6px;
+}
