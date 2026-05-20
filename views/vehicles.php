@@ -44,7 +44,6 @@
           <div class="pv-row" id="pvListingRow"><span class="pv-l">− Listing Fee</span><span class="pv-v text-ak-red" id="pvListing">—</span></div>
           <div class="pv-row" id="pvSoldFeeRow"><span class="pv-l">− Sold Fee</span><span class="pv-v text-ak-red" id="pvSoldFee">—</span></div>
           <div class="pv-row" id="pvNagareRow" style="display:none"><span class="pv-l">− Nagare Fee</span><span class="pv-v text-ak-red" id="pvNagare">—</span></div>
-          <div class="pv-row"><span class="pv-l">− Other Fee</span><span class="pv-v text-ak-red" id="pvOther">—</span></div>
           <div class="pv-row"><span class="pv-l">− Commission</span><span class="pv-v text-ak-red" id="pvCommission">—</span></div>
         </div>
 
