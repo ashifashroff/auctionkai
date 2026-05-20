@@ -19,9 +19,37 @@
       <div><label class="lbl">Listing Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_listingFee" name="listingFee" placeholder="3000" data-parsley-type="number" data-parsley-min="0"></div>
       <div><label class="lbl">Sold Fee (¥)</label><input class="inp font-mono sold-fields" type="number" id="add_soldFee" name="soldFee" placeholder="25500" data-parsley-type="number" data-parsley-min="0"></div>
       <div class="nagare-field"><label class="lbl">Nagare Fee (¥)</label><input class="inp font-mono" type="number" id="add_nagareFee" name="nagareFee" placeholder="8000" data-parsley-type="number" data-parsley-min="0" disabled></div>
+      <div><label class="lbl">Other Fee (¥)</label><input class="inp font-mono" type="number" id="add_otherFee" name="otherFee" placeholder="0" data-parsley-type="number" data-parsley-min="0"></div>
       <div class="flex items-end pt-[22px] gap-2">
         <label class="flex items-center gap-1.5 text-ak-muted text-xs cursor-pointer"><input type="checkbox" id="add_sold" name="sold" checked class="accent-ak-gold" onchange="toggleSoldFields(this.checked)"> Sold</label>
         <button class="btn btn-gold" type="submit" id="addVehicleBtn">Add</button>
+      </div>
+    </div>
+    <!-- Live Payout Preview -->
+    <div id="vehiclePreview" class="mt-3 p-4 rounded-xl border border-ak-border bg-ak-dark/50" style="display:none">
+      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Payout Preview</div>
+      <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+        <div id="pvSoldBlock">
+          <div class="dr"><span class="dr-l">Sold Price</span><span id="pvSoldPrice">—</span></div>
+          <div class="dr"><span class="dr-l">Tax (10%)</span><span id="pvTax">—</span></div>
+          <div class="dr"><span class="dr-l">Recycle</span><span id="pvRecycle">—</span></div>
+        </div>
+        <div>
+          <div class="dr font-bold"><span class="dr-l text-ak-gold">Total Received</span><span id="pvTotalRec">¥0</span></div>
+        </div>
+      </div>
+      <div class="border-t border-ak-border my-2.5"></div>
+      <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+        <div>
+          <div id="pvListingRow" class="dr"><span class="dr-l">Listing Fee</span><span id="pvListing">—</span></div>
+          <div id="pvSoldFeeRow" class="dr"><span class="dr-l">Sold Fee</span><span id="pvSoldFee">—</span></div>
+          <div id="pvNagareRow" class="dr" style="display:none"><span class="dr-l">Nagare Fee</span><span id="pvNagare">—</span></div>
+          <div class="dr"><span class="dr-l">Other</span><span id="pvOther">—</span></div>
+          <div class="dr"><span class="dr-l">Commission</span><span id="pvCommission">—</span></div>
+        </div>
+        <div class="flex flex-col justify-end">
+          <div class="dr font-bold"><span class="dr-l">Net Payout</span><span id="pvNet">¥0</span></div>
+        </div>
       </div>
     </div>
     <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>

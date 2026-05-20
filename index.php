@@ -208,7 +208,7 @@ if ($activeAuctionId) {
 <?php endif; ?>
 </div>
 
-<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;const CSRF_TOKEN = '<?= h($tok) ?>';</script>
+<script>const membersData = <?= json_encode(array_map(fn($m) => ['id'=>(int)$m['id'], 'name'=>$m['name'], 'phone'=>$m['phone']], $members)) ?>;const activeAuctionId = <?= (int)$activeAuctionId ?>;const CSRF_TOKEN = '<?= h($tok) ?>';const auctionCommission = <?= (float)($auction['commission_fee'] ?? 3300) ?>;</script>
 <script src="js/common.js?v=3.9.0"></script>
 <script src="js/vehicles.js?v=3.9.0"></script>
 <script src="js/members.js?v=3.9.0"></script>

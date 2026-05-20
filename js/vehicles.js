@@ -9,6 +9,7 @@ function toggleSoldFields(isSold) {
   document.querySelectorAll('.nagare-field').forEach(el => {
     el.querySelector('input').disabled = isSold;
   });
+  if (typeof updateVehiclePreview === 'function') updateVehiclePreview();
 }
 
 // ─── MODAL: Toggle sold/unsold fields ───────────────
@@ -203,6 +204,7 @@ async function submitAddVehicle(e) {
     listingFee: parseFloat(document.getElementById('add_listingFee').value) || 0,
     soldFee:    parseFloat(document.getElementById('add_soldFee').value) || 0,
     nagareFee:  parseFloat(document.getElementById('add_nagareFee').value) || 0,
+    otherFee:   parseFloat(document.getElementById('add_otherFee')?.value) || 0,
     sold:       document.getElementById('add_sold').checked,
     auctionId:  activeAuctionId
   };
@@ -636,3 +638,82 @@ function toggleAllColumns(btn) {
     label.textContent = isHidden ? 'Show less' : 'Show all columns';
   }
 }
+
+// ── LIVE VEHICLE PAYOUT PREVIEW ──────────────────────────────────────────────
+
+function updateVehiclePreview() {
+  const panel = document.getElementById('vehiclePreview');
+  if (!panel) return;
+
+  const isSold = document.getElementById('add_sold')?.checked ?? true;
+  const sp  = parseFloat(document.getElementById('add_soldPrice')?.value || 0);
+  const rec = parseFloat(document.getElementById('add_recycleFee')?.value || 0);
+  const lst = parseFloat(document.getElementById('add_listingFee')?.value || 0);
+  const sf  = parseFloat(document.getElementById('add_soldFee')?.value || 0);
+  const nag = parseFloat(document.getElementById('add_nagareFee')?.value || 0);
+  const oth = parseFloat(document.getElementById('add_otherFee')?.value || 0);
+  const com = (typeof auctionCommission !== 'undefined') ? auctionCommission : 0;
+
+  const fmt = n => '¥' + Math.round(n).toLocaleString();
+
+  if (isSold) {
+    if (sp <= 0) { panel.style.display = 'none'; return; }
+
+    const tax = Math.round(sp * 0.10);
+    const totalReceived = sp + tax + rec;
+    const totalDed = lst + sf + oth + com;
+    const net = totalReceived - totalDed;
+
+    panel.style.display = '';
+    document.getElementById('pvSoldBlock').style.display = '';
+    document.getElementById('pvListingRow').style.display = '';
+    document.getElementById('pvSoldFeeRow').style.display = '';
+    document.getElementById('pvNagareRow').style.display = 'none';
+
+    document.getElementById('pvSoldPrice').textContent = fmt(sp);
+    document.getElementById('pvTax').textContent = fmt(tax);
+    document.getElementById('pvRecycle').textContent = rec > 0 ? fmt(rec) : '—';
+    document.getElementById('pvTotalRec').textContent = fmt(totalReceived);
+    document.getElementById('pvListing').textContent = lst > 0 ? '−' + fmt(lst) : '—';
+    document.getElementById('pvSoldFee').textContent = sf > 0 ? '−' + fmt(sf) : '—';
+    document.getElementById('pvOther').textContent = oth > 0 ? '−' + fmt(oth) : '—';
+    document.getElementById('pvCommission').textContent = com > 0 ? '−' + fmt(com) : '—';
+
+    const netEl = document.getElementById('pvNet');
+    netEl.textContent = fmt(net);
+    netEl.className = 'font-mono font-bold text-2xl leading-none ' +
+      (net >= 0 ? 'text-ak-gold' : 'text-ak-red');
+
+  } else {
+    if (nag <= 0 && oth <= 0) { panel.style.display = 'none'; return; }
+
+    const totalDed = nag + oth + com;
+
+    panel.style.display = '';
+    document.getElementById('pvSoldBlock').style.display = 'none';
+    document.getElementById('pvListingRow').style.display = 'none';
+    document.getElementById('pvSoldFeeRow').style.display = 'none';
+    document.getElementById('pvNagareRow').style.display = '';
+
+    document.getElementById('pvTotalRec').textContent = '¥0';
+    document.getElementById('pvNagare').textContent = nag > 0 ? '−' + fmt(nag) : '—';
+    document.getElementById('pvOther').textContent = oth > 0 ? '−' + fmt(oth) : '—';
+    document.getElementById('pvCommission').textContent = com > 0 ? '−' + fmt(com) : '—';
+
+    const netEl = document.getElementById('pvNet');
+    netEl.textContent = '−' + fmt(totalDed);
+    netEl.className = 'font-mono font-bold text-2xl leading-none text-ak-red';
+  }
+}
+
+// Wire up all fee inputs to trigger the preview on every keystroke
+document.addEventListener('DOMContentLoaded', () => {
+  const feeFieldIds = [
+    'add_soldPrice', 'add_recycleFee', 'add_listingFee',
+    'add_soldFee', 'add_nagareFee', 'add_otherFee'
+  ];
+
+  feeFieldIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateVehiclePreview);
+  });
