@@ -40,19 +40,33 @@
   <?php endif; ?>
 </div>
 
-<!-- ─── EDIT AUCTION FORM ─────────────────────────────── -->
+<!-- ─── EDIT AUCTION FORM ────────────────────────────── -->
 <?php if ($auction): ?>
 <div id="editAuctionForm" style="display:none" class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-4 animate-slide-down">
-  <form onsubmit="return submitSaveAuction(event)" data-parsley-validate class="w-full max-w-2xl">
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-0">
-      <div><label class="lbl">Auction Name</label><input class="inp" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
-      <div><label class="lbl">Date</label><input class="inp opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
-      <div><label class="lbl">Commission ¥/member</label><input class="inp font-mono" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
-      <div class="flex items-end gap-2">
-        <button class="btn btn-gold btn-sm flex-1 sm:flex-initial" type="submit">💾 Save</button>
-        <a class="btn btn-sm flex-1 sm:flex-initial" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
-      </div>
+  <?= postForm('save_auction', $tab, $tok) ?>
+  <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Edit Auction</div>
+  <div class="add-row ar-auction mb-0">
+    <div>
+      <label class="lbl">Auction Name</label>
+      <input class="inp w-64" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name" required>
     </div>
+    <div>
+      <label class="lbl">Auction Date</label>
+      <input class="inp w-40" type="date" name="date" value="<?= h($auction['date']) ?>" required>
+    </div>
+    <div>
+      <label class="lbl">Commission (¥/member)</label>
+      <input class="inp font-mono w-24" type="number" step="1" name="commissionFee"
+        value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" placeholder="3300">
+    </div>
+    <div class="flex items-end gap-2 pt-[22px]">
+      <button class="btn btn-gold" type="submit">Save</button>
+      <button type="button" class="btn btn-dark"
+        onclick="document.getElementById('editAuctionForm').style.display='none'">
+        Cancel
+      </button>
+    </div>
+  </div>
   </form>
 </div>
 <?php endif; ?>
