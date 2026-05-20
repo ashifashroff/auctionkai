@@ -150,7 +150,7 @@ foreach ($members as $m) {
           WA
         </button>
         <?php endif; ?>
-        <button onclick="generateLink(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all bg-ak-gold/10 border-ak-gold/30 text-ak-gold hover:bg-ak-gold/20 cursor-pointer">🔗 Link</button>
+        <button onclick="generateStatementLink(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all bg-ak-gold/10 border-ak-gold/30 text-ak-gold hover:bg-ak-gold/20 cursor-pointer">🔗 Link</button>
       </div>
     </div>
 
@@ -195,6 +195,7 @@ foreach ($members as $m) {
         <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red" id="nagare_owed_<?= (int)$m['id'] ?>"><?= fmt(abs($s['netPayout'])) ?></span></div>
       </div>
     </div>
+    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden"></div>
 
   </div>
   <?php continue; ?>
