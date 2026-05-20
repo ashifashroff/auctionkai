@@ -152,8 +152,6 @@ function renderNagareStatement(array $m, array $s, array $auction, string $paySt
       <div class='net' style='border-color:#e74c3c'><div class='net-l' style='color:#e74c3c'>AMOUNT OWED</div><div class='net-n' style='color:#e74c3c'>−" . fmt(abs($s['netPayout'])) . "</div></div>
       <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
     </div>";
-}" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
-    </div>";
 }
 ?>
 <!DOCTYPE html>
