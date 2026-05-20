@@ -51,9 +51,11 @@
 
         <!-- Net payout — the big number -->
         <div class="pv-net-block">
-          <div class="text-[10px] text-ak-muted uppercase tracking-widest mb-1">Net Payout</div>
+          <div>
+            <div class="text-[10px] text-ak-muted uppercase tracking-widest mb-1">Net Payout · お支払い額</div>
+            <div class="text-[10px] text-ak-muted">(estimate)</div>
+          </div>
           <div class="font-mono font-bold text-2xl leading-none" id="pvNet">—</div>
-          <div class="text-[10px] text-ak-muted mt-1">お支払い額 (estimate)</div>
         </div>
 
       </div>
