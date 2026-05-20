@@ -717,3 +717,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id);
     if (el) el.addEventListener('input', updateVehiclePreview);
   });
+
+  // Also trigger when sold/unsold checkbox changes
+  const soldCb = document.getElementById('add_sold');
+  if (soldCb) soldCb.addEventListener('change', updateVehiclePreview);
+
+  // Reset preview after a vehicle is successfully added
+  const origSubmit = window.submitAddVehicle;
+  if (typeof origSubmit === 'function') {
+    window.submitAddVehicle = function(e) {
+      const result = origSubmit(e);
+      // After submission resets the form, clear the preview
+      setTimeout(() => {
+        const panel = document.getElementById('vehiclePreview');
+        if (panel) panel.style.display = 'none';
+      }, 300);
+      return result;
+    };
+  }
+});
