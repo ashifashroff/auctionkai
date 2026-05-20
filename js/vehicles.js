@@ -650,7 +650,7 @@ function updateVehiclePreview() {
   const lst = parseFloat(document.getElementById('add_listingFee')?.value || 0);
   const sf  = parseFloat(document.getElementById('add_soldFee')?.value || 0);
   const nag = parseFloat(document.getElementById('add_nagareFee')?.value || 0);
-  const com = (typeof auctionCommission !== 'undefined') ? auctionCommission : 0;
+  const com = 0; // Commission is per-member, not per-vehicle — shown in disclaimer only
 
   const fmt = n => '¥' + Math.round(n).toLocaleString();
 
@@ -674,7 +674,6 @@ function updateVehiclePreview() {
     document.getElementById('pvTotalRec').textContent = fmt(totalReceived);
     document.getElementById('pvListing').textContent = lst > 0 ? '−' + fmt(lst) : '—';
     document.getElementById('pvSoldFee').textContent = sf > 0 ? '−' + fmt(sf) : '—';
-    document.getElementById('pvCommission').textContent = com > 0 ? '−' + fmt(com) : '—';
 
     const netEl = document.getElementById('pvNet');
     netEl.textContent = fmt(net);
@@ -694,7 +693,6 @@ function updateVehiclePreview() {
 
     document.getElementById('pvTotalRec').textContent = '¥0';
     document.getElementById('pvNagare').textContent = nag > 0 ? '−' + fmt(nag) : '—';
-    document.getElementById('pvCommission').textContent = com > 0 ? '−' + fmt(com) : '—';
 
     const netEl = document.getElementById('pvNet');
     netEl.textContent = '−' + fmt(totalDed);

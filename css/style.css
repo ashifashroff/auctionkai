@@ -1106,3 +1106,30 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
     font-size: 11px;
   }
 }
+
+/* ── Preview panel disclaimer ──────────────────────────────────────── */
+.pv-disclaimer {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.65rem 0.875rem;
+  background: rgba(212, 168, 75, 0.06);
+  border: 0.5px solid rgba(212, 168, 75, 0.2);
+  border-radius: 6px;
+  font-size: 11.5px;
+  color: var(--ak-muted, #6A88A0);
+  line-height: 1.6;
+}
+
+.pv-disclaimer strong {
+  color: var(--ak-text, #E8DCC8);
+  font-weight: 500;
+}
+
+.pv-disclaimer-icon {
+  color: var(--ak-gold, #D4A84B);
+  font-size: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}

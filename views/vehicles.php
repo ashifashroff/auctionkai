@@ -44,7 +44,6 @@
           <div class="pv-row" id="pvListingRow"><span class="pv-l">− Listing Fee</span><span class="pv-v text-ak-red" id="pvListing">—</span></div>
           <div class="pv-row" id="pvSoldFeeRow"><span class="pv-l">− Sold Fee</span><span class="pv-v text-ak-red" id="pvSoldFee">—</span></div>
           <div class="pv-row" id="pvNagareRow" style="display:none"><span class="pv-l">− Nagare Fee</span><span class="pv-v text-ak-red" id="pvNagare">—</span></div>
-          <div class="pv-row"><span class="pv-l">− Commission</span><span class="pv-v text-ak-red" id="pvCommission">—</span></div>
         </div>
 
         <!-- Net payout — the big number -->
@@ -56,6 +55,18 @@
           <div class="font-mono font-bold text-2xl leading-none" id="pvNet">—</div>
         </div>
 
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="pv-disclaimer">
+        <span class="pv-disclaimer-icon">ⓘ</span>
+        <span>
+          This is a <strong>per-vehicle estimate only</strong>.
+          Commission (¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member)
+          and any other shared fees are <strong>not included here</strong>.
+          The full settlement with all deductions is shown in the
+          <strong>Statements tab</strong>.
+        </span>
       </div>
     </div>
   </form>
