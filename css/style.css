@@ -1066,6 +1066,18 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   #vehiclePreview > .flex {
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
+  }
+
+  #vehiclePreview {
+    overflow: hidden;
+  }
+
+  #pvSoldBlock,
+  #pvSoldBlock + div,
+  .pv-net-block {
+    width: 100%;
+    min-width: 0;
   }
 
   /* Net payout: remove left border, add top border, go full width */
@@ -1083,5 +1095,14 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   /* Tighten label-to-value gap on small screens */
   .pv-row {
     gap: 1rem;
+  }
+
+  .pv-v {
+    min-width: 70px;
+    font-size: 11px;
+  }
+
+  .pv-l {
+    font-size: 11px;
   }
 }
