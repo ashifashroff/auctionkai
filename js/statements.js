@@ -173,7 +173,7 @@ async function generateStatementLink(memberId, auctionId, btnEl) {
       btnEl.disabled = false;
       const expiry = new Date(data.expires_at).toLocaleDateString('ja-JP', {year:'numeric',month:'2-digit',day:'2-digit'});
       if (resultDiv) {
-        resultDiv.className = 'mt-3 p-4 rounded-xl border border-ak-border bg-ak-infield';
+        resultDiv.className = 'mt-4 p-5 rounded-xl border border-ak-border bg-ak-infield mb-4';
         resultDiv.innerHTML = `
           <div class="flex items-start justify-between gap-3 flex-wrap mb-3">
             <div>
