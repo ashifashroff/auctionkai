@@ -5,7 +5,7 @@
     <div class="text-ak-muted text-[11px] hidden md:block"><?= h($brand['brand_tagline']) ?></div>
   </div>
   <?php if ($auction): ?>
-  <button onclick="document.getElementById('auctionEditPanel').classList.toggle('hidden')" class="btn btn-dark btn-sm text-[11px] shrink-0 hidden md:inline-flex">✎ Edit Auction</button>
+  <button onclick="document.getElementById('editAuctionForm').classList.toggle('hidden')" class="btn btn-dark btn-sm text-[11px] shrink-0 hidden md:inline-flex">✎ Edit Auction</button>
   <?php endif; ?>
   <div class="flex items-center gap-3 shrink-0 ml-auto">
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu" aria-expanded="false" onclick="document.getElementById('hamburgerBtn').classList.toggle('open'); document.getElementById('mobileMenu').classList.toggle('open');">
@@ -65,7 +65,7 @@ if ($maintenanceOn && $userRole === 'admin'):
     </a>
     <hr class="border-ak-border">
     <?php if ($auction): ?>
-    <a href="#" onclick="document.getElementById('mobileMenu').classList.remove('open');document.getElementById('auctionEditPanel').classList.remove('hidden');return false" class="text-ak-text2 hover:text-ak-gold transition-colors py-2">✎ Edit Auction</a>
+    <a href="#" onclick="document.getElementById('mobileMenu').classList.remove('open');document.getElementById('editAuctionForm').classList.remove('hidden');return false" class="text-ak-text2 hover:text-ak-gold transition-colors py-2">✎ Edit Auction</a>
     <?php endif; ?>
     <?php if ($userRole === 'admin'): ?>
     <a href="admin/index.php" class="text-ak-green hover:text-ak-gold transition-colors py-2">⚙ Admin Panel</a>

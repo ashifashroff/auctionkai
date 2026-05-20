@@ -25,21 +25,37 @@
     ← scroll to see more auctions →
   </div>
   <?php if ($auction): ?>
-  <div id="auctionEditPanel" class="hidden bg-ak-bg2 border border-ak-border rounded-xl p-5 mt-3 animate-slide-down">
-    <form onsubmit="return submitSaveAuction(event)" data-parsley-validate>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-        <div><label class="lbl">Auction Name</label><input class="inp" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
-        <div><label class="lbl">Date</label><input class="inp opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
-        <div><label class="lbl">Commission ¥/member</label><input class="inp font-mono" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
-        <div class="flex items-end gap-2">
-          <button class="btn btn-gold btn-sm flex-1 sm:flex-initial" type="submit">💾 Save</button>
-          <a class="btn btn-sm flex-1 sm:flex-initial" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
-        </div>
-      </div>
-    </form>
+  <div class="text-ak-muted text-xs mt-2 flex items-center gap-3 flex-wrap">
+    <span>
+      <b class="text-ak-text"><?= h($auction['name']) ?></b>
+      · <?= h($auction['date']) ?>
+      · Commission: ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member
+      · Expires: <?= h($auction['expires_at'] ?? 'N/A') ?>
+    </span>
+    <button
+      class="text-ak-muted text-[11px] hover:text-ak-gold transition-colors px-2 py-0.5 rounded border border-ak-border hover:border-ak-gold"
+      onclick="var f = document.getElementById('editAuctionForm'); f.style.display = f.style.display === 'none' ? 'block' : 'none';"
+    >✎ Edit</button>
   </div>
   <?php endif; ?>
 </div>
+
+<!-- ─── EDIT AUCTION FORM ─────────────────────────────── -->
+<?php if ($auction): ?>
+<div id="editAuctionForm" style="display:none" class="bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-4 animate-slide-down">
+  <form onsubmit="return submitSaveAuction(event)" data-parsley-validate class="w-full max-w-2xl">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-0">
+      <div><label class="lbl">Auction Name</label><input class="inp" name="name" value="<?= h($auction['name']) ?>" placeholder="Auction name"></div>
+      <div><label class="lbl">Date</label><input class="inp opacity-50 cursor-not-allowed" type="date" name="date" value="<?= h($auction['date']) ?>" disabled></div>
+      <div><label class="lbl">Commission ¥/member</label><input class="inp font-mono" type="number" step="1" name="commissionFee" value="<?= (float)($auction['commission_fee'] ?? 3300) ?>" data-parsley-type="number" data-parsley-min="0"></div>
+      <div class="flex items-end gap-2">
+        <button class="btn btn-gold btn-sm flex-1 sm:flex-initial" type="submit">💾 Save</button>
+        <a class="btn btn-sm flex-1 sm:flex-initial" href="api/delete_auction.php?auction_id=<?= (int)$auction['id'] ?>" style="background:rgba(204,119,119,.15);color:var(--red);border:1px solid rgba(204,119,119,.3)">🗑 Delete</a>
+      </div>
+    </div>
+  </form>
+</div>
+<?php endif; ?>
 
 <!-- ─── ADD AUCTION FORM ─────────────────────────────── -->
 <div id="addAuctionForm" class="hidden bg-ak-bg2 border-b border-ak-border px-4 md:px-7 py-4 animate-slide-down">
