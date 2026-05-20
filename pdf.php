@@ -121,6 +121,40 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
       <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
     </div>";
 }
+
+function renderNagareStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = []): string {
+    if (empty($brand)) {
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
+    }
+    $uRows = '';
+    foreach ($s['uv'] ?? [] as $v) {
+        $uRows .= "<tr><td>" . h($v['lot'] ?: '—') . "</td><td>" . h($v['make'] . ' ' . $v['model']) . "</td><td class='r'>−" . fmt((float)($v['nagare_fee'] ?? 0)) . "</td></tr>";
+    }
+    $exp = !empty($auction['expires_at']) ? ' · Expires: ' . h($auction['expires_at']) : '';
+    return "
+    <div class='page'>
+      <div class='hdr'>
+        <div><div class='brand'>" . h($brand['brand_name']) . " <span>Fee Notice</span></div><div class='sub'>" . h($auction['name']) . $exp . "</div></div>
+        <div class='meta'><strong>" . h($m['name']) . "</strong> " . h($m['phone']) . "<br>" . h($m['email']) . "<br><br>Date: " . h($auction['date']) . "</div>
+      </div>
+      <div class='sec'>Unsold Vehicles ({$s['unsoldCount']} units)</div>
+      <table>
+        <thead><tr><th>Lot #</th><th>Vehicle</th><th class='r'>Nagare</th></tr></thead>
+        <tbody>{$uRows}</tbody>
+      </table>
+      <div class='sec'>Fees Owed</div>
+      <div class='fees'>
+        " . ($s['nagareFeeTotal'] > 0 ? "<div class='row dim'><span>− Nagare Fee ×{$s['unsoldCount']}</span><span>" . fmt($s['nagareFeeTotal']) . "</span></div>" : "") . "
+        " . (($s['otherFeeTotal'] ?? 0) > 0 ? "<div class='row dim'><span>− Other Fee</span><span>" . fmt($s['otherFeeTotal']) . "</span></div>" : "") . "
+        " . ($s['commissionTotal'] > 0 ? "<div class='row dim'><span>− Commission ¥" . number_format($s['commissionFee']) . "/member</span><span>" . fmt($s['commissionTotal']) . "</span></div>" : "") . "
+        <div class='row total'><span>Total Fees</span><span>−" . fmt(abs($s['netPayout'])) . "</span></div>
+      </div>
+      <div class='net' style='border-color:#e74c3c'><div class='net-l' style='color:#e74c3c'>AMOUNT OWED</div><div class='net-n' style='color:#e74c3c'>−" . fmt(abs($s['netPayout'])) . "</div></div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
+    </div>";
+}" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
+    </div>";
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -143,7 +177,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 
 <?php foreach ($targets as $m):
     $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAllPdf[$m['id']] ?? []);
-    if ($s['count'] === 0) continue;
+    if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';
     // Detect if this member has any sold vehicle >= ¥1,000,000
@@ -159,7 +193,11 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         $auctionNote = $noteStmt->fetchColumn() ?? '';
     } catch (Exception $e) {}
 
-    echo renderStatement($m, $s, $auction, $payStatus, $brand, $useLandscape, $auctionNote);
+    if ($s['isNagareOnly'] ?? false) {
+        echo renderNagareStatement($m, $s, $auction, $payStatus, $brand);
+    } else {
+        echo renderStatement($m, $s, $auction, $payStatus, $brand, $useLandscape, $auctionNote);
+    }
 
     // Log PDF generation to statement_history
     try {
