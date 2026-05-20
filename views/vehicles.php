@@ -25,34 +25,39 @@
         <button class="btn btn-gold" type="submit" id="addVehicleBtn">Add</button>
       </div>
     </div>
-    <!-- Live Payout Preview -->
-    <div id="vehiclePreview" class="mt-3 p-4 rounded-xl border border-ak-border bg-ak-dark/50" style="display:none">
-      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Payout Preview</div>
-      <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
+    <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
+
+    <!-- Live payout preview — shown/hidden by JS -->
+    <div id="vehiclePreview" style="display:none" class="mt-4 pt-4 border-t border-ak-border">
+      <div class="text-[10px] font-bold tracking-[2px] uppercase text-ak-muted mb-3">Estimated Payout Preview</div>
+      <div class="flex gap-8 flex-wrap items-start">
+
+        <!-- Received column (sold mode only) -->
         <div id="pvSoldBlock">
-          <div class="dr"><span class="dr-l">Sold Price</span><span id="pvSoldPrice">—</span></div>
-          <div class="dr"><span class="dr-l">Tax (10%)</span><span id="pvTax">—</span></div>
-          <div class="dr"><span class="dr-l">Recycle</span><span id="pvRecycle">—</span></div>
+          <div class="pv-row"><span class="pv-l">Sold Price</span><span class="pv-v text-ak-green" id="pvSoldPrice">—</span></div>
+          <div class="pv-row"><span class="pv-l">+ Tax 10%</span><span class="pv-v text-ak-green" id="pvTax">—</span></div>
+          <div class="pv-row"><span class="pv-l">+ Recycle</span><span class="pv-v text-ak-green" id="pvRecycle">—</span></div>
+          <div class="pv-row pv-subtotal"><span class="pv-l">Total In</span><span class="pv-v text-ak-gold" id="pvTotalRec">—</span></div>
         </div>
+
+        <!-- Deductions column -->
         <div>
-          <div class="dr font-bold"><span class="dr-l text-ak-gold">Total Received</span><span id="pvTotalRec">¥0</span></div>
+          <div class="pv-row" id="pvListingRow"><span class="pv-l">− Listing Fee</span><span class="pv-v text-ak-red" id="pvListing">—</span></div>
+          <div class="pv-row" id="pvSoldFeeRow"><span class="pv-l">− Sold Fee</span><span class="pv-v text-ak-red" id="pvSoldFee">—</span></div>
+          <div class="pv-row" id="pvNagareRow" style="display:none"><span class="pv-l">− Nagare Fee</span><span class="pv-v text-ak-red" id="pvNagare">—</span></div>
+          <div class="pv-row"><span class="pv-l">− Other Fee</span><span class="pv-v text-ak-red" id="pvOther">—</span></div>
+          <div class="pv-row"><span class="pv-l">− Commission</span><span class="pv-v text-ak-red" id="pvCommission">—</span></div>
         </div>
-      </div>
-      <div class="border-t border-ak-border my-2.5"></div>
-      <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
-        <div>
-          <div id="pvListingRow" class="dr"><span class="dr-l">Listing Fee</span><span id="pvListing">—</span></div>
-          <div id="pvSoldFeeRow" class="dr"><span class="dr-l">Sold Fee</span><span id="pvSoldFee">—</span></div>
-          <div id="pvNagareRow" class="dr" style="display:none"><span class="dr-l">Nagare Fee</span><span id="pvNagare">—</span></div>
-          <div class="dr"><span class="dr-l">Other</span><span id="pvOther">—</span></div>
-          <div class="dr"><span class="dr-l">Commission</span><span id="pvCommission">—</span></div>
+
+        <!-- Net payout — the big number -->
+        <div class="pv-net-block">
+          <div class="text-[10px] text-ak-muted uppercase tracking-widest mb-1">Net Payout</div>
+          <div class="font-mono font-bold text-2xl leading-none" id="pvNet">—</div>
+          <div class="text-[10px] text-ak-muted mt-1">お支払い額 (estimate)</div>
         </div>
-        <div class="flex flex-col justify-end">
-          <div class="dr font-bold"><span class="dr-l">Net Payout</span><span id="pvNet">¥0</span></div>
-        </div>
+
       </div>
     </div>
-    <div id="addVehicleMsg" class="hidden mt-2.5 px-3.5 py-2.5 rounded-lg text-[13px]"></div>
   </form>
 </div>
 

@@ -1024,3 +1024,10 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
 .stagger-2 { animation-delay: 100ms !important; }
 .stagger-3 { animation-delay: 150ms !important; }
 .stagger-4 { animation-delay: 200ms !important; }
+
+/* ── Vehicle payout preview ─────────────────────────────────────────── */
+.pv-row { display: flex; justify-content: space-between; gap: 16px; font-size: 13px; padding: 2px 0; }
+.pv-l { color: var(--ak-muted, #6A88A0); white-space: nowrap; }
+.pv-v { font-family: 'JetBrains Mono', ui-monospace, monospace; text-align: right; }
+.pv-subtotal { border-top: 1px solid var(--ak-border, #2a2a3a); margin-top: 4px; padding-top: 6px; }
+.pv-net-block { margin-left: auto; text-align: right; }
