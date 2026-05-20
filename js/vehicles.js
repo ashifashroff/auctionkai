@@ -315,7 +315,7 @@ function filterVehicles() {
 
 // ─── DELETE VEHICLE (AJAX) ─────────────────────────
 function deleteVehicle(vehicleId, btn) {
-  inlineConfirm(btn, () => {
+  showConfirmModal('Remove Vehicle?', 'This vehicle will be permanently removed.', () => {
     if (btn) { btn.disabled = true; btn.textContent = '…'; }
     fetch('api/delete_vehicle.php', {
       method: 'POST',
