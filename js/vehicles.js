@@ -256,16 +256,52 @@ async function submitAddVehicle(e) {
 }
 
 // ─── TOGGLE SOLD (AJAX) ────────────────────────────
-function toggleSold(id, btn) {
+async function toggleSold(id, btn) {
   btn.disabled = true;
-  fetch('api.php', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({action:'toggle_sold', id:id, _tok:CSRF_TOKEN})
-  }).then(r=>r.json()).then(d=>{
-    if(d.error){showToast(d.error, 'error');btn.disabled=false;return;}
-    AK.soldToggle(btn, d.sold !== undefined ? d.sold : true);
-    if(typeof VehiclesPager!=="undefined"){VehiclesPager.reload();}else{location.reload();}
-  }).catch(()=>{showToast('Connection error', 'error');btn.disabled=false;});
+  btn.style.opacity = '0.55';
+
+  try {
+    const res = await fetch('api/toggle_vehicle.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: id, _tok: CSRF_TOKEN})
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      showToast(data.error || 'Toggle failed', 'error');
+      return;
+    }
+
+    const sold = data.sold;
+    const row = btn.closest('tr');
+
+    // Update button
+    btn.className = 'sb ' + (sold ? 'sy' : 'sn');
+    btn.textContent = sold ? '✓ SOLD' : '✗ UNSOLD';
+    if (row) row.dataset.sold = sold ? '1' : '0';
+
+    // Animate
+    if (typeof AK !== 'undefined') AK.soldToggle(btn, sold);
+
+    // Flash the row green/red
+    if (row) {
+      row.style.transition = 'background 0.25s';
+      row.style.background = sold ? 'rgba(76,175,130,0.07)' : 'rgba(204,119,119,0.07)';
+      setTimeout(() => { row.style.background = ''; }, 600);
+    }
+
+    // Reload to reflect fee changes
+    if (typeof VehiclesPager !== 'undefined') {
+      setTimeout(() => VehiclesPager.reload(), 300);
+    }
+
+  } catch (e) {
+    showToast('Connection error', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '';
+  }
 }
 
 // ─── VEHICLE TABLE SEARCH ──────────────────────────
