@@ -75,7 +75,9 @@ foreach ($members as $m) {
 <?php else: ?>
   <?php $hasSales = false; $stmtRank = 1; ?>
   <?php foreach ($members as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? []);
+    $isNagareOnlyMember = count(array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id'] && $v['sold'])) === 0;
+    $chargeCommission = $isNagareOnlyMember ? ($commissionFlags[(int)$m['id']] ?? false) : true;
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAll[$m['id']] ?? [], $chargeCommission);
     if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $hasSales = true;
     $ps = $paymentStatuses[$m['id']] ?? null;
@@ -106,6 +108,24 @@ foreach ($members as $m) {
         <div class="flex items-center gap-2">
           <div class="sn2"><?= h($m['name']) ?></div>
           <span class="nagare-badge">✗ No Sales</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              class="accent-ak-gold nagare-commission-cb"
+              id="cb_commission_<?= (int)$m['id'] ?>"
+              data-member-id="<?= (int)$m['id'] ?>"
+              data-auction-id="<?= $activeAuctionId ?>"
+              data-commission-raw="<?= (float)($auction['commission_fee'] ?? 3300) ?>"
+              <?= ($commissionFlags[(int)$m['id']] ?? false) ? 'checked' : '' ?>
+              onchange="toggleNagareCommission(this)"
+            >
+            <span class="text-ak-muted text-xs">
+              Charge commission
+              <span class="text-ak-muted font-mono">(¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>)</span>
+            </span>
+          </label>
         </div>
         <div class="sm"><?= h($m['email']) ?> · <?= h($m['phone']) ?></div>
       </div>
@@ -164,13 +184,15 @@ foreach ($members as $m) {
         <div class="dr"><span class="dr-l">Other Fee</span><span class="dr-a">−<?= fmt($s['otherFeeTotal']) ?></span></div>
         <?php endif; ?>
         <?php if ($s['commissionTotal'] > 0): ?>
-        <div class="dr"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <div class="dr" id="nagare_commission_row_<?= (int)$m['id'] ?>"><span class="dr-l">Commission ¥<?= number_format($s['commissionFee']) ?>/member</span><span class="dr-a">−<?= fmt($s['commissionTotal']) ?></span></div>
+        <?php elseif (!($commissionFlags[(int)$m['id']] ?? false)): ?>
+        <div class="dr" id="nagare_commission_row_<?= (int)$m['id'] ?>" style="display:none"><span class="dr-l">Commission ¥<?= number_format((float)($auction['commission_fee'] ?? 3300)) ?>/member</span><span class="dr-a">−<?= fmt((float)($auction['commission_fee'] ?? 3300)) ?></span></div>
         <?php endif; ?>
         <?php if (!empty($s['specialFees'])): foreach ($s['specialFees'] as $sf): $isAdd = ($sf['fee_type'] ?? 'deduction') === 'addition'; ?>
         <div class="dr"><span class="dr-l"><?= $isAdd ? '+' : '−' ?> <?= h($sf['fee_name']) ?></span><span class="dr-a"><?= $isAdd ? '+' : '−' ?><?= fmt((float)$sf['amount']) ?></span></div>
         <?php endforeach; endif; ?>
-        <div class="dt"><span class="dt-l">Total Fees</span><span class="dt-n">−<?= fmt(abs($s['netPayout'])) ?></span></div>
-        <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red"><?= fmt(abs($s['netPayout'])) ?></span></div>
+        <div class="dt"><span class="dt-l">Total Fees</span><span class="dt-n" id="nagare_total_<?= (int)$m['id'] ?>">−<?= fmt(abs($s['netPayout'])) ?></span></div>
+        <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red" id="nagare_owed_<?= (int)$m['id'] ?>"><?= fmt(abs($s['netPayout'])) ?></span></div>
       </div>
     </div>
 

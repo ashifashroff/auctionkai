@@ -175,7 +175,13 @@ function renderNagareStatement(array $m, array $s, array $auction, string $paySt
 </div>
 
 <?php foreach ($targets as $m):
-    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAllPdf[$m['id']] ?? []);
+    // Load commission flag for nagare-only members
+    $flagStmt = $db->prepare("SELECT charge_commission FROM member_auction_flags WHERE member_id = ? AND auction_id = ? AND user_id = ?");
+    $flagStmt->execute([(int)$m['id'], $activeAuctionId, $userId]);
+    $flagRow = $flagStmt->fetch();
+    $isNagareOnlyPdf = count(array_filter($vehicles, fn($v) => (int)$v['member_id'] === (int)$m['id'] && $v['sold'])) === 0;
+    $chargeCommissionPdf = $isNagareOnlyPdf ? (bool)($flagRow['charge_commission'] ?? false) : true;
+    $s = calcStatement((int)$m['id'], $vehicles, (float)($auction['commission_fee'] ?? 3300), $memberFeesAllPdf[$m['id']] ?? [], $chargeCommissionPdf);
     if ($s['count'] === 0 && $s['unsoldCount'] === 0) continue;
     $ps = $paymentStatuses[$m['id']] ?? null;
     $payStatus = $ps['status'] ?? 'unpaid';

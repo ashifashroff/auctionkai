@@ -109,6 +109,16 @@ $vehicles = $activeAuctionId
     ? (function() use ($db, $activeAuctionId, $userId) { $q = $db->prepare("SELECT v.* FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id=? AND m.user_id=? ORDER BY v.id"); $q->execute([$activeAuctionId, $userId]); return $q->fetchAll(); })()
     : [];
 
+// Load per-member commission flags for this auction
+$commissionFlags = [];
+if ($activeAuctionId) {
+    $flagRows = $db->prepare("SELECT member_id, charge_commission FROM member_auction_flags WHERE auction_id = ? AND user_id = ?");
+    $flagRows->execute([$activeAuctionId, $userId]);
+    foreach ($flagRows->fetchAll() as $f) {
+        $commissionFlags[(int)$f['member_id']] = (bool)$f['charge_commission'];
+    }
+}
+
 // Fetch payment statuses for active auction
 $paymentStatuses = [];
 if ($activeAuctionId) {

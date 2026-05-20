@@ -487,3 +487,55 @@ function dismissInstallPrompt(permanent = false) {
 }
 
 document.addEventListener('DOMContentLoaded', () => PWAInstall.init());
+
+// ── NAGARE COMMISSION TOGGLE ─────────────────────────────────────────────────
+
+async function toggleNagareCommission(checkbox) {
+  const memberId = checkbox.dataset.memberId;
+  const auctionId = checkbox.dataset.auctionId;
+  const commission = parseFloat(checkbox.dataset.commissionRaw || 0);
+  const charge = checkbox.checked ? '1' : '0';
+
+  checkbox.disabled = true;
+
+  try {
+    const res = await fetch('toggle_commission.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member_id: memberId, auction_id: auctionId, charge: charge, _tok: CSRF_TOKEN })
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      checkbox.checked = !checkbox.checked;
+      return;
+    }
+
+    const fmt = n => '¥' + Math.round(n).toLocaleString();
+
+    // Show/hide the commission deduction row
+    const commRow = document.getElementById('nagare_commission_row_' + memberId);
+    if (commRow) commRow.style.display = charge === '1' ? '' : 'none';
+
+    // Recalculate totals
+    const totalEl = document.getElementById('nagare_total_' + memberId);
+    const owedEl = document.getElementById('nagare_owed_' + memberId);
+
+    if (totalEl && owedEl) {
+      const currentOwed = parseFloat(owedEl.textContent.replace(/[¥,−-]/g, '')) || 0;
+      const newOwed = charge === '1' ? currentOwed + commission : currentOwed - commission;
+      totalEl.textContent = '−' + fmt(newOwed);
+      owedEl.textContent = fmt(newOwed);
+
+      // Flash to confirm
+      owedEl.style.transition = 'color 0.2s';
+      owedEl.style.color = '#e8bd5e';
+      setTimeout(() => { owedEl.style.color = ''; }, 600);
+    }
+
+  } catch (e) {
+    checkbox.checked = !checkbox.checked;
+  } finally {
+    checkbox.disabled = false;
+  }
+}
