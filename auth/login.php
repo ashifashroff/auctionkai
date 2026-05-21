@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="AuctionKai">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="icons/icon-152.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icon-152.png">
 <meta name="theme-color" content="#D4A84B">
 <title>AuctionKai — <?= $showRegister ? 'Register' : 'Login' ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
