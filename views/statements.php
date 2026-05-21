@@ -195,7 +195,7 @@ foreach ($members as $m) {
         <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red" id="nagare_owed_<?= (int)$m['id'] ?>"><?= fmt(abs($s['netPayout'])) ?></span></div>
       </div>
     </div>
-    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="padding:0 1.25rem 1.25rem"></div>
+    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:0 1.25rem 1.25rem"></div>
 
   </div>
   <?php continue; ?>
