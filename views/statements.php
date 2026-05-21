@@ -302,14 +302,12 @@ foreach ($members as $m) {
 
           <button onclick="generateStatementLink(<?= (int)$m['id'] ?>, <?= (int)$activeAuctionId ?>, this)" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-all bg-ak-infield border-ak-border text-ak-muted hover:border-ak-gold hover:text-ak-gold cursor-pointer" id="link-btn-<?= (int)$m['id'] ?>">🔗 Link</button>
         </div>
-
-        <!-- Share link result -->
       </div>
     </div>
 
+    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:0 1.25rem 1.25rem"></div>
+
     <button class="w-full px-4 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-gold hover:bg-ak-infield/50 transition-colors sm:hidden" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.stmt-chevron').classList.toggle('rotate-180')"><span>📊 View Breakdown</span><span class="stmt-chevron transition-transform">▾</span></button><div class="sb2 hidden sm:grid">
-      <!-- Share link result (inside breakdown) -->
-      <div id="link-result-<?= (int)$m['id'] ?>" class="hidden col-span-2 p-3 rounded-xl border border-ak-border bg-ak-infield mb-2"></div>
       <div class="sl">
         <div class="ssl">Sold Vehicles (<?= $s['count'] ?>)</div>
         <?php foreach ($s['mv'] as $v): $vTax = round((float)$v['sold_price'] * 0.10); $vRecycle = (float)($v['recycle_fee'] ?? 0); ?>
