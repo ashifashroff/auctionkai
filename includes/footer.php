@@ -17,8 +17,8 @@ $brandTagline = $brand['brand_tagline'] ?? 'Settlement Management System';
 $brandFooter = $brand['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions';
 $year = date('Y');
 ?>
-<footer class="bg-ak-bg2 border-t border-ak-border px-7 py-8 w-full mt-auto">
-  <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+<footer class="bg-ak-bg2 border-t border-ak-border px-4 md:px-7 py-6 md:py-8 w-full mt-auto">
+  <div class="max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
     <!-- Column 1 — Brand -->
     <div>
       <div class="text-ak-gold font-bold text-lg">⚡ <?= h($brandName) ?></div>
