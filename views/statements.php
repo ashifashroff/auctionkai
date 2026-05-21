@@ -204,7 +204,7 @@ foreach ($members as $m) {
         <div class="np nagare-np"><span class="np-l">AMOUNT OWED</span><span class="np-n text-ak-red" id="nagare_owed_<?= (int)$m['id'] ?>"><?= fmt(abs($s['netPayout'])) ?></span></div>
       </div>
     </div>
-    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:0 1.25rem 1.25rem"></div>
+    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:1.25rem"></div>
 
   </div>
   <?php continue; ?>
@@ -305,7 +305,7 @@ foreach ($members as $m) {
       </div>
     </div>
 
-    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:0 1.25rem 1.25rem"></div>
+    <div id="link-result-<?= (int)$m['id'] ?>" class="hidden" style="margin:1.25rem"></div>
 
     <button class="w-full px-4 py-2.5 flex items-center justify-between text-xs text-ak-muted hover:text-ak-gold hover:bg-ak-infield/50 transition-colors sm:hidden" onclick="this.nextElementSibling.classList.toggle('hidden');this.querySelector('.stmt-chevron').classList.toggle('rotate-180')"><span>📊 View Breakdown</span><span class="stmt-chevron transition-transform">▾</span></button><div class="sb2 hidden sm:grid">
       <div class="sl">
