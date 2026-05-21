@@ -285,14 +285,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-4">
           <label class="lbl">Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="password" autocomplete="new-password" id="register-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
           <div class="strength-bar-wrap" id="reg-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="reg-strength-label"></div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm Password *</label>
-          <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true" data-parsley-required-message="Please confirm your password">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="confirm" autocomplete="new-password" placeholder="••••••" data-parsley-required="true" data-parsley-required-message="Please confirm your password">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="mb-7 flex items-start gap-2">
@@ -329,7 +339,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
 
         <div class="mb-5">
           <label class="lbl">Password</label>
-          <input class="inp" type="password" name="password" autocomplete="new-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="password" autocomplete="new-password" placeholder="••••••" data-parsley-required data-parsley-minlength="8" data-parsley-required-message="Password is required" data-parsley-minlength-message="Password must be at least 8 characters">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Log In</button>

@@ -99,12 +99,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
 
         <div class="mb-4">
           <label class="lbl">New Password <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="password" placeholder="••••••••" data-parsley-required data-parsley-minlength="8">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="password" placeholder="••••••••" data-parsley-required data-parsley-minlength="8">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password</label>
-          <input class="inp" type="password" name="confirm" placeholder="••••••••" data-parsley-required data-parsley-equalto="[name='password']">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="confirm" placeholder="••••••••" data-parsley-required data-parsley-equalto="[name='password']">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <button class="btn btn-gold w-full" type="submit">Reset Password</button>

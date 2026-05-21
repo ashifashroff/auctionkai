@@ -337,7 +337,12 @@ $tabs = [
     <div class="mb-4"><label class="lbl">Username *</label><input class="inp" name="username" placeholder="Choose a username" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Full Name *</label><input class="inp" name="name" placeholder="e.g. Ahmad Hassan" data-parsley-required="true"></div>
     <div class="mb-4"><label class="lbl">Email</label><input class="inp" type="email" name="email" placeholder="email@example.com" data-parsley-type="email"></div>
-    <div class="mb-4"><label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label><input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true"></div>
+    <div class="mb-4"><label class="lbl">Password * <span class="font-normal text-ak-muted">(min 6 chars)</span></label><div class="pw-wrap">
+      <input class="inp" type="password" name="password" placeholder="••••••" data-parsley-required="true">
+      <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div></div>
     <div class="mb-5"><label class="lbl">Role</label><select class="inp" name="role"><option value="user">User</option><option value="admin">Admin</option></select></div>
     <button class="btn btn-gold w-full" type="submit" id="createUserBtn">+ Create User</button>
   </form>
@@ -832,8 +837,18 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="mb-4"><label class="lbl">Email</label><input class="inp" type="email" name="email" value="<?= h($admin['email'] ?? '') ?>" data-parsley-type="email"></div>
     <div class="border-t border-ak-border my-5 pt-5">
       <div class="text-ak-muted text-[10px] font-bold tracking-[2px] uppercase mb-3">Change Password</div>
-      <div class="mb-4"><label class="lbl">Current Password</label><input class="inp" type="password" name="current_password" placeholder="Enter current password to change"></div>
-      <div class="mb-4"><label class="lbl">New Password <span class="font-normal text-ak-muted">(min 6 chars, leave blank to keep current)</span></label><input class="inp" type="password" name="new_password" placeholder="••••••"></div>
+      <div class="mb-4"><label class="lbl">Current Password</label><div class="pw-wrap">
+        <input class="inp" type="password" name="current_password" placeholder="Enter current password to change">
+        <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div></div>
+      <div class="mb-4"><label class="lbl">New Password <span class="font-normal text-ak-muted">(min 6 chars, leave blank to keep current)</span></label><div class="pw-wrap">
+        <input class="inp" type="password" name="new_password" placeholder="••••••">
+        <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div></div>
     </div>
     <button class="btn btn-gold w-full" type="submit" id="adminSettingsBtn">Save Settings</button>
   </form>

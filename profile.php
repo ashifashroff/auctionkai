@@ -133,19 +133,34 @@ function parseOS(string $ua): string {
 
         <div class="mb-4">
           <label class="lbl">Current Password *</label>
-          <input class="inp" type="password" name="current_password" id="pf_current" placeholder="Enter current password" data-parsley-required="true" data-parsley-required-message="Current password is required">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="current_password" id="pf_current" placeholder="Enter current password" data-parsley-required="true" data-parsley-required-message="Current password is required">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="mb-4">
           <label class="lbl">New Password * <span class="font-normal text-ak-muted">(min 8 chars)</span></label>
-          <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-required-message="New password is required" data-parsley-minlength="8" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="new_password" id="profile-new-password" placeholder="Enter new password" data-parsley-required="true" data-parsley-required-message="New password is required" data-parsley-minlength="8" data-parsley-minlength-message="Password must be at least 8 characters" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$" data-parsley-pattern-message="Must include uppercase, lowercase, and numbers">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
           <div class="strength-bar-wrap" id="prof-strength-bars"><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div><div class="strength-bar"></div></div>
           <div class="strength-label" id="prof-strength-label"></div>
         </div>
 
         <div class="mb-5">
           <label class="lbl">Confirm New Password *</label>
-          <input class="inp" type="password" name="confirm_password" id="pf_confirm" placeholder="Confirm new password" data-parsley-required="true" data-parsley-required-message="Please confirm your new password" data-parsley-equalto="#profile-new-password" data-parsley-equalto-message="Passwords do not match">
+          <div class="pw-wrap">
+            <input class="inp" type="password" name="confirm_password" id="pf_confirm" placeholder="Confirm new password" data-parsley-required="true" data-parsley-required-message="Please confirm your new password" data-parsley-equalto="#profile-new-password" data-parsley-equalto-message="Passwords do not match">
+            <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
 
         <button class="btn btn-gold w-full" type="submit" id="passwordChangeBtn">Change Password</button>
@@ -298,7 +313,12 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div class="mb-5">
       <label class="text-ak-muted text-xs block mb-2">Type your password to confirm:</label>
-      <input type="password" id="deleteAccountPassword" class="inp w-full" placeholder="Enter your password">
+      <div class="pw-wrap">
+        <input type="password" id="deleteAccountPassword" class="inp w-full" placeholder="Enter your password">
+        <button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <div id="deleteAccountError" class="hidden text-ak-red text-xs mt-2"></div>
     </div>
     <div class="mb-4">

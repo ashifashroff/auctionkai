@@ -1157,3 +1157,46 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
 .nagare-np .np-n {
   color: var(--ak-red, #CC7777) !important;
 }
+
+/* ── Password show/hide toggle ─────────────────────────────────────── */
+.pw-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pw-wrap input {
+  width: 100%;
+  padding-right: 2.75rem !important;
+}
+
+.pw-toggle {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: var(--ak-muted, #6A88A0);
+  transition: color 0.15s;
+  line-height: 1;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pw-toggle:hover {
+  color: var(--ak-text, #E8DCC8);
+}
+
+.pw-toggle svg {
+  width: 16px;
+  height: 16px;
+  pointer-events: none;
+}
