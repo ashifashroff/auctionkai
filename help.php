@@ -15,7 +15,7 @@ $userRole = $_SESSION['user_role'] ?? 'user';
 <title>AuctionKai — Help & Guide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.9.0">
+<link rel="stylesheet" href="css/style.css?v=3.10.0">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -52,13 +52,13 @@ $sections = [
     'items' => [
       '<b>Adding a seller/member</b> — Go to the Members tab. Fill in the name (required), phone, and email. Click "+ Add". Duplicate names are blocked.',
       '<b>Editing member details</b> — Click the "Edit" button on any member card. A popup lets you update name, phone, and email without reloading the page.',
-      '<b>Removing a member</b> — Click "Remove" on the member card. This also deletes all their vehicles in the current auction.',
+      '<b>Removing a member</b> — Click "Remove" on the member card. An inline confirmation appears — click Yes to proceed. This also deletes all their vehicles from the auction.',les in the current auction.',
     ],
   ],
   [
     'title' => '🚗 Managing Vehicles',
     'items' => [
-      '<b>Adding a vehicle</b> — In the Vehicles tab, select a member from the search dropdown. Fill in the make (required), model, lot number, and fees. Click "Add".',
+      '<b>Adding a vehicle</b> — In the Vehicles tab, select a member from the search dropdown. Fill in the make (required), model, lot number, and fees. A live payout preview appears below the form as you type, showing the estimated net payout in real-time.',
       '<b>Fee field explanations:</b>
         <ul class="list-disc list-inside ml-2 mt-1 space-y-1">
           <li><b>Sold Price</b> — the hammer price at auction</li>
@@ -68,7 +68,7 @@ $sections = [
           <li><b>Nagare Fee (流れ費用)</b> — fee charged for unsold vehicles</li>
           <li><b>Other Fee</b> — any additional deduction</li>
         </ul>',
-      '<b>Toggling Sold / Unsold</b> — Click the "✓ SOLD" or "✗ UNSOLD" button on any vehicle row. When sold, the nagare field disables and sold-price fields enable. When unsold, it flips.',
+      '<b>Toggling Sold / Unsold</b> — Click the "✓ SOLD" or "✗ UNSOLD" button on any vehicle row. It toggles instantly with a green/red flash animation — no page reload. When sold, the nagare field disables and sold-price fields enable. When unsold, it flips.',
       '<b>Inline editing</b> — Double-click on the Lot #, Vehicle, or Sold Price cell in the vehicle table to edit it directly. Press Enter to save or Escape to cancel.',
     ],
   ],
@@ -95,7 +95,9 @@ $sections = [
       '<b>Filtering by payment status</b> — Use the dropdown next to the search box to filter by Paid, Unpaid, or Partial.',
       '<b>Mark all unpaid as paid</b> — Click "✓ Mark Unpaid as Paid" to bulk-update all unpaid members at once.',
       '<b>WhatsApp sharing</b> — Click the "💬 WhatsApp" button to open WhatsApp with a pre-filled settlement message including full fee breakdown and emojis. Works on both desktop (WhatsApp Web) and mobile.',
-      '<b>Shareable statement link</b> — Click "🔗 Share Link" to generate a unique URL for the member. They can view their statement online, protected by a PIN (last 4 digits of their phone number). Links are valid for 14 days.',
+      '<b>Shareable statement link</b> — Click "🔗 Link" to generate a unique URL for the member. They can view their statement online, protected by a PIN (last 4 digits of their phone number). Links are valid for 14 days.',
+      '<b>Nagare-only members</b> — Members with only unsold vehicles appear with a distinct "✗ No Sales" card in the Statements tab. Their fees (nagare + commission if checked) are shown separately.',
+      '<b>Commission for nagare-only members</b> — By default, commission is NOT charged to nagare-only members. Check the "Charge commission" checkbox to add it. The choice is saved and reflected in the PDF.',
       '<b>Statement history</b> — Click the ▾ arrow on any member\'s card to see a log of all actions (PDF generated, email sent, WhatsApp opened).',
     ],
   ],

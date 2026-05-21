@@ -15,7 +15,7 @@ $brand = loadBranding($db);
 <title><?= h($brand['brand_name']) ?> — About</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=3.9.0">
+<link rel="stylesheet" href="css/style.css?v=3.10.0">
 <?php include 'css/tailwind-config.php'; ?>
 </head>
 <body class="bg-ak-bg text-ak-text font-sans min-h-screen flex flex-col"><div class="flex-1 flex flex-col">
@@ -76,6 +76,7 @@ $brand = loadBranding($db);
 <div class="bg-ak-card border border-ak-border rounded-xl p-7">
   <h2 class="text-ak-gold font-bold text-lg mb-4">📋 Version History</h2>
   <div class="space-y-3">
+    <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.10</span><span class="text-ak-text2 text-sm">Live vehicle payout preview, nagare-only statement cards with commission toggle, inline confirm dialogs, decluttered topbar, password show/hide toggles, shareable links for all members</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.9</span><span class="text-ak-text2 text-sm">PWA install on iPhone/Android, member notes (global + per-auction), animation system, auto-update from admin, smart 万 formatting</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-gold font-mono text-xs bg-ak-gold/10 px-2 py-0.5 rounded shrink-0">v3.8.1</span><span class="text-ak-text2 text-sm">Security patch: SQL injection fix, CSRF on downloads, reset token exposure, DB-based brute force, SMTP encryption, API rate limiting</span></div>
     <div class="flex items-start gap-3"><span class="text-ak-muted font-mono text-xs bg-ak-border px-2 py-0.5 rounded shrink-0">v3.7</span><span class="text-ak-text2 text-sm">WhatsApp statement sharing, shareable links with PIN protection, online statement view, view counter, auto-cleanup</span></div>
