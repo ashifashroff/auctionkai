@@ -66,9 +66,10 @@
 </div>
 
 <!-- Records Table (same style as vehicles table) -->
-<div class="bg-ak-card rounded-xl border border-ak-border overflow-x-auto">
-  <table class="vt">
-    <thead>
+<div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">
+  <div class="vt-scroll-wrap">
+  <table class="vt" id="special-fees-table">
+    <thead class="sticky-thead">
       <tr>
         <th>Member</th>
         <th>Fee Name</th>
@@ -107,7 +108,7 @@
       <?php foreach ($allSpecialFees as $fee):
         $isAdd = $fee['fee_type'] === 'addition';
       ?>
-      <tr id="sf-row-<?= (int)$fee['id'] ?>" class="animate-fade-in">
+      <tr id="sf-row-<?= (int)$fee['id'] ?>" class="animate-fade-in" data-member="<?= h(strtolower($fee['member_name'])) ?>" data-fee-type="<?= h($fee['fee_type']) ?>" data-amount="<?= (float)$fee['amount'] ?>">
         <td class="font-medium text-ak-text"><?= h($fee['member_name']) ?></td>
         <td class="text-ak-text2"><?= h($fee['fee_name']) ?></td>
         <td class="text-ak-muted text-xs"><?= h($fee['notes'] ?? '—') ?></td>
@@ -128,6 +129,7 @@
       <?php endif; ?>
     </tbody>
   </table>
+  </div><!-- /vt-scroll-wrap -->
 
   <!-- Summary row at bottom -->
   <?php if (!empty($allSpecialFees)):

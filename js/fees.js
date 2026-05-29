@@ -182,6 +182,8 @@ async function submitAddSpecialFee(event) {
         `;
         tbody.insertBefore(tr, tbody.firstChild);
       }
+      // Re-init grouping after add
+      if (typeof initFeesMemberGrouping === 'function') initFeesMemberGrouping();
     } else {
       showToast(data.message || 'Failed to add fee', 'error');
     }
@@ -212,6 +214,8 @@ async function sfDeleteFee(feeId, memberId, auctionId) {
         setTimeout(() => row.remove(), 200);
       }
       showToast('Fee deleted', 'warning');
+      // Re-init grouping after delete
+      if (typeof initFeesMemberGrouping === 'function') setTimeout(initFeesMemberGrouping, 250);
     } else {
       showToast(data.message || 'Delete failed', 'error');
     }
@@ -222,3 +226,90 @@ async function sfDeleteFee(feeId, memberId, auctionId) {
 
 // Modal backdrop close
 document.getElementById('editFeeModal')?.addEventListener('click', function(e) { if (e.target === this) closeEditFeeModal(); });
+
+// ── SPECIAL FEES MEMBER GROUPING ───────────────────────────────────────────
+
+function initFeesMemberGrouping() {
+  const table = document.getElementById('special-fees-table');
+  if (!table) return;
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  // Remove existing group headers
+  tbody.querySelectorAll('.member-group-header').forEach(r => r.remove());
+
+  // Get fee rows (skip empty state row)
+  const rows = Array.from(tbody.querySelectorAll('tr[data-member]'));
+  if (rows.length === 0) return;
+
+  // Group by member
+  const groups = {};
+  const order = [];
+
+  rows.forEach(row => {
+    const member = row.dataset.member || 'unknown';
+    if (!groups[member]) {
+      groups[member] = [];
+      order.push(member);
+    }
+    groups[member].push(row);
+  });
+
+  if (order.length <= 1) return;
+
+  const isExpanded = false;
+
+  order.forEach(member => {
+    const memberRows = groups[member];
+    const total = memberRows.length;
+    const deductions = memberRows.filter(r => r.dataset.feeType === 'deduction');
+    const additions = memberRows.filter(r => r.dataset.feeType === 'addition');
+    const dedTotal = deductions.reduce((s, r) => s + parseFloat(r.dataset.amount || 0), 0);
+    const addTotal = additions.reduce((s, r) => s + parseFloat(r.dataset.amount || 0), 0);
+
+    const displayName = member.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    const fmt = n => '¥' + Math.round(Math.abs(n)).toLocaleString();
+
+    const header = document.createElement('tr');
+    header.className = 'member-group-header';
+    header.dataset.group = member;
+    header.dataset.expanded = isExpanded ? '1' : '0';
+
+    header.innerHTML = `
+      <td colspan="7" class="mgr-cell">
+        <div class="mgr-inner">
+          <span class="mgr-arrow">${isExpanded ? '▼' : '▶'}</span>
+          <span class="mgr-name">${displayName}</span>
+          <span class="mgr-stats">
+            <span class="mgr-total">${total} fee${total !== 1 ? 's' : ''}</span>
+            ${dedTotal > 0 ? `<span class="mgr-unsold">−${fmt(dedTotal)}</span>` : ''}
+            ${addTotal > 0 ? `<span class="mgr-sold">+${fmt(addTotal)}</span>` : ''}
+          </span>
+        </div>
+      </td>`;
+
+    tbody.insertBefore(header, memberRows[0]);
+
+    memberRows.forEach(row => {
+      row.style.display = isExpanded ? '' : 'none';
+    });
+
+    header.addEventListener('click', () => {
+      const expanded = header.dataset.expanded === '1';
+      const nowExpanded = !expanded;
+      header.dataset.expanded = nowExpanded ? '1' : '0';
+      header.querySelector('.mgr-arrow').textContent = nowExpanded ? '▼' : '▶';
+      memberRows.forEach(row => {
+        row.style.display = nowExpanded ? '' : 'none';
+      });
+    });
+  });
+}
+
+// Auto-init on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('special-fees-table')) {
+    initFeesMemberGrouping();
+  }
+});
