@@ -762,7 +762,7 @@ function initMemberGrouping() {
   // If only one member, no point grouping
   if (order.length <= 1) return;
 
-  const isExpanded = true; // expanded - pagination already limits members per page
+  const isExpanded = false; // collapsed by default
 
   // Build group headers and insert before each group's first row
   order.forEach(member => {
@@ -935,7 +935,7 @@ function initMobileMemberGrouping() {
   // Skip if only one member
   if (order.length <= 1) return;
 
-  const isExpanded = true; // expanded - pagination already limits members per page
+  const isExpanded = false; // collapsed by default
 
   order.forEach(member => {
     const memberCards = groups[member];
