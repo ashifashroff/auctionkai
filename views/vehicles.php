@@ -100,7 +100,7 @@
       <span class="text-ak-muted text-[11px]" id="vehicles-count-header"></span>
     </div>
     <div class="flex items-center gap-3">
-      <button onclick="toggleAllColumns(this)" class="text-[11px] text-ak-muted hover:text-ak-gold transition-colors flex items-center gap-1">
+      <button onclick="toggleAllColumns(this)" class="text-[11px] text-ak-muted hover:text-ak-gold transition-colors flex items-center gap-1 hidden md:flex">
         <span>⊞</span>
         <span class="toggle-col-label">Show all columns</span>
       </button>
