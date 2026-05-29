@@ -65,7 +65,48 @@
   </form>
 </div>
 
-<!-- Records Table (same style as vehicles table) -->
+<?php
+// ── MEMBER-BASED PAGINATION FOR FEES ─────────────────────────────────
+$membersPerPage = 10;
+$feePage = max(1, (int)($_GET['fee_page'] ?? 1));
+
+// Build list of members who have fees, sorted by name
+$feeMemberList = [];
+foreach ($memberFeesAll as $mId => $fees) {
+    $memberName = '';
+    foreach ($members as $m) {
+        if ((int)$m['id'] === $mId) {
+            $memberName = $m['name'];
+            break;
+        }
+    }
+    $feeMemberList[] = ['id' => $mId, 'name' => $memberName];
+}
+usort($feeMemberList, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+$totalFeeMembers = count($feeMemberList);
+$feeLastPage = max(1, ceil($totalFeeMembers / $membersPerPage));
+$feePage = min($feePage, $feeLastPage);
+$feeOffset = ($feePage - 1) * $membersPerPage;
+
+// Slice members for this page
+$pageFeeMembers = array_slice($feeMemberList, $feeOffset, $membersPerPage);
+$pageFeeMemberIds = array_map(fn($m) => (int)$m['id'], $pageFeeMembers);
+
+// Collect fees only for this page's members
+$allSpecialFees = [];
+foreach ($pageFeeMembers as $pm) {
+    $mId = $pm['id'];
+    if (!isset($memberFeesAll[$mId])) continue;
+    foreach ($memberFeesAll[$mId] as $fee) {
+        $fee['member_name'] = $pm['name'];
+        $allSpecialFees[] = $fee;
+    }
+}
+usort($allSpecialFees, fn($a, $b) => strcmp($a['member_name'], $b['member_name']));
+?>
+
+<!-- Records Table -->
 <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden">
   <div class="vt-scroll-wrap">
   <table class="vt" id="special-fees-table">
@@ -81,23 +122,6 @@
       </tr>
     </thead>
     <tbody id="specialFeesTableBody">
-      <?php
-      $allSpecialFees = [];
-      foreach ($memberFeesAll as $mId => $fees) {
-        $memberName = '';
-        foreach ($members as $m) {
-          if ((int)$m['id'] === $mId) {
-            $memberName = $m['name'];
-            break;
-          }
-        }
-        foreach ($fees as $fee) {
-          $fee['member_name'] = $memberName;
-          $allSpecialFees[] = $fee;
-        }
-      }
-      usort($allSpecialFees, fn($a,$b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-      ?>
       <?php if (empty($allSpecialFees)): ?>
       <tr>
         <td colspan="7" class="text-center text-ak-muted py-12">
@@ -131,13 +155,13 @@
   </table>
   </div><!-- /vt-scroll-wrap -->
 
-  <!-- Summary row at bottom -->
+  <!-- Summary + Pagination -->
   <?php if (!empty($allSpecialFees)):
-    $sumDed = array_sum(array_map(fn($f) => $f['fee_type'] === 'deduction' ? (float)$f['amount'] : 0, $allSpecialFees));
+    $sumDed = array_sum(array_map(fn($f) => $fee_type === 'deduction' ? (float)$f['amount'] : 0, $allSpecialFees));
     $sumAdd = array_sum(array_map(fn($f) => $f['fee_type'] === 'addition' ? (float)$f['amount'] : 0, $allSpecialFees));
   ?>
-  <div class="px-5 py-3 border-t border-ak-border flex gap-6 text-sm">
-    <span class="text-ak-muted"><?= count($allSpecialFees) ?> fee(s) total</span>
+  <div class="px-5 py-3 border-t border-ak-border flex flex-wrap gap-4 items-center text-sm">
+    <span class="text-ak-muted"><?= count($allSpecialFees) ?> fee(s)</span>
     <?php if ($sumDed > 0): ?>
     <span class="font-mono text-ak-red font-bold">−¥<?= number_format($sumDed) ?> deductions</span>
     <?php endif; ?>
@@ -146,6 +170,24 @@
     <?php endif; ?>
   </div>
   <?php endif; ?>
+
+  <!-- Member-based pagination -->
+  <?php if ($feeLastPage > 1): ?>
+  <div class="pagination-wrap">
+    <div class="pagination-info">
+      Members <b><?= $feeOffset + 1 ?>–<?= min($feeOffset + $membersPerPage, $totalFeeMembers) ?></b> of <b><?= $totalFeeMembers ?></b>
+    </div>
+    <div class="pagination-controls">
+      <?php if ($feePage > 1): ?>
+      <a href="?tab=special_fees&fee_page=<?= $feePage - 1 ?>" class="page-btn prev">‹</a>
+      <?php endif; ?>
+      <?php for ($p = 1; $p <= $feeLastPage; $p++): ?>
+      <a href="?tab=special_fees&fee_page=<?= $p ?>" class="page-btn <?= $p === $feePage ? 'active' : '' ?>"><?= $p ?></a>
+      <?php endfor; ?>
+      <?php if ($feePage < $feeLastPage): ?>
+      <a href="?tab=special_fees&fee_page=<?= $feePage + 1 ?>" class="page-btn next">›</a>
+      <?php endif; ?>
+    </div>
+  </div>
+  <?php endif; ?>
 </div>
-
-
