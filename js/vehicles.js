@@ -757,7 +757,7 @@ function initMemberGrouping() {
   const order = []; // preserve first-seen order
 
   rows.forEach(row => {
-    const member = row.dataset.member || 'Unknown';
+    const member = (row.dataset.member || 'Unknown').toLowerCase();
     if (!groups[member]) {
       groups[member] = [];
       order.push(member);
@@ -767,6 +767,8 @@ function initMemberGrouping() {
 
   // If only one member, no point grouping
   if (order.length <= 1) return;
+
+  const isExpanded = false; // collapsed by default
 
   // Build group headers and insert before each group's first row
   order.forEach(member => {
@@ -784,8 +786,8 @@ function initMemberGrouping() {
         const rec = parseFloat(r.dataset.recycle || 0);
         const lst = parseFloat(r.dataset.listing || 0);
         const sf = parseFloat(r.dataset.soldFee || 0);
-        const oth = parseFloat(r.dataset.nagare || 0);
-        net += sp + tax + rec - lst - sf - oth;
+        const nag = parseFloat(r.dataset.nagare || 0);
+        net += sp + tax + rec - lst - sf - nag;
       } else {
         const nag = parseFloat(r.dataset.nagare || 0);
         net -= nag;
@@ -793,43 +795,67 @@ function initMemberGrouping() {
     });
 
     const fmt = n => '¥' + Math.round(Math.abs(n)).toLocaleString();
-    const netColor = net >= 0 ? 'var(--ak-green)' : 'var(--ak-red)';
-    const netSign = net >= 0 ? '' : '−';
+    const displayName = member.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     // Build header row
     const header = document.createElement('tr');
     header.className = 'member-group-header';
     header.dataset.group = member;
-    header.dataset.expanded = '0';
+    header.dataset.expanded = isExpanded ? '1' : '0';
 
-    header.innerHTML = `<td colspan="11" style="padding:10px 16px;cursor:pointer;user-select:none">
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="group-chevron" style="font-size:12px;transition:transform .2s">▶</span>
-        <strong style="color:var(--ak-gold)">${member}</name></strong>
-        <span style="color:var(--ak-muted);font-size:12px">${total} vehicle${total!==1?'s':''}</span>
-        <span style="font-size:11px;color:var(--ak-green)">✓${sold}</span>
-        <span style="font-size:11px;color:var(--ak-muted)">✗${unsold}</span>
-        <span style="font-size:12px;color:${netColor};margin-left:auto;font-weight:600;font-family:monospace">${netSign}${fmt(net)}</span>
-      </div>
-    </td>`;
+    header.innerHTML = `
+      <td colspan="11" class="mgr-cell">
+        <div class="mgr-inner">
+          <span class="mgr-arrow">${isExpanded ? '▼' : '▶'}</span>
+          <span class="mgr-name">${displayName}</span>
+          <span class="mgr-stats">
+            <span class="mgr-total">${total} vehicle${total !== 1 ? 's' : ''}</span>
+            <span class="mgr-sold">✓ ${sold} sold</span>
+            ${unsold > 0 ? `<span class="mgr-unsold">✗ ${unsold} unsold</span>` : ''}
+          </span>
+          <span class="mgr-net ${net >= 0 ? 'mgr-net-pos' : 'mgr-net-neg'}">
+            ${net >= 0 ? '' : '−'}${fmt(net)}
+          </span>
+        </div>
+      </td>`;
 
-    // Toggle expand/collapse on click
+    // Insert header before first row of this group
+    tbody.insertBefore(header, memberRows[0]);
+
+    // Set initial visibility
+    memberRows.forEach(row => {
+      row.style.display = isExpanded ? '' : 'none';
+      row.dataset.groupMember = member;
+    });
+
+    // Toggle on click
     header.addEventListener('click', () => {
       const expanded = header.dataset.expanded === '1';
-      header.dataset.expanded = expanded ? '0' : '1';
-      const chevron = header.querySelector('.group-chevron');
-      if (chevron) chevron.style.transform = expanded ? '' : 'rotate(90deg)';
-      memberRows.forEach(r => {
-        r.style.display = expanded ? 'none' : '';
+      const nowExpanded = !expanded;
+
+      header.dataset.expanded = nowExpanded ? '1' : '0';
+      header.querySelector('.mgr-arrow').textContent = nowExpanded ? '▼' : '▶';
+
+      memberRows.forEach(row => {
+        row.style.display = nowExpanded ? '' : 'none';
       });
     });
-
-    // Insert header before the first row of this group
-    memberRows[0].before(header);
-
-    // Collapse by default
-    memberRows.forEach(r => {
-      r.style.display = 'none';
-    });
   });
+}
+
+// ── Expand a specific member group ────────────────────────────────────────────
+function expandMemberGroup(memberName) {
+  const header = document.querySelector(`.member-group-header[data-group="${memberName.toLowerCase()}"]`);
+  if (!header || header.dataset.expanded === '1') return;
+  header.click();
+}
+
+// ── Collapse all groups ───────────────────────────────────────────────────────
+function collapseAllGroups() {
+  document.querySelectorAll('.member-group-header[data-expanded="1"]').forEach(h => h.click());
+}
+
+// ── Expand all groups ─────────────────────────────────────────────────────────
+function expandAllGroups() {
+  document.querySelectorAll('.member-group-header[data-expanded="0"]').forEach(h => h.click());
 }

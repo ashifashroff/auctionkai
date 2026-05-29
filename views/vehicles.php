@@ -89,6 +89,8 @@
     <span>per page</span>
   </div>
   <div class="vehicles-count-badge" id="vehicles-count-badge">— vehicles</div>
+  <button class="vf-btn" onclick="expandAllGroups()" title="Expand all members">↕ Expand</button>
+  <button class="vf-btn" onclick="collapseAllGroups()" title="Collapse all members">↕ Collapse</button>
 </div>
 
 <!-- Vehicles Table -->
