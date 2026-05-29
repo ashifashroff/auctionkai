@@ -1200,3 +1200,32 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   height: 16px;
   pointer-events: none;
 }
+
+/* ── Sticky vehicles table header ──────────────────────────────────── */
+
+/* Scroll container — required for sticky thead to work */
+.vt-scroll-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 72vh; /* scroll kicks in after 72% of viewport height */
+  border-radius: 0 0 10px 10px;
+  -webkit-overflow-scrolling: touch; /* smooth scroll on iOS */
+}
+
+/* Sticky header cells */
+.sticky-thead th {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--ak-card, #111E2D);
+  border-bottom: 1px solid var(--ak-border, rgba(212,168,75,0.18));
+  /* Prevent text from showing through on scroll */
+  box-shadow:0 1px 0 var(--ak-border, rgba(212,168,75,0.18));
+}
+
+/* Mobile: reduce max-height slightly so bottom nav doesn't overlap */
+@media (max-width: 768px) {
+  .vt-scroll-wrap {
+    max-height: 60vh;
+  }
+}

@@ -104,14 +104,16 @@
       </button>
     </div>
   </div>
+  <div class="vt-scroll-wrap">
   <table class="vt vehicles-table-desktop" id="vehicles-table">
-    <thead>
+    <thead class="sticky-thead">
       <tr><th>Lot #</th><th>Member</th><th>Vehicle</th><th class="r">Sold Price</th><th class="r">Recycle</th><th class="r">Listing</th><th class="r">Sold Fee</th><th class="r">Nagare</th><th class="r">Total</th><th>Status</th><th class="w-[90px]">Actions</th></tr>
     </thead>
     <tbody id="vehicles-tbody">
       <!-- populated by JS -->
     </tbody>
   </table>
+  </div><!-- /vt-scroll-wrap -->
 
   <!-- Pagination Controls -->
   <div class="pagination-wrap" id="pagination-wrap">
