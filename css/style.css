@@ -1394,3 +1394,20 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
 .mgr-m-total { color: var(--ak-muted, #6A88A0); }
 .mgr-m-sold { color: var(--ak-green, #4CAF82); }
 .mgr-m-unsold { color: var(--ak-red, #CC7777); }
+
+/* ── Fee actions column sticky on mobile ─────────────────────────── */
+.sf-actions-cell {
+  position: sticky;
+  right: 0;
+  background: var(--ak-card, #111E2D);
+  z-index: 5;
+}
+.sf-actions-cell::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(to right, transparent, var(--ak-card, #111E2D));
+}
