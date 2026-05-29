@@ -48,11 +48,11 @@ usort($memberRanking, fn($a, $b) => $b['net'] <=> $a['net']);
   <?php if (empty($memberRanking) || $totalNet == 0): ?>
     <div class="text-ak-muted text-center py-8">No sales data available yet.</div>
   <?php else: ?>
-  <div class="flex flex-col gap-2">
-    <?php foreach ($memberRanking as $i => $mr): ?>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <?php foreach (array_slice($memberRanking, 0, 10) as $i => $mr): ?>
     <?php if ($mr['net'] <= 0 && $mr['gross'] <= 0) continue; ?>
     <div class="flex items-center gap-3 bg-ak-bg rounded-lg px-4 py-3 flex-wrap">
-      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 <?= $i === 0 ? 'bg-ak-gold text-ak-bg' : 'bg-ak-border text-ak-muted' ?>"><?= $i + 1 ?></div>
+      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 <?= $i < 3 ? 'bg-ak-gold text-ak-bg' : 'bg-ak-border text-ak-muted' ?>"><?= $i + 1 ?></div>
       <div class="flex-1 min-w-0">
         <div class="text-ak-text font-semibold"><?= h($mr['name']) ?></div>
         <div class="text-ak-muted text-xs"><?= $mr['count'] ?> sold · <?= $mr['unsoldCount'] ?> unsold</div>
