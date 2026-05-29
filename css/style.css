@@ -1230,71 +1230,87 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   }
 }
 
-/* ── Member group header rows ────────────────────────────────────── */
+/* ── Member group header rows ──────────────────────────────────────── */
 .member-group-header {
-  background: var(--ak-bg2, #07101A);
-  border-bottom: 1px solid var(--ak-border, #1E3A5F);
   cursor: pointer;
-  transition: background .15s;
+  user-select: none;
+  background: var(--ak-bg, #0A1420) !important;
+  border-top: 2px solid var(--ak-border, rgba(212,168,75,0.18));
+  transition: background 0.15s;
 }
+
 .member-group-header:hover {
-  background: var(--ak-card, #111E2D);
+  background: rgba(212,168,75,0.05) !important;
 }
 
 .mgr-cell {
-  padding: 12px 16px !important;
-  border: none !important;
+  padding: 0 !important;
 }
 
 .mgr-inner {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 0.875rem;
+  padding: 0.65rem 1rem;
   flex-wrap: wrap;
-  user-select: none;
 }
 
 .mgr-arrow {
-  font-size: 11px;
-  color: var(--ak-muted);
-  transition: transform .15s;
-  flex-shrink: 0;
+  font-size: 10px;
+  color: var(--ak-gold, #D4A84B);
+  min-width: 12px;
+  transition: transform 0.15s;
 }
 
 .mgr-name {
-  font-weight: 700;
-  color: var(--ak-gold);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ak-text, #E8DCC8);
+  min-width: 140px;
 }
 
 .mgr-stats {
   display: flex;
-  gap: 8px;
-  font-size: 11px;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  flex-wrap: wrap;
 }
 
 .mgr-total {
-  color: var(--ak-muted);
+  font-size: 11px;
+  color: var(--ak-muted, #6A88A0);
+  font-family: 'Space Mono', monospace;
 }
 
 .mgr-sold {
-  color: var(--ak-green);
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--ak-green, #4CAF82);
 }
 
 .mgr-unsold {
-  color: var(--ak-red);
+  font-size: 11px;
+  color: var(--ak-red, #CC7777);
+  font-family: 'Space Mono', monospace;
 }
 
 .mgr-net {
-  margin-left: auto;
-  font-weight: 700;
-  font-family: var(--mono, 'Space Mono', monospace);
+  font-family: 'Space Mono', monospace;
   font-size: 13px;
-  white-space: nowrap;
+  font-weight: 700;
+  margin-left: auto;
 }
 
-.mgr-net-pos { color: var(--ak-green); }
-.mgr-net-neg { color: var(--ak-red); }
+.mgr-net-pos { color: var(--ak-gold, #D4A84B); }
+.mgr-net-neg { color: var(--ak-red, #CC7777); }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .mgr-name { min-width: 100px; font-size: 12px; }
+  .mgr-net { font-size: 12px; }
+  .mgr-stats { gap: 0.35rem; }
+}
 
 /* Expand/Collapse buttons */
 .vf-btn {

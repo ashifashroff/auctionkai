@@ -859,3 +859,50 @@ function collapseAllGroups() {
 function expandAllGroups() {
   document.querySelectorAll('.member-group-header[data-expanded="0"]').forEach(h => h.click());
 }
+
+// ── Update a single group header after toggle (without full re-init) ────────
+function _updateGroupHeader(member) {
+  if (!member) return;
+  const memberRows = Array.from(
+    document.querySelectorAll(`tr[data-group-member="${member}"]`)
+  );
+  const header = document.querySelector(
+    `.member-group-header[data-group="${member}"]`
+  );
+  if (!header || memberRows.length === 0) return;
+
+  const total = memberRows.length;
+  const sold = memberRows.filter(r => r.dataset.status === 'sold').length;
+  const unsold = total - sold;
+
+  let net = 0;
+  memberRows.forEach(r => {
+    if (r.dataset.status === 'sold') {
+      net += parseFloat(r.dataset.soldPrice || 0)
+        + parseFloat(r.dataset.tax || 0)
+        + parseFloat(r.dataset.recycle || 0)
+        - parseFloat(r.dataset.listing || 0)
+        - parseFloat(r.dataset.soldFee || 0)
+        - parseFloat(r.dataset.nagare || 0);
+    } else {
+      net -= parseFloat(r.dataset.nagare || 0);
+    }
+  });
+
+  const fmt = n => '¥' + Math.round(Math.abs(n)).toLocaleString();
+
+  const statsEl = header.querySelector('.mgr-stats');
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <span class="mgr-total">${total} vehicle${total !== 1 ? 's' : ''}</span>
+      <span class="mgr-sold">✓ ${sold} sold</span>
+      ${unsold > 0 ? `<span class="mgr-unsold">✗ ${unsold} unsold</span>` : ''}
+    `;
+  }
+
+  const netEl = header.querySelector('.mgr-net');
+  if (netEl) {
+    netEl.textContent = (net >= 0 ? '' : '−') + fmt(net);
+    netEl.className = 'mgr-net ' + (net >= 0 ? 'mgr-net-pos' : 'mgr-net-neg');
+  }
+}
