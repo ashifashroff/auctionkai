@@ -1229,3 +1229,13 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
     max-height: 60vh;
   }
 }
+
+/* ── Member group header rows ────────────────────────────────────── */
+.member-group-header {
+  background: var(--ak-bg2, #07101A);
+  border-bottom: 1px solid var(--ak-border, #1E3A5F);
+  transition: background .2s;
+}
+.member-group-header:hover {
+  background: var(--ak-card, #111E2D);
+}

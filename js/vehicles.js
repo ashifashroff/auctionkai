@@ -403,6 +403,8 @@ const VehiclesPager = {
       this.renderMobileCards(data.vehicles);
       this.renderPagination();
       this.updateBadge();
+      // Apply member grouping after render
+      if (typeof initMemberGrouping === 'function') initMemberGrouping();
 
     } catch (err) {
       this.showEmpty('Connection error');
@@ -448,7 +450,7 @@ const VehiclesPager = {
       const vTax = v.sold == 1 ? Math.round(parseFloat(v.sold_price) * 0.10) : 0;
       const vTotal = v.sold == 1 ? parseFloat(v.sold_price) + vTax + parseFloat(v.recycle_fee||0) - parseFloat(v.listing_fee||0) - parseFloat(v.sold_fee||0) - parseFloat(v.nagare_fee||0) : 0;
 
-      return `<tr id="vehicle-row-${v.id}" style="border-bottom:1px solid #131F2E">
+      return `<tr id="vehicle-row-${v.id}" data-vid="${v.id}" data-member="${this.esc(v.member_name || '?')}" data-status="${v.sold == 1 ? 'sold' : 'unsold'}" data-sold-price="${v.sold_price||0}" data-tax="${vTax}" data-recycle="${v.recycle_fee||0}" data-listing="${v.listing_fee||0}" data-sold-fee="${v.sold_fee||0}" data-nagare="${v.nagare_fee||0}" style="border-bottom:1px solid #131F2E">
         <td><span class="lot" data-field="lot">${this.esc(v.lot || '—')}</span></td>
         <td style="color:var(--ak-text2)">${this.esc(v.member_name || '?')}</td>
         <td style="color:var(--ak-text2)" data-field="make">${this.esc(v.make + ' ' + v.model)}</td>
@@ -730,3 +732,104 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 });
+
+// ── VEHICLE TABLE MEMBER GROUPING ────────────────────────────────────────────
+// Groups flat vehicle rows by member with expand/collapse toggle.
+// Reads data-member and data-status attributes from each <tr>.
+// Runs after table is rendered. Re-runs after any AJAX add/delete.
+
+function initMemberGrouping() {
+  const table = document.getElementById('vehicles-table');
+  if (!table) return;
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  // Remove any existing group headers from a previous run
+  tbody.querySelectorAll('.member-group-header').forEach(r => r.remove());
+
+  // Collect all vehicle rows (skip empty/no-result rows)
+  const rows = Array.from(tbody.querySelectorAll('tr[data-vid]'));
+  if (rows.length === 0) return;
+
+  // Group rows by member name (data-member attribute)
+  const groups = {};
+  const order = []; // preserve first-seen order
+
+  rows.forEach(row => {
+    const member = row.dataset.member || 'Unknown';
+    if (!groups[member]) {
+      groups[member] = [];
+      order.push(member);
+    }
+    groups[member].push(row);
+  });
+
+  // If only one member, no point grouping
+  if (order.length <= 1) return;
+
+  // Build group headers and insert before each group's first row
+  order.forEach(member => {
+    const memberRows = groups[member];
+    const total = memberRows.length;
+    const sold = memberRows.filter(r => r.dataset.status === 'sold').length;
+    const unsold = total - sold;
+
+    // Calculate net payout
+    let net = 0;
+    memberRows.forEach(r => {
+      if (r.dataset.status === 'sold') {
+        const sp = parseFloat(r.dataset.soldPrice || 0);
+        const tax = parseFloat(r.dataset.tax || 0);
+        const rec = parseFloat(r.dataset.recycle || 0);
+        const lst = parseFloat(r.dataset.listing || 0);
+        const sf = parseFloat(r.dataset.soldFee || 0);
+        const oth = parseFloat(r.dataset.nagare || 0);
+        net += sp + tax + rec - lst - sf - oth;
+      } else {
+        const nag = parseFloat(r.dataset.nagare || 0);
+        net -= nag;
+      }
+    });
+
+    const fmt = n => '¥' + Math.round(Math.abs(n)).toLocaleString();
+    const netColor = net >= 0 ? 'var(--ak-green)' : 'var(--ak-red)';
+    const netSign = net >= 0 ? '' : '−';
+
+    // Build header row
+    const header = document.createElement('tr');
+    header.className = 'member-group-header';
+    header.dataset.group = member;
+    header.dataset.expanded = '0';
+
+    header.innerHTML = `<td colspan="11" style="padding:10px 16px;cursor:pointer;user-select:none">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="group-chevron" style="font-size:12px;transition:transform .2s">▶</span>
+        <strong style="color:var(--ak-gold)">${member}</name></strong>
+        <span style="color:var(--ak-muted);font-size:12px">${total} vehicle${total!==1?'s':''}</span>
+        <span style="font-size:11px;color:var(--ak-green)">✓${sold}</span>
+        <span style="font-size:11px;color:var(--ak-muted)">✗${unsold}</span>
+        <span style="font-size:12px;color:${netColor};margin-left:auto;font-weight:600;font-family:monospace">${netSign}${fmt(net)}</span>
+      </div>
+    </td>`;
+
+    // Toggle expand/collapse on click
+    header.addEventListener('click', () => {
+      const expanded = header.dataset.expanded === '1';
+      header.dataset.expanded = expanded ? '0' : '1';
+      const chevron = header.querySelector('.group-chevron');
+      if (chevron) chevron.style.transform = expanded ? '' : 'rotate(90deg)';
+      memberRows.forEach(r => {
+        r.style.display = expanded ? 'none' : '';
+      });
+    });
+
+    // Insert header before the first row of this group
+    memberRows[0].before(header);
+
+    // Collapse by default
+    memberRows.forEach(r => {
+      r.style.display = 'none';
+    });
+  });
+}
