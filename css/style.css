@@ -1329,3 +1329,49 @@ a { transition: color 0.15s ease, opacity 0.15s ease; }
   color: var(--ak-gold);
   border-color: var(--ak-gold);
 }
+
+/* ── Mobile member group headers ────────────────────────────────────── */
+.mobile-group-header {
+  background: var(--ak-bg, #0A1420);
+  border: 1px solid var(--ak-border, #1E3A5F);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+}
+.mobile-group-header:hover {
+  background: rgba(212,168,75,0.05);
+}
+
+.mgr-m-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mgr-m-arrow {
+  font-size: 10px;
+  color: var(--ak-gold, #D4A84B);
+  min-width: 12px;
+}
+
+.mgr-m-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ak-text, #E8DCC8);
+}
+
+.mgr-m-stats {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  margin-left: auto;
+}
+
+.mgr-m-total { color: var(--ak-muted, #6A88A0); }
+.mgr-m-sold { color: var(--ak-green, #4CAF82); }
+.mgr-m-unsold { color: var(--ak-red, #CC7777); }

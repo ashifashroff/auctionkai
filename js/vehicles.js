@@ -403,8 +403,9 @@ const VehiclesPager = {
       this.renderMobileCards(data.vehicles);
       this.renderPagination();
       this.updateBadge();
-      // Apply member grouping after render
+      // Apply member grouping after render (desktop + mobile)
       if (typeof initMemberGrouping === 'function') initMemberGrouping();
+      if (typeof initMobileMemberGrouping === 'function') initMobileMemberGrouping();
 
     } catch (err) {
       this.showEmpty('Connection error');
@@ -906,3 +907,95 @@ function _updateGroupHeader(member) {
     netEl.className = 'mgr-net ' + (net >= 0 ? 'mgr-net-pos' : 'mgr-net-neg');
   }
 }
+
+// ── MOBILE MEMBER GROUPING ──────────────────────────────────────────────────────
+// Groups .v-card elements inside #vehicle-cards-mobile by member.
+// Inserts collapsible section headers above each group.
+
+function initMobileMemberGrouping() {
+  const container = document.getElementById('vehicle-cards-mobile');
+  if (!container) return;
+
+  // Only run on mobile (when table is hidden)
+  if (window.innerWidth > 768) return;
+
+  // Remove existing mobile group headers
+  container.querySelectorAll('.mobile-group-header').forEach(el => el.remove());
+
+  // Collect all .v-card elements
+  const cards = Array.from(container.querySelectorAll('.v-card'));
+  if (cards.length === 0) return;
+
+  // Group by member name from .v-card-meta
+  const groups = {};
+  const order = [];
+
+  cards.forEach(card => {
+    const member = (card.querySelector('.v-card-meta')?.textContent || 'Unknown').trim().toLowerCase();
+    if (!groups[member]) {
+      groups[member] = [];
+      order.push(member);
+    }
+    groups[member].push(card);
+  });
+
+  // Skip if only one member
+  if (order.length <= 1) return;
+
+  const isExpanded = false; // collapsed by default
+
+  order.forEach(member => {
+    const memberCards = groups[member];
+    const total = memberCards.length;
+
+    // Count sold from button text
+    const sold = memberCards.filter(c => {
+      const btn = c.querySelector('.sb');
+      return btn && btn.classList.contains('sy');
+    }).length;
+    const unsold = total - sold;
+
+    const displayName = member.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    // Build header
+    const header = document.createElement('div');
+    header.className = 'mobile-group-header';
+    header.dataset.group = member;
+    header.dataset.expanded = isExpanded ? '1' : '0';
+
+    header.innerHTML = `
+      <div class="mgr-m-inner">
+        <span class="mgr-m-arrow">${isExpanded ? '▼' : '▶'}</span>
+        <span class="mgr-m-name">${displayName}</span>
+        <span class="mgr-m-stats">
+          <span class="mgr-m-total">${total} vehicle${total !== 1 ? 's' : ''}</span>
+          <span class="mgr-m-sold">✓${sold}</span>
+          ${unsold > 0 ? `<span class="mgr-m-unsold">✗${unsold}</span>` : ''}
+        </span>
+      </div>`;
+
+    // Insert before first card of this group
+    container.insertBefore(header, memberCards[0]);
+
+    // Collapse by default
+    memberCards.forEach(c => { c.style.display = isExpanded ? '' : 'none'; });
+
+    // Toggle
+    header.addEventListener('click', () => {
+      const expanded = header.dataset.expanded === '1';
+      const nowExpanded = !expanded;
+      header.dataset.expanded = nowExpanded ? '1' : '0';
+      header.querySelector('.mgr-m-arrow').textContent = nowExpanded ? '▼' : '▶';
+      memberCards.forEach(c => { c.style.display = nowExpanded ? '' : 'none'; });
+    });
+  });
+}
+
+// Re-init mobile grouping on resize (switching between mobile/desktop)
+let _mobileGroupTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(_mobileGroupTimer);
+  _mobileGroupTimer = setTimeout(() => {
+    if (typeof initMobileMemberGrouping === 'function') initMobileMemberGrouping();
+  }, 250);
+});
