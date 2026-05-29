@@ -530,11 +530,12 @@ const VehiclesPager = {
 
   updateBadge() {
     const badge = document.getElementById('vehicles-count-badge');
-    if (badge) {
-      badge.textContent = this.search
-        ? `${this.total} result${this.total !== 1 ? 's' : ''}`
-        : `${this.total} vehicle${this.total !== 1 ? 's' : ''}`;
-    }
+    const header = document.getElementById('vehicles-count-header');
+    const text = this.search
+      ? `${this.total} result${this.total !== 1 ? 's' : ''}`
+      : `${this.total} vehicle${this.total !== 1 ? 's' : ''}`;
+    if (badge) badge.textContent = text;
+    if (header) header.textContent = text;
   },
 
   goTo(page) {

@@ -97,7 +97,7 @@
 <div class="bg-ak-card rounded-xl border border-ak-border overflow-hidden" id="vehicles-table-wrap">
   <div class="flex justify-between items-center mb-3 px-4 pt-3">
     <div class="text-[10px] uppercase tracking-wider text-ak-muted">
-      <span id="vehicles-count-badge">Loading…</span>
+      <span class="text-ak-muted text-[11px]" id="vehicles-count-header"></span>
     </div>
     <div class="flex items-center gap-3">
       <button onclick="toggleAllColumns(this)" class="text-[11px] text-ak-muted hover:text-ak-gold transition-colors flex items-center gap-1">
