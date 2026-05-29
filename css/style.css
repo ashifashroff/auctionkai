@@ -703,12 +703,31 @@ a:focus-visible {
  /* Pagination on mobile */
  .pagination-wrap {
  flex-direction: column;
- align-items: center;
+ align-items: stretch;
  gap: 8px;
+ padding: 10px 12px;
  }
  .pagination-info {
  font-size: 11px;
+ text-align: center;
  }
+ .pagination-controls {
+ justify-content: center;
+ flex-wrap: nowrap;
+ overflow-x: auto;
+ -webkit-overflow-scrolling: touch;
+ scrollbar-width: none;
+ }
+ .pagination-controls::-webkit-scrollbar { display: none; }
+ .page-btn {
+ min-width: 30px;
+ height: 30px;
+ font-size: 11px;
+ padding: 0 6px;
+ border-radius: 6px;
+ flex-shrink: 0;
+ }
+ .page-ellipsis { font-size: 11px; }
 
  /* Toast on mobile */
  #toast-container {
