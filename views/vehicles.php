@@ -78,16 +78,6 @@
     <span class="search-icon">🔍</span>
     <input type="text" id="vehicle-search" aria-label="Search vehicles" class="vehicles-search-input" placeholder="Search lot, make, model, member..." autocomplete="off">
   </div>
-  <div class="per-page-wrap">
-    <span>Show</span>
-    <select class="per-page-select" id="per-page-select">
-      <option value="10">10</option>
-      <option value="25" selected>25</option>
-      <option value="50">50</option>
-      <option value="100">100</option>
-    </select>
-    <span>per page</span>
-  </div>
   <div class="vehicles-count-badge" id="vehicles-count-badge">— vehicles</div>
   <button class="vf-btn" onclick="expandAllGroups()" title="Expand all members">↕ Expand</button>
   <button class="vf-btn" onclick="collapseAllGroups()" title="Collapse all members">↕ Collapse</button>

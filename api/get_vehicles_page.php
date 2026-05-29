@@ -12,11 +12,7 @@ if (!$userId) {
 
 $auctionId = (int)($_GET['auction_id'] ?? 0);
 $page = max(1, (int)($_GET['page'] ?? 1));
-$allowedPerPage = [10, 25, 50, 100];
-$perPage = (int)($_GET['per_page'] ?? 25);
-if (!in_array($perPage, $allowedPerPage)) {
-    $perPage = 25;
-}
+$membersPerPage = 10;
 $search = trim($_GET['search'] ?? '');
 
 // Sanitize LIKE search
@@ -49,53 +45,68 @@ if (!$stmt->fetch()) {
     exit;
 }
 
-// Count total
-$countSql = "
-    SELECT COUNT(*)
-    FROM vehicles v
-    JOIN members m ON v.member_id = m.id
+// ── MEMBER-BASED PAGINATION ──────────────────────────────────────────
+// 1. Get DISTINCT members who have vehicles in this auction
+$memberListSql = "
+    SELECT DISTINCT m.id, m.name
+    FROM members m
+    JOIN vehicles v ON v.member_id = m.id
     WHERE v.auction_id = ?
     AND m.user_id = ?
     $searchWhere
+    ORDER BY m.name ASC
 ";
-$countStmt = $db->prepare($countSql);
-$countStmt->execute(
-    array_merge([$auctionId, $userId], $searchParams)
-);
-$total = (int)$countStmt->fetchColumn();
-$lastPage = max(1, ceil($total / $perPage));
-$page = min($page, $lastPage);
-$offset = ($page - 1) * $perPage;
+$memberListStmt = $db->prepare($memberListSql);
+$memberListStmt->execute(array_merge([$auctionId, $userId], $searchParams));
+$allAuctionMembers = $memberListStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch vehicles for this page
-$sql = "
-    SELECT
-        v.*,
-        m.name as member_name
-    FROM vehicles v
-    JOIN members m ON v.member_id = m.id
-    WHERE v.auction_id = ?
-    AND m.user_id = ?
-    $searchWhere
-    ORDER BY v.lot ASC, v.id ASC
-    LIMIT ? OFFSET ?
-";
-$stmt = $db->prepare($sql);
-$stmt->execute(
-    array_merge(
-        [$auctionId, $userId],
-        $searchParams,
-        [$perPage, $offset]
-    )
-);
-$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$totalMembers = count($allAuctionMembers);
+$lastPage = max(1, ceil($totalMembers / $membersPerPage));
+$page = min($page, $lastPage);
+$offset = ($page - 1) * $membersPerPage;
+
+// 2. Slice the members for THIS page
+$pageMembers = array_slice($allAuctionMembers, $offset, $membersPerPage);
+$pageMemberIds = array_map(fn($m) => (int)$m['id'], $pageMembers);
+
+// 3. Fetch ALL vehicles for ONLY those members (never split across pages)
+if (!empty($pageMemberIds)) {
+    $placeholders = implode(',', array_fill(0, count($pageMemberIds), '?'));
+    $vehSql = "
+        SELECT
+            v.*,
+            m.name as member_name
+        FROM vehicles v
+        JOIN members m ON v.member_id = m.id
+        WHERE v.auction_id = ?
+        AND v.member_id IN ($placeholders)
+        ORDER BY m.name ASC, v.lot ASC, v.id ASC
+    ";
+    $vehStmt = $db->prepare($vehSql);
+    $vehStmt->execute(array_merge([$auctionId], $pageMemberIds));
+    $vehicles = $vehStmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $vehicles = [];
+}
+
+// Total vehicles for the badge
+$totalVehicles = 0;
+$countSql = "SELECT COUNT(*) FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id = ? AND m.user_id = ?";
+if (!empty($pageMemberIds)) {
+    // For the badge, count ALL vehicles in the auction (not just this page)
+    $cntStmt = $db->prepare("SELECT COUNT(*) FROM vehicles v JOIN members m ON v.member_id = m.id WHERE v.auction_id = ? AND m.user_id = ?");
+    $cntStmt->execute([$auctionId, $userId]);
+    $totalVehicles = (int)$cntStmt->fetchColumn();
+}
 
 echo json_encode([
     'success' => true,
     'vehicles' => $vehicles,
     'page' => $page,
     'lastPage' => $lastPage,
-    'total' => $total,
-    'perPage' => $perPage,
+    'total' => $totalVehicles,
+    'totalMembers' => $totalMembers,
+    'membersPerPage' => $membersPerPage,
+    'pageMembers' => $pageMembers,
     'search' => $search,
 ]);

@@ -339,7 +339,8 @@ const VehiclesPager = {
   page: 1,
   lastPage: 1,
   total: 0,
-  perPage: 25,
+  totalMembers: 0,
+  membersPerPage: 10,
   search: '',
   loading: false,
   auctionId: 0,
@@ -362,15 +363,6 @@ const VehiclesPager = {
       });
     }
 
-    const perPageSel = document.getElementById('per-page-select');
-    if (perPageSel) {
-      perPageSel.addEventListener('change', () => {
-        this.perPage = parseInt(perPageSel.value);
-        this.page = 1;
-        this.load();
-      });
-    }
-
     this.load();
   },
 
@@ -383,7 +375,6 @@ const VehiclesPager = {
       const params = new URLSearchParams({
         auction_id: this.auctionId,
         page: this.page,
-        per_page: this.perPage,
         search: this.search,
       });
 
@@ -396,6 +387,7 @@ const VehiclesPager = {
       }
 
       this.total = data.total;
+      this.totalMembers = data.totalMembers || 0;
       this.lastPage = data.lastPage;
       this.page = data.page;
 
@@ -502,9 +494,9 @@ const VehiclesPager = {
     const controls = document.getElementById('pagination-controls');
     if (!info || !controls) return;
 
-    const from = ((this.page - 1) * this.perPage) + 1;
-    const to = Math.min(this.page * this.perPage, this.total);
-    info.innerHTML = this.total === 0 ? 'No results' : `Showing <b>${from}–${to}</b> of <b>${this.total}</b> vehicles`;
+    const from = ((this.page - 1) * this.membersPerPage) + 1;
+    const to = Math.min(this.page * this.membersPerPage, this.totalMembers);
+    info.innerHTML = this.totalMembers === 0 ? 'No results' : `Members <b>${from}–${to}</b> of <b>${this.totalMembers}</b> · <b>${this.total}</b> vehicles`;
 
     if (this.lastPage <= 1) { controls.innerHTML = ''; return; }
 
@@ -770,7 +762,7 @@ function initMemberGrouping() {
   // If only one member, no point grouping
   if (order.length <= 1) return;
 
-  const isExpanded = false; // collapsed by default
+  const isExpanded = true; // expanded - pagination already limits members per page
 
   // Build group headers and insert before each group's first row
   order.forEach(member => {
@@ -943,7 +935,7 @@ function initMobileMemberGrouping() {
   // Skip if only one member
   if (order.length <= 1) return;
 
-  const isExpanded = false; // collapsed by default
+  const isExpanded = true; // expanded - pagination already limits members per page
 
   order.forEach(member => {
     const memberCards = groups[member];
