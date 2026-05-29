@@ -155,28 +155,6 @@ usort($allSpecialFees, fn($a, $b) => strcmp($a['member_name'], $b['member_name']
   </table>
   </div><!-- /vt-scroll-wrap -->
 
-  <!-- Mobile fee cards (shown on small screens) -->
-  <div class="sf-cards-mobile">
-    <?php foreach ($allSpecialFees as $fee):
-      $isAdd = $fee['fee_type'] === 'addition';
-    ?>
-    <div class="sf-card" id="sf-card-<?= (int)$fee['id'] ?>">
-      <div class="sf-card-top">
-        <span class="sf-card-member"><?= h($fee['member_name']) ?></span>
-        <span class="sf-card-type <?= $isAdd ? 'sf-type-add' : 'sf-type-ded' ?>"><?= $isAdd ? '+ Add' : '− Ded' ?></span>
-      </div>
-      <div class="sf-card-name"><?= h($fee['fee_name']) ?></div>
-      <?php if (!empty($fee['notes'])): ?>
-      <div class="sf-card-notes"><?= h($fee['notes']) ?></div>
-      <?php endif; ?>
-      <div class="sf-card-bottom">
-        <span class="sf-card-amount <?= $isAdd ? 'text-ak-green' : 'text-ak-red' ?>"><?= $isAdd ? '+' : '−' ?>¥<?= number_format((float)$fee['amount']) ?></span>
-        <button class="sf-card-delete" onclick="sfDeleteFee(<?= (int)$fee['id'] ?>, <?= (int)$fee['member_id'] ?>, <?= (int)$activeAuctionId ?>)">×</button>
-      </div>
-    </div>
-    <?php endforeach; ?>
-  </div>
-
   <!-- Summary + Pagination -->
   <?php if (!empty($allSpecialFees)):
     $sumDed = array_sum(array_map(fn($f) => $fee_type === 'deduction' ? (float)$f['amount'] : 0, $allSpecialFees));
