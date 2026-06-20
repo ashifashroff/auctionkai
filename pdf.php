@@ -118,7 +118,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . "</div>
     </div>";
 }
 
@@ -151,7 +151,7 @@ function renderNagareStatement(array $m, array $s, array $auction, string $paySt
         <div class='row total'><span>Total Fees</span><span>−" . fmt(abs($s['netPayout'])) . "</span></div>
       </div>
       <div class='net' style='border-color:#e74c3c'><div class='net-l' style='color:#e74c3c'>AMOUNT OWED</div><div class='net-n' style='color:#e74c3c'>−" . fmt(abs($s['netPayout'])) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . "</div>
     </div>";
 }
 ?>
