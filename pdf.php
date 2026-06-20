@@ -72,7 +72,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     $landscapeStyle = $useLandscape ? ' style="width:297mm"' : '';
     $landscapePage = $useLandscape ? ' data-landscape="1"' : '';
     if (empty($brand)) {
-        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Mirai Global Solutions'];
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
     }
     $rows = '';
     foreach ($s['mv'] as $v) {
@@ -118,13 +118,13 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
         <div class='row total'><span>Total Deductions</span><span>−" . fmt($s['totalDed']) . "</span></div>
       </div>
       <div class='net'><div class='net-l'>NET PAYOUT</div><div class='net-n'>" . fmt($s['netPayout']) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . "</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
     </div>";
 }
 
 function renderNagareStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = []): string {
     if (empty($brand)) {
-        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Mirai Global Solutions'];
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
     }
     $uRows = '';
     foreach ($s['uv'] ?? [] as $v) {
@@ -151,7 +151,7 @@ function renderNagareStatement(array $m, array $s, array $auction, string $paySt
         <div class='row total'><span>Total Fees</span><span>−" . fmt(abs($s['netPayout'])) . "</span></div>
       </div>
       <div class='net' style='border-color:#e74c3c'><div class='net-l' style='color:#e74c3c'>AMOUNT OWED</div><div class='net-n' style='color:#e74c3c'>−" . fmt(abs($s['netPayout'])) . "</div></div>
-      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . "</div>
+      <div class='footer'>" . h($auction['name']) . " · " . h($auction['date']) . $exp . " · " . h($brand['brand_name']) . " · " . h($brand['brand_footer_text']) . "</div>
     </div>";
 }
 ?>

@@ -247,7 +247,7 @@ function buildEmailBody(
     $brand = isset($db) ? loadBranding($db) : [];
     $brandName = $brand['brand_name'] ?? 'AuctionKai';
     $accentColor = sanitizeColor($brand['brand_accent_color'] ?? '#D4A84B');
-    $footerText = $brand['brand_footer_text'] ?? 'Mirai Global Solutions';
+    $footerText = $brand['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions';
     $rows = '';
     foreach ($s['mv'] as $v) {
         $rows .= "
@@ -287,7 +287,7 @@ function buildEmailBody(
             <tr style='border-top:2px solid #ccc;font-weight:700'><td style='padding:8px 0'>NET PAYOUT</td><td style='text-align:right;font-family:monospace;color:' . $accentColor . ''>¥" . number_format($s['netPayout']) . "</td></tr>
           </table>
         </div>
-        <div style='background:#0A1420;padding:16px 32px;text-align:center;font-size:11px;color:#6A88A0'>" . htmlspecialchars($auction['name']) . " · " . htmlspecialchars($auction['date']) . "</div>
+        <div style='background:#0A1420;padding:16px 32px;text-align:center;font-size:11px;color:#6A88A0'>" . htmlspecialchars($auction['name']) . " · " . htmlspecialchars($auction['date']) . "<br>" . h($footerText) . "</div>
       </div>
     </body></html>";
 }
