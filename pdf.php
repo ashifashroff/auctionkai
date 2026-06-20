@@ -72,7 +72,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
     $landscapeStyle = $useLandscape ? ' style="width:297mm"' : '';
     $landscapePage = $useLandscape ? ' data-landscape="1"' : '';
     if (empty($brand)) {
-        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Mirai Global Solutions'];
     }
     $rows = '';
     foreach ($s['mv'] as $v) {
@@ -124,7 +124,7 @@ function renderStatement(array $m, array $s, array $auction, string $payStatus =
 
 function renderNagareStatement(array $m, array $s, array $auction, string $payStatus = 'unpaid', array $brand = []): string {
     if (empty($brand)) {
-        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Designed & Developed by Mirai Global Solutions'];
+        $brand = ['brand_name'=>'AuctionKai','brand_tagline'=>'Settlement Management System','brand_owner'=>'Mirai Global Solutions','brand_email'=>'','brand_phone'=>'','brand_address'=>'','brand_logo_url'=>'','brand_accent_color'=>'#D4A84B','brand_footer_text'=>'Mirai Global Solutions'];
     }
     $uRows = '';
     foreach ($s['uv'] ?? [] as $v) {

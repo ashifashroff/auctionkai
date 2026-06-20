@@ -247,7 +247,7 @@ function buildEmailBody(
     $brand = isset($db) ? loadBranding($db) : [];
     $brandName = $brand['brand_name'] ?? 'AuctionKai';
     $accentColor = sanitizeColor($brand['brand_accent_color'] ?? '#D4A84B');
-    $footerText = $brand['brand_footer_text'] ?? 'Designed & Developed by Mirai Global Solutions';
+    $footerText = $brand['brand_footer_text'] ?? 'Mirai Global Solutions';
     $rows = '';
     foreach ($s['mv'] as $v) {
         $rows .= "
