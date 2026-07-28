@@ -1,19 +1,9 @@
-# Protect sensitive files from direct browser access
+# Protect sensitive files from direct browser access (Apache 2.4 syntax)
+<FilesMatch "^(\.env.*|\.rsync-exclude|composer\.(json|lock)|.*\.(sql|md|bak|log))$">
+ Require all denied
+</FilesMatch>
 <Files "config.php">
- Order allow,deny
- Deny from all
-</Files>
-<Files "schema.sql">
- Order allow,deny
- Deny from all
-</Files>
-<Files ".env">
- Order allow,deny
- Deny from all
-</Files>
-<Files "migrations.sql">
- Order allow,deny
- Deny from all
+ Require all denied
 </Files>
 
 # Block access to .git directory and git files
