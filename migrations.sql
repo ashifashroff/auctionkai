@@ -28,3 +28,9 @@ CREATE TABLE IF NOT EXISTS activity_log (
 --   - Use ALTER TABLE ... ADD COLUMN IF NOT EXISTS
 --   - Use CREATE INDEX IF NOT EXISTS
 --   - Never DROP tables or columns
+
+-- ── Migration: v4.1 — Statement PIN hardening ───────────────────
+-- Widen pin column to hold password hashes, add attempt tracking
+ALTER TABLE statement_links MODIFY COLUMN pin VARCHAR(255) NOT NULL;
+ALTER TABLE statement_links ADD COLUMN IF NOT EXISTS pin_attempts INT UNSIGNED DEFAULT 0;
+ALTER TABLE statement_links ADD COLUMN IF NOT EXISTS pin_locked_until DATETIME NULL;

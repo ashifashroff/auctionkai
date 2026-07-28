@@ -50,18 +50,9 @@ try {
  exit;
  }
 
- // Extract last 4 digits of phone
- $phone = preg_replace('/\D/', '', 
- $member['phone'] ?? ''
- );
- if (strlen($phone) < 4) {
- echo json_encode([
- 'success' => false,
- 'message' => 'Member phone number is missing or too short. Please add a valid phone number to generate a link.'
- ]);
- exit;
- }
- $pin = substr($phone, -4);
+ // Generate a random 6-digit PIN — no longer derived from member data
+ $pin = (string)random_int(100000, 999999);
+ $pinHash = password_hash($pin, PASSWORD_DEFAULT);
 
  // Check if valid link already exists for this member + auction
  $stmt = $db->prepare("
@@ -77,27 +68,28 @@ try {
  $existing = $stmt->fetch();
 
  if ($existing) {
- // Return existing valid link
+ // Return existing valid link — PIN is not retrievable, operator must regenerate
  $baseUrl = appUrl() . '/statement.php';
 
  echo json_encode([
  'success' => true,
  'token' => $existing['token'],
  'url' => $baseUrl . '?token=' . $existing['token'],
- 'pin' => $pin,
+ 'pin' => null,
  'expires_at' => $existing['expires_at'],
  'views' => $existing['views'],
  'is_new' => false,
- 'message' => 'Existing link retrieved'
+ 'message' => 'Existing link retrieved. PIN was set when link was created.'
  ]);
  exit;
  }
 
  // Generate new secure token
  $token = bin2hex(random_bytes(32));
+ // Expiry: 72 hours (was 14 days)
  $expiresAt = date(
  'Y-m-d H:i:s', 
- strtotime('+14 days')
+ strtotime('+' . STATEMENT_LINK_EXPIRY_HOURS . ' hours')
  );
 
  // Save to database
@@ -109,7 +101,7 @@ try {
  ");
  $stmt->execute([
  $token, $auctionId, $memberId,
- $userId, $pin, $expiresAt
+ $userId, $pinHash, $expiresAt
  ]);
 
  // Build full URL
@@ -132,7 +124,7 @@ try {
  'expires_at' => $expiresAt,
  'views' => 0,
  'is_new' => true,
- 'message' => 'Link generated successfully'
+ 'message' => 'Link generated successfully. PIN is shown once — deliver it to the member separately.'
  ]);
 
 } catch (Exception $e) {

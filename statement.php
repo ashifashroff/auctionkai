@@ -156,12 +156,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
  $pinError = 'Too many incorrect PIN attempts. Please try again in 15 minutes.';
  } else {
  $enteredPin = trim($_POST['pin'] ?? '');
- if ($enteredPin === $link['pin']) {
+ // Check if token is locked due to too many PIN attempts
+ if (!empty($link['pin_locked_until']) && strtotime($link['pin_locked_until']) > time()) {
+ $pinError = 'This link has been locked due to too many incorrect PIN attempts. Please contact the auction operator.';
+ } elseif ($enteredPin !== '' && password_verify($enteredPin, $link['pin'])) {
  $pinVerified = true;
  clearPinAttempts($token, $pinIp);
  $_SESSION['verified_token_' . md5($token)] = true;
  $pinJustVerified = true;
  session_regenerate_id(true);
+
+ // Reset per-token attempts on success
+ $db->prepare("UPDATE statement_links SET pin_attempts = 0, pin_locked_until = NULL WHERE token = ?")->execute([$token]);
 
  // Update view count
  $db->prepare("
@@ -173,8 +179,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pin'])) {
 
  } else {
  recordPinAttempt($token, $pinIp);
- $remaining = $maxPinAttempts - (checkPinRateLimit($token, $pinIp, $maxPinAttempts) ? $maxPinAttempts : (json_decode(file_get_contents(getPinRateFile($token, $pinIp)), true)['count'] ?? 0));
- $pinError = "Incorrect PIN. " . max(0, $maxPinAttempts - $remaining) . " attempt(s) remaining.";
+ // Increment per-token attempts in DB
+ $newAttempts = ((int)$link['pin_attempts'] ?? 0) + 1;
+ if ($newAttempts >= 10) {
+ $db->prepare("UPDATE statement_links SET pin_attempts = ?, pin_locked_until = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE token = ?")->execute([$newAttempts, $token]);
+ $pinError = 'Too many incorrect PIN attempts. This link has been locked for 15 minutes.';
+ } else {
+ $db->prepare("UPDATE statement_links SET pin_attempts = ? WHERE token = ?")->execute([$newAttempts, $token]);
+ $remaining = 10 - $newAttempts;
+ $pinError = "Incorrect PIN. {$remaining} attempt(s) remaining.";
+ }
  }
  }
 } elseif (isset($_SESSION['verified_token_' . md5($token)])) {
