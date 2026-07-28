@@ -19,7 +19,7 @@ $tok = $_SESSION['tok'];
 // Validate token
 if ($token !== '') {
     $tokenHash = hash('sha256', $token);
-    $stmt = $db->prepare("SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()");
+    $stmt = $db->prepare("SELECT * FROM password_resets WHERE token = ? AND expires_at > UTC_TIMESTAMP()");
     $stmt->execute([$tokenHash]);
     $reset = $stmt->fetch();
     if ($reset) {
