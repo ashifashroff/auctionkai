@@ -11,6 +11,15 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/db.php';
 
+// Guard: allow CLI, require admin for web access
+if (php_sapi_name() !== 'cli') {
+    require_once __DIR__ . '/../includes/auth_check.php';
+    if (($_SESSION['user_role'] ?? '') !== 'admin') {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+}
+
 $db = db();
 
 // ── Clean expired statement links ─────────────

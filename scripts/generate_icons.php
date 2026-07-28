@@ -5,6 +5,16 @@
  * Requires: Imagick or GD extension
  */
 
+// Guard: allow CLI, require admin for web access
+if (php_sapi_name() !== 'cli') {
+    require_once __DIR__ . '/../config.php';
+    require_once __DIR__ . '/../includes/auth_check.php';
+    if (($_SESSION['user_role'] ?? '') !== 'admin') {
+        http_response_code(403);
+        exit('Forbidden');
+    }
+}
+
 $svgPath = __DIR__ . '/../icons/icon.svg';
 $iconDir = __DIR__ . '/../icons/';
 $sizes = [72, 96, 128, 144, 152, 192, 384, 512];
