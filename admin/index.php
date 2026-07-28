@@ -431,6 +431,9 @@ $currentEnabled = getSetting($db, 'recaptcha_enabled', '0') === '1';
 </div>
 
 <script>
+// XSS escape helper — all API-derived values must pass through this before innerHTML
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 function loadActivityLog(page, filter) {
   if (!filter) filter = document.getElementById('activityFilter').value;
   const content = document.getElementById('activityLogContent');
@@ -463,11 +466,11 @@ function loadActivityLog(page, filter) {
 
     data.rows.forEach(r => {
      html += '<tr class="border-b border-ak-border/50 hover:bg-ak-bg/50 transition-colors">';
-     html += '<td class="px-4 py-2 text-ak-muted text-xs font-mono whitespace-nowrap">' + r.time + '</td>';
-     html += '<td class="px-4 py-2"><div class="text-ak-text text-xs">' + (r.username||'') + '</div><div class="text-ak-muted text-[10px]">' + r.user_name + '</div></td>';
-     html += '<td class="px-4 py-2"><span class="inline-flex items-center gap-1.5 text-xs ' + r.color + '">' + r.icon + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + r.action + '</span></span></td>';
-     html += '<td class="px-4 py-2 text-ak-text2 text-xs max-w-[200px] truncate">' + (r.description||'') + '</td>';
-     html += '<td class="px-4 py-2 text-ak-muted text-[11px] font-mono">' + (r.ip||'') + '</td>';
+     html += '<td class="px-4 py-2 text-ak-muted text-xs font-mono whitespace-nowrap">' + esc(r.time) + '</td>';
+     html += '<td class="px-4 py-2"><div class="text-ak-text text-xs">' + esc(r.username||'') + '</div><div class="text-ak-muted text-[10px]">' + esc(r.user_name) + '</div></td>';
+     html += '<td class="px-4 py-2"><span class="inline-flex items-center gap-1.5 text-xs ' + esc(r.color) + '">' + esc(r.icon) + ' <span class="px-2 py-0.5 rounded bg-ak-bg text-[11px] font-mono">' + esc(r.action) + '</span></span></td>';
+     html += '<td class="px-4 py-2 text-ak-text2 text-xs max-w-[200px] truncate">' + esc(r.description||'') + '</td>';
+     html += '<td class="px-4 py-2 text-ak-muted text-[11px] font-mono">' + esc(r.ip||'') + '</td>';
      html += '</tr>';
     });
     html += '</tbody></table></div></div>';
@@ -478,15 +481,15 @@ function loadActivityLog(page, filter) {
      html += '<div class="bg-ak-card border border-ak-border rounded-xl p-3">';
      html += '<div class="flex items-start justify-between gap-2 mb-1.5">';
      html += '<div class="flex items-center gap-2">';
-     html += '<span class="text-sm ' + r.color + '">' + r.icon + '</span>';
-     html += '<span class="text-xs font-mono bg-ak-bg px-2 py-0.5 rounded ' + r.color + '">' + r.action + '</span>';
+     html += '<span class="text-sm ' + esc(r.color) + '">' + esc(r.icon) + '</span>';
+     html += '<span class="text-xs font-mono bg-ak-bg px-2 py-0.5 rounded ' + esc(r.color) + '">' + esc(r.action) + '</span>';
      html += '</div>';
-     html += '<span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">' + r.time + '</span>';
+     html += '<span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">' + esc(r.time) + '</span>';
      html += '</div>';
-     html += '<div class="text-ak-text2 text-xs mb-1">' + (r.description||'—') + '</div>';
+     html += '<div class="text-ak-text2 text-xs mb-1">' + esc(r.description||'—') + '</div>';
      html += '<div class="flex items-center justify-between">';
-     html += '<span class="text-[10px] text-ak-muted">@' + (r.username||'?') + '</span>';
-     html += '<span class="text-[10px] text-ak-muted font-mono">' + (r.ip||'') + '</span>';
+     html += '<span class="text-[10px] text-ak-muted">@' + esc(r.username||'?') + '</span>';
+     html += '<span class="text-[10px] text-ak-muted font-mono">' + esc(r.ip||'') + '</span>';
      html += '</div>';
      html += '</div>';
     });

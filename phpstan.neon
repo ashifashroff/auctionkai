@@ -1,0 +1,13 @@
+parameters:
+    level: 5
+    paths:
+        - api
+        - admin
+        - auth
+        - includes
+        - models
+        - views
+        - scripts
+    excludePaths:
+        - vendor/*
+    tmpDir: /tmp/phpstan

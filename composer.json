@@ -1,1 +1,5 @@
-{"require":{"phpmailer/phpmailer":"^6","dompdf/dompdf":"^3"}}
+{"require":{"phpmailer/phpmailer":"^6","dompdf/dompdf":"^3"},
+    "require-dev": {
+        "phpstan/phpstan": "^2.2"
+    }
+}

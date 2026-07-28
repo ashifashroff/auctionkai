@@ -318,6 +318,9 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 <?php require_once '../includes/footer.php'; ?>
 <script src="../js/common.js?v=3.9.0"></script>
 <script>
+// XSS escape helper — all API-derived values must pass through this before innerHTML
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 // ── Error Logs ──────────────────────────────
 let errCurrentPage = 1;
 let errCurrentFilter = 'all';
@@ -343,7 +346,7 @@ async function loadErrorLogs(severity = 'all', page = 1) {
     let summaryHTML = '<div class="flex gap-3 mb-4 flex-wrap">';
     for (const s of summary) {
       if (severity !== 'all' && s.severity !== severity) continue;
-      summaryHTML += `<span class="text-xs px-2.5 py-1 rounded-full font-bold ${sevColors[s.severity] || 'bg-ak-border text-ak-muted'}">${s.severity}: ${s.unresolved} unresolved / ${s.total} total</span>`;
+      summaryHTML += `<span class="text-xs px-2.5 py-1 rounded-full font-bold ${sevColors[esc(s.severity)] || 'bg-ak-border text-ak-muted'}">${esc(s.severity)}: ${esc(s.unresolved)} unresolved / ${esc(s.total)} total</span>`;
     }
     summaryHTML += '</div>';
 
@@ -356,20 +359,20 @@ async function loadErrorLogs(severity = 'all', page = 1) {
     let html = summaryHTML + '<div class="space-y-2">';
     for (const err of data.data) {
       const resolvedBadge = err.is_resolved ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-ak-green/15 text-ak-green font-bold">✓ Resolved</span>' : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-ak-red/15 text-ak-red font-bold">Unresolved</span>';
-      const sevBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${sevColors[err.severity] || ''}">${err.severity}</span>`;
+      const sevBadge = `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${sevColors[esc(err.severity)] || ''}">${esc(err.severity)}</span>`;
       const timeAgo = new Date(err.created_at).toLocaleString('ja-JP');
-      const shortFile = err.file ? err.file.replace(/.*\//, '') : '';
+      const shortFile = err.file ? String(err.file).replace(/.*\//, '') : '';
       html += `
         <div class="border border-ak-border/50 rounded-lg p-3 ${err.is_resolved ? 'opacity-50' : ''}">
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1">${sevBadge}${resolvedBadge}<span class="text-[10px] text-ak-muted font-mono">#${err.id}</span></div>
-              <div class="text-sm text-ak-text break-all">${err.message.replace(/</g,'&lt;')}</div>
-              <div class="text-[11px] text-ak-muted mt-1">${shortFile ? shortFile + ':' + (err.line || '?') : ''} ${err.url ? '· ' + err.url.replace(/</g,'&lt;') : ''}</div>
+              <div class="flex items-center gap-2 mb-1">${sevBadge}${resolvedBadge}<span class="text-[10px] text-ak-muted font-mono">#${esc(err.id)}</span></div>
+              <div class="text-sm text-ak-text break-all">${esc(err.message)}</div>
+              <div class="text-[11px] text-ak-muted mt-1">${shortFile ? esc(shortFile) + ':' + esc(err.line || '?') : ''} ${err.url ? '· ' + esc(err.url) : ''}</div>
             </div>
             <div class="flex gap-2 items-start shrink-0">
-              <span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">${timeAgo}</span>
-              ${!err.is_resolved ? `<button onclick="resolveError(${err.id})" class="text-[11px] px-2 py-0.5 rounded bg-ak-green/15 text-ak-green hover:bg-ak-green/30 font-bold cursor-pointer">Resolve</button>` : ''}
+              <span class="text-[10px] text-ak-muted font-mono whitespace-nowrap">${esc(timeAgo)}</span>
+              ${!err.is_resolved ? `<button onclick="resolveError(${parseInt(err.id)})" class="text-[11px] px-2 py-0.5 rounded bg-ak-green/15 text-ak-green hover:bg-ak-green/30 font-bold cursor-pointer">Resolve</button>` : ''}
             </div>
           </div>
         </div>`;
@@ -379,11 +382,11 @@ async function loadErrorLogs(severity = 'all', page = 1) {
 
     // Pagination
     const totalPages = Math.ceil(data.total / data.per_page);
-    let pagHTML = `<span>${data.total} error(s) · Page ${data.page} of ${totalPages}</span>`;
+    let pagHTML = `<span>${esc(data.total)} error(s) · Page ${esc(data.page)} of ${esc(totalPages)}</span>`;
     if (totalPages > 1) {
       pagHTML += '<div class="flex gap-2">';
-      if (data.page > 1) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${data.page-1})" class="btn btn-dark btn-sm text-[11px]">← Prev</button>`;
-      if (data.page < totalPages) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${data.page+1})" class="btn btn-dark btn-sm text-[11px]">Next →</button>`;
+      if (data.page > 1) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${parseInt(data.page)-1})" class="btn btn-dark btn-sm text-[11px]">← Prev</button>`;
+      if (data.page < totalPages) pagHTML += `<button onclick="loadErrorLogs(errCurrentFilter, ${parseInt(data.page)+1})" class="btn btn-dark btn-sm text-[11px]">Next →</button>`;
       pagHTML += '</div>';
     }
     pagination.innerHTML = pagHTML;

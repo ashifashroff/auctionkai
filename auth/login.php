@@ -124,7 +124,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
         } else {
             $error = 'Invalid credentials.';
             require_once __DIR__ . '/../includes/activity.php';
-            logActivity($db, 0, 'login.failed', 'user', 0, "Failed login for username: " . $username);
+            // Truncate username to prevent stored XSS via activity log descriptions
+            $truncatedUsername = substr($username, 0, 100);
+            logActivity($db, 0, 'login.failed', 'user', 0, "Failed login for username: " . $truncatedUsername);
             $failedUserId = isset($user['id']) ? (int)$user['id'] : 0;
             logLoginHistory($db, $failedUserId, 'failed');
         }
