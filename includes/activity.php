@@ -2,6 +2,8 @@
 /**
  * Log an activity to the database
  */
+require_once __DIR__ . '/helpers.php';
+
 function logActivity(
     PDO $db,
     int $userId,
@@ -11,10 +13,7 @@ function logActivity(
     string $description = ''
 ): void {
     try {
-        $ip = $_SERVER['HTTP_X_FORWARDED_FOR']
-            ?? $_SERVER['REMOTE_ADDR']
-            ?? '';
-        $ip = trim(explode(',', $ip)[0]);
+        $ip = clientIp();
 
         // Mark impersonated actions
         $impersonatedBy = null;

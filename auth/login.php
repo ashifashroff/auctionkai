@@ -32,7 +32,7 @@ if (isset($_GET['deleted']) && $_GET['deleted'] == '1') {
 // Login history helper
 function logLoginHistory(PDO $db, int $userId, string $status): void {
   try {
-    $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+    $ip = clientIp();
     $ua = substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500);
     $stmt = $db->prepare("INSERT INTO login_history (user_id, ip_address, user_agent, status) VALUES (?, ?, ?, ?)");
     $stmt->execute([$userId, $ip, $ua, $status]);
@@ -48,7 +48,7 @@ function checkLoginRateLimit(PDO $db, string $username): bool {
     try {
         $window = 15 * 60; // 15 minutes
         $since = date('Y-m-d H:i:s', time() - $window);
-        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+        $ip = clientIp();
 
         $stmt = $db->prepare("
             SELECT COUNT(*) FROM login_history
@@ -68,7 +68,7 @@ $tok = $_SESSION['tok'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login') {
     // Rate limit check
-    if (!checkRateLimit($_SERVER['REMOTE_ADDR'])) {
+    if (!checkRateLimit(clientIp())) {
         $error = 'Too many login attempts. Please try again later.';
     } else {
     if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
             }
             if ($userStatus === 'active') {
                 // Rate limit cleared on success (DB-based, no session tracking needed)
-                logActivity($db, (int)$user['id'], 'login', 'user', (int)$user['id'], "Login from IP: " . ($_SERVER['REMOTE_ADDR'] ?? ''));
+                logActivity($db, (int)$user['id'], 'login', 'user', (int)$user['id'], "Login from IP: " . clientIp());
                 logLoginHistory($db, (int)$user['id'], 'success');
                 $_SESSION['user_id'] = (int)$user['id'];
                 $_SESSION['user_name'] = $user['name'];
@@ -166,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'registe
                 CURLOPT_POSTFIELDS => http_build_query([
                     'secret' => recaptchaSecretKey(),
                     'response' => $_POST['g-recaptcha-response'] ?? '',
-                    'remoteip' => $_SERVER['REMOTE_ADDR'] ?? '',
+                    'remoteip' => clientIp(),
                 ]),
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 5,

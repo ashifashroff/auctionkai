@@ -1,6 +1,24 @@
 <?php
 // ─── SHARED HELPER FUNCTIONS ─────────────────────────────────────────────────
 
+require_once __DIR__ . '/constants.php';
+
+/**
+ * Resolve the real client IP, trusting X-Forwarded-For only from known proxies.
+ * Takes the RIGHTMOST entry in X-Forwarded-For (the one your proxy appended).
+ */
+function clientIp(): string {
+    $remote = $_SERVER['REMOTE_ADDR'] ?? '';
+    if (in_array($remote, TRUSTED_PROXY_IPS, true) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $parts = array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
+        $candidate = end($parts);
+        if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+            return $candidate;
+        }
+    }
+    return $remote;
+}
+
 function fmt(float $n): string {
     return '¥' . number_format(round($n));
 }

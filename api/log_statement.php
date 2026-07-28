@@ -32,7 +32,7 @@ try {
         exit;
     }
 
-    $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+    $ip = clientIp();
 
     $db->prepare("INSERT INTO statement_history (auction_id, member_id, user_id, action, net_payout, ip_address) VALUES (?, ?, ?, ?, ?, ?)")
         ->execute([$auctionId, $memberId, $userId, $action, $netPayout, $ip]);

@@ -5,6 +5,10 @@ const CSRF_TOKEN_LENGTH = 32;
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_SECONDS = 30;
 
+// Trusted proxy IPs — only these may set X-Forwarded-For
+// Add your Plesk nginx IP here if it differs from 127.0.0.1
+const TRUSTED_PROXY_IPS = ['127.0.0.1', '::1'];
+
 // Session
 const SESSION_TIMEOUT_MINUTES = 30;
 const SESSION_WARN_BEFORE_MINUTES = 2;

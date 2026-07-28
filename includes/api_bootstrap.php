@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/helpers.php';
 
 // Secure session
 if (session_status() === PHP_SESSION_NONE) {
@@ -54,7 +55,7 @@ $userId = (int)$_SESSION['user_id'];
 $db = db();
 
 // ── API Rate Limiting (120 req/min per IP) ──────────
-$_apiRlKey = 'api_' . trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown')[0]);
+$_apiRlKey = 'api_' . clientIp();
 $_apiRlFile = sys_get_temp_dir() . '/ak_rl_' . md5($_apiRlKey) . '.lock';
 $_apiRlData = ['count' => 0, 'window_start' => time()];
 if (file_exists($_apiRlFile)) {
@@ -64,7 +65,25 @@ if (file_exists($_apiRlFile)) {
     }
 }
 $_apiRlData['count']++;
-file_put_contents($_apiRlFile, json_encode($_apiRlData));
+// Use file locking to prevent lost increments under concurrency
+$_apiRlFp = fopen($_apiRlFile, 'c');
+if ($_apiRlFp) {
+    flock($_apiRlFp, LOCK_EX);
+    $_apiRlRaw = fread($_apiRlFp, 8192);
+    $_apiRlExisting = json_decode($_apiRlRaw, true);
+    if ($_apiRlExisting && (time() - ($_apiRlExisting['window_start'] ?? 0)) < 60) {
+        $_apiRlData = $_apiRlExisting;
+    }
+    $_apiRlData['count']++;
+    ftruncate($_apiRlFp, 0);
+    rewind($_apiRlFp);
+    fwrite($_apiRlFp, json_encode($_apiRlData));
+    fflush($_apiRlFp);
+    flock($_apiRlFp, LOCK_UN);
+    fclose($_apiRlFp);
+} else {
+    file_put_contents($_apiRlFile, json_encode($_apiRlData));
+}
 if ($_apiRlData['count'] > 120) {
     http_response_code(429);
     header('Retry-After: 60');

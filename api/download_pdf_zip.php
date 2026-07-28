@@ -158,7 +158,7 @@ foreach ($members as $member) {
     // Log to statement history
     try {
         $s = calcStatement((int)$member['id'], $allVehicles, $commissionFee);
-        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+        $ip = clientIp();
         $db->prepare("INSERT INTO statement_history (auction_id, member_id, user_id, action, net_payout, ip_address) VALUES (?, ?, ?, 'pdf', ?, ?)")
             ->execute([$auctionId, (int)$member['id'], $userId, $s['netPayout'], $ip]);
     } catch (Exception $e) {}

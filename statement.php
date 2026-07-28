@@ -139,7 +139,7 @@ function clearPinAttempts(string $token, string $ip): void {
     if (file_exists($file)) @unlink($file);
 }
 
-$pinIp = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '')[0]);
+$pinIp = clientIp();
 
 if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
