@@ -13,6 +13,7 @@ if (empty($filename) || !preg_match('/^auctionkai_backup_[\w\-\.]+\.sql(\.gz)?$/
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/activity.php';
 
+$db = db();
 logActivity($db, $userId, 'backup.download', 'system', 0, "Downloaded backup: {$filename}");
 
 $contentType = str_ends_with($filename, '.gz') ? 'application/gzip' : 'application/octet-stream';
