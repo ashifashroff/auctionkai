@@ -210,7 +210,8 @@ function appUrl(): string {
  */
 function encryptSetting(string $value): string {
     if ($value === '') return '';
-    $key = defined('APP_SECRET_KEY') ? APP_SECRET_KEY : (getenv('APP_SECRET_KEY') ?: 'auctionkai_default_key_change_me');
+    // APP_SECRET_KEY is guaranteed defined by config.php (fails closed if missing)
+    $key = APP_SECRET_KEY;
     $iv = random_bytes(16);
     $encrypted = openssl_encrypt($value, 'AES-256-CBC', hash('sha256', $key, true), 0, $iv);
     return base64_encode($iv . $encrypted);
@@ -222,14 +223,20 @@ function encryptSetting(string $value): string {
 function decryptSetting(string $value): string {
     if ($value === '') return '';
     try {
-        $key = defined('APP_SECRET_KEY') ? APP_SECRET_KEY : (getenv('APP_SECRET_KEY') ?: 'auctionkai_default_key_change_me');
+        // APP_SECRET_KEY is guaranteed defined by config.php (fails closed if missing)
+        $key = APP_SECRET_KEY;
         $data = base64_decode($value);
-        if (strlen($data) < 17) return $value; // Not encrypted — return as-is (legacy)
+        if (strlen($data) < 17) return ''; // Not encrypted / invalid — return empty (legacy data won't decrypt)
         $iv = substr($data, 0, 16);
         $encrypted = substr($data, 16);
         $decrypted = openssl_decrypt($encrypted, 'AES-256-CBC', hash('sha256', $key, true), 0, $iv);
-        return $decrypted !== false ? $decrypted : $value; // Fall back to raw value if decryption fails
+        if ($decrypted === false) {
+            error_log('decryptSetting: decryption failed — key mismatch or corrupted data');
+            return '';
+        }
+        return $decrypted;
     } catch (Exception $e) {
-        return $value;
+        error_log('decryptSetting exception: ' . $e->getMessage());
+        return '';
     }
 }

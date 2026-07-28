@@ -32,4 +32,13 @@ if (!defined('RECAPTCHA_SITE_KEY')) {
 }
 
 // Secret key for encrypting sensitive settings (SMTP passwords, etc.)
-define('APP_SECRET_KEY', getenv('APP_SECRET_KEY') ?: 'change-this-to-a-random-64-char-string');
+// Read from $_ENV first (populated by .env parser above), then getenv() as fallback
+$_secret = $_ENV['APP_SECRET_KEY'] ?? getenv('APP_SECRET_KEY') ?: '';
+// Fail closed if missing or still a placeholder — never boot with a known default
+if ($_secret === '' || str_starts_with($_secret, 'change-this') || str_starts_with($_secret, 'your-random')) {
+    error_log('CRITICAL: APP_SECRET_KEY is not configured or is still a placeholder. Application cannot start safely.');
+    http_response_code(500);
+    exit('Application configuration error. Contact the administrator.');
+}
+define('APP_SECRET_KEY', $_secret);
+unset($_secret);
