@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     } elseif ($username === '' || $password === '') {
         $error = 'Please fill in all fields.';
     } else {
-        $stmt = $db->prepare("SELECT id, username, password, name, email, role, status, suspended_until, suspend_reason FROM users WHERE username = ?");
+        $stmt = $db->prepare("SELECT id, username, password, name, email, role, status, suspended_until, suspend_reason, disabled FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
