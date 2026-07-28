@@ -40,12 +40,12 @@ $soldCount = count(array_filter($vehicleList, fn($v) => $v['sold']));
 $unsoldCount = $totalVehicles - $soldCount;
 $grossSales = array_sum(array_map(fn($v) => $v['sold'] ? (float)$v['sold_price'] : 0, $vehicleList));
 
-$tok = $_SESSION['tok'] ?? bin2hex(random_bytes(16));
+$tok = $_SESSION['tok'] ?? bin2hex(random_bytes(32));
 if (empty($_SESSION['tok'])) $_SESSION['tok'] = $tok;
 
 // Handle delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (($_POST['_tok'] ?? '') !== $tok) {
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) {
         http_response_code(403);
         exit('Forbidden');
     }

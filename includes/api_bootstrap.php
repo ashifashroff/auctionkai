@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $GLOBALS['_json_input'] = json_decode($rawInput, true);
         $tok = $GLOBALS['_json_input']['_tok'] ?? '';
     }
-    if (empty($tok) || $tok !== ($_SESSION['tok'] ?? '')) {
+    if (empty($tok) || !hash_equals($_SESSION['tok'] ?? '', $tok)) {
         http_response_code(403);
         echo json_encode(['error' => 'CSRF token mismatch']);
         exit;

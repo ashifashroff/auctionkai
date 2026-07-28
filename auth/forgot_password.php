@@ -13,14 +13,14 @@ $db = db();
 $error = '';
 $sent = false;
 
-if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(32));
 $tok = $_SESSION['tok'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!checkRateLimit(clientIp(), 5, 300)) {
         $error = 'Too many attempts. Please try again in 5 minutes.';
     } else {
-    if (($_POST['_tok'] ?? '') !== $tok) {
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) {
         $error = 'Invalid request.';
     } else {
         $email = trim($_POST['email'] ?? '');

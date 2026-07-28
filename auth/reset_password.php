@@ -13,7 +13,7 @@ $tokenEmail = '';
 
 $token = trim($_GET['token'] ?? '');
 
-if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(32));
 $tok = $_SESSION['tok'];
 
 // Validate token
@@ -34,7 +34,7 @@ if ($token !== '') {
 
 // Handle password reset
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $validToken) {
-    if (($_POST['_tok'] ?? '') !== $tok) {
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) {
         $error = 'Invalid request.';
     } else {
         $password = $_POST['password'] ?? '';

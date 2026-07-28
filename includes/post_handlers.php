@@ -1,7 +1,7 @@
 <?php
 // ─── HANDLE POSTS ────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (($_POST['_tok'] ?? '') !== $tok) {
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) {
         http_response_code(403); exit('Forbidden');
     }
 

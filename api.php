@@ -18,7 +18,7 @@ if (empty($_SESSION['user_id'])) {
 // CSRF check
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
-    if (empty($input['_tok']) || $input['_tok'] !== ($_SESSION['tok'] ?? '')) {
+    if (empty($input['_tok']) || !hash_equals($_SESSION['tok'] ?? '', (string)$input['_tok'])) {
         http_response_code(403);
         echo json_encode(['error' => 'CSRF token mismatch']);
         exit;

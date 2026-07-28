@@ -11,7 +11,7 @@ if (($_SESSION['user_role'] ?? '') !== 'admin') {
 
 // CSRF protection — require valid token
 $getToken = $_GET['_tok'] ?? '';
-if (empty($getToken) || $getToken !== ($_SESSION['tok'] ?? '')) {
+if (empty($getToken) || !hash_equals($_SESSION['tok'] ?? '', $getToken)) {
     http_response_code(403);
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'CSRF token required']);

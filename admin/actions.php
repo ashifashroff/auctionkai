@@ -6,7 +6,8 @@ require_once __DIR__ . '/../includes/constants.php';
 header("Content-Security-Policy: default-src 'self'; connect-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:;");
 
 // CSRF check
-if (($_POST['_tok'] ?? '') !== ($_SESSION['tok'] ?? '')) {
+$_csrfTok = $_POST['_tok'] ?? '';
+if ($_csrfTok === '' || !hash_equals($_SESSION['tok'] ?? '', $_csrfTok)) {
     http_response_code(403);
     exit('Forbidden');
 }

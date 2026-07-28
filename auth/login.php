@@ -63,7 +63,7 @@ function checkLoginRateLimit(PDO $db, string $username): bool {
     }
 }
 
-if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(16));
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(32));
 $tok = $_SESSION['tok'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login') {
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
     if (!checkRateLimit(clientIp())) {
         $error = 'Too many login attempts. Please try again later.';
     } else {
-    if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) { $error = 'Invalid request.'; }
     else {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -118,6 +118,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_username'] = $user['username'];
                 session_regenerate_id(true);
+                // Rotate CSRF token after login to prevent fixation
+                $_SESSION['tok'] = bin2hex(random_bytes(32));
                 header('Location: ../index.php');
                 exit;
             }
@@ -136,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'login')
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'register') {
-    if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) { $error = 'Invalid request.'; }
     else {
     $username = trim($_POST['username'] ?? '');
     $name     = trim($_POST['name'] ?? '');

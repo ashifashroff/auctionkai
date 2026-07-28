@@ -18,12 +18,14 @@ $userId = (int)$_SESSION['user_id'];
 
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/constants.php';
+require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/settings.php';
 
 header('Content-Type: application/json');
 
 // CSRF check
-if (($_POST['_tok'] ?? '') !== ($_SESSION['tok'] ?? '')) {
+$_csrfTok = $_POST['_tok'] ?? '';
+if ($_csrfTok === '' || !hash_equals($_SESSION['tok'] ?? '', $_csrfTok)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Forbidden']);
     exit;

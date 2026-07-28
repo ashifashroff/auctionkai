@@ -351,7 +351,7 @@ $tabs = [
 <?php elseif ($tab === 'recaptcha'): ?>
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'recaptcha') {
-    if (($_POST['_tok'] ?? '') !== $tok) { $error = 'Invalid request.'; }
+    if (!hash_equals($tok, $_POST['_tok'] ?? '')) { $error = 'Invalid request.'; }
     else {
         $siteKey = trim($_POST['recaptcha_site_key'] ?? '');
         $secretKey = trim($_POST['recaptcha_secret_key'] ?? '');
