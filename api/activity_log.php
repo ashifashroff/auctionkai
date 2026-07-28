@@ -2,6 +2,13 @@
 require_once __DIR__ . '/../includes/api_bootstrap.php';
 require_once __DIR__ . '/../includes/activity.php';
 
+// Admin-only — must check before any data is returned
+if (($_SESSION['user_role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode(['error' => 'Admin access required']);
+    exit;
+}
+
 $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 50;
 $offset = ($page - 1) * $perPage;
