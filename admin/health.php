@@ -6,6 +6,9 @@ require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/activity.php';
 require_once __DIR__ . '/../includes/helpers.php';
 
+if (empty($_SESSION['tok'])) $_SESSION['tok'] = bin2hex(random_bytes(CSRF_TOKEN_LENGTH));
+$tok = $_SESSION['tok'];
+
 $db = db();
 
 // ── Collect System Info ───────────────────────
@@ -318,6 +321,7 @@ logActivity($db, $userId, 'admin.health_check', 'system', 0, "Viewed system heal
 <?php require_once '../includes/footer.php'; ?>
 <script src="../js/common.js?v=3.9.0"></script>
 <script>
+const CSRF_TOKEN = '<?= h($tok) ?>';
 // XSS escape helper — all API-derived values must pass through this before innerHTML
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -400,7 +404,7 @@ async function resolveError(id) {
   try {
     const res = await fetch('../api/error_logs.php', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({action: 'resolve', id})
+      body: JSON.stringify({action: 'resolve', id, _tok: CSRF_TOKEN})
     });
     const data = await res.json();
     if (data.success) loadErrorLogs(errCurrentFilter, errCurrentPage);
@@ -411,7 +415,7 @@ async function resolveError(id) {
 async function resolveAllErrors() {
   if (!confirm('Resolve all unresolved errors?')) return;
   try {
-    const body = {action: 'resolve_all'};
+    const body = {action: 'resolve_all', _tok: CSRF_TOKEN};
     if (errCurrentFilter !== 'all') body.severity = errCurrentFilter;
     const res = await fetch('../api/error_logs.php', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -428,7 +432,7 @@ async function deleteOldErrors() {
   try {
     const res = await fetch('../api/error_logs.php', {
       method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({action: 'delete_old', days: 30})
+      body: JSON.stringify({action: 'delete_old', days: 30, _tok: CSRF_TOKEN})
     });
     const data = await res.json();
     if (data.success) { showToast(`Deleted ${data.deleted} old errors`, 'success'); loadErrorLogs(errCurrentFilter, errCurrentPage); }
