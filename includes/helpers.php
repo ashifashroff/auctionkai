@@ -4,12 +4,24 @@
 require_once __DIR__ . '/constants.php';
 
 /**
- * Resolve the real client IP, trusting X-Forwarded-For only from known proxies.
- * Takes the RIGHTMOST entry in X-Forwarded-For (the one your proxy appended).
+ * Resolve the real client IP, trusting forwarded headers only from known proxies.
+ * Prefers CF-Connecting-IP (Cloudflare), then rightmost X-Forwarded-For entry.
+ * Supports CIDR ranges in TRUSTED_PROXY_IPS.
  */
 function clientIp(): string {
     $remote = $_SERVER['REMOTE_ADDR'] ?? '';
-    if (in_array($remote, TRUSTED_PROXY_IPS, true) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+    if (!ipIsTrustedProxy($remote)) {
+        return $remote;
+    }
+    // Cloudflare sets CF-Connecting-IP to the real client IP
+    if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+        $candidate = trim($_SERVER['HTTP_CF_CONNECTING_IP']);
+        if (filter_var($candidate, FILTER_VALIDATE_IP)) {
+            return $candidate;
+        }
+    }
+    // Fall back to rightmost X-Forwarded-For entry
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $parts = array_map('trim', explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']));
         $candidate = end($parts);
         if (filter_var($candidate, FILTER_VALIDATE_IP)) {
@@ -17,6 +29,32 @@ function clientIp(): string {
         }
     }
     return $remote;
+}
+
+/**
+ * Check if an IP is a trusted proxy (supports CIDR notation).
+ */
+function ipIsTrustedProxy(string $ip): bool {
+    foreach (TRUSTED_PROXY_IPS as $range) {
+        if (str_contains($range, '/')) {
+        // CIDR range
+        [$subnet, $maskBits] = explode('/', $range, 2);
+        $maskBits = (int)$maskBits;
+        $ipLong = ip2long($ip);
+        $subnetLong = ip2long($subnet);
+        if ($ipLong !== false && $subnetLong !== false) {
+            $mask = $maskBits === 0 ? 0 : (~0 << (32 - $maskBits));
+            if (($ipLong & $mask) === ($subnetLong & $mask)) {
+                return true;
+            }
+        }
+        } else {
+            if ($ip === $range) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function fmt(float $n): string {

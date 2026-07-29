@@ -6,8 +6,17 @@ const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_LOCKOUT_SECONDS = 30;
 
 // Trusted proxy IPs — only these may set X-Forwarded-For
-// Add your Plesk nginx IP here if it differs from 127.0.0.1
-const TRUSTED_PROXY_IPS = ['127.0.0.1', '::1'];
+// Cloudflare IP ranges (https://www.cloudflare.com/ips/)
+// Plus localhost for direct nginx access
+const TRUSTED_PROXY_IPS = [
+    '127.0.0.1', '::1',
+    // Cloudflare IPv4 ranges
+    '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22',
+    '103.31.4.0/22', '141.101.64.0/18', '108.162.192.0/18',
+    '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22',
+    '198.41.128.0/17', '162.158.0.0/15', '104.16.0.0/13',
+    '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
+];
 
 // Session
 const SESSION_TIMEOUT_MINUTES = 30;
